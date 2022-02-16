@@ -4,25 +4,21 @@ Blockchain and cryptocurrency implementation in Go
 ## Overview of the project structure:
 ```bash
 ├── Cryptograpby
-│   ├── subfolder
-│   │   ├── subsubfolder
-│   │   └── file
-│   └── file
+│   ├── xcrypt.go
+│   └── security.go
 ├── Database
-│   ├── subfolder
-│   │   ├── subsubfolder
-│   │   └── file
-│   └── file
+│   ├── block.go
+│   ├── database.go
+│   ├── genesis.go
+│   ├── state.go
+│   └── transaction.go
 ├── Networking
-│   ├── subfolder
-│   │   ├── subsubfolder
-│   │   └── file
-│   └── file
+│   ├── client.go
+│   ├── http.go
+│   └── listener.go
 ├── Node
-│   ├── subfolder
-│   │   ├── subsubfolder
-│   │   └── file
-│   └── file
+│   ├── node.go
+│   └── sync.go
 └── UI
     └── CommandLine
         ├── cmd
