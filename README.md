@@ -3,27 +3,27 @@ Blockchain and cryptocurrency implementation in Go
 
 ## Overview of the project structure:
 ```bash
-├─▷ Cryptograpby
+├── Cryptograpby
 │   ├── subfolder
 │   │   ├── subsubfolder
 │   │   └── file
 │   └── file
-├─▷ Database
+├── Database
 │   ├── subfolder
 │   │   ├── subsubfolder
 │   │   └── file
 │   └── file
-├─▷ Networking
+├── Networking
 │   ├── subfolder
 │   │   ├── subsubfolder
 │   │   └── file
 │   └── file
-├─▷ Node
+├── Node
 │   ├── subfolder
 │   │   ├── subsubfolder
 │   │   └── file
 │   └── file
-└─▷ UI
+└── UI
     └── CommandLine
         ├── cmd
         │   ├── root.go
