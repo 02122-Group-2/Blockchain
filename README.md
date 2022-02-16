@@ -3,7 +3,7 @@ Blockchain and cryptocurrency implementation in Go
 
 ## Overview of the project structure:
 ```bash
-├── Cryptograpby
+├── Cryptography
 │   ├── xcrypt.go
 │   └── security.go
 ├── Database
