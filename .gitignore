@@ -1,3 +1,23 @@
+# MacOS stuff
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows stuff
+*.stackdump
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
 # Binaries for programs and plugins
 *.exe
 *.exe~
