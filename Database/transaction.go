@@ -13,7 +13,7 @@ type Transaction struct {
 	SerialNo  int
 }
 
-func (dbInfo *DatabaseInfo) CreateTransaction(from string, to string, amount float64) {
+func (dbInfo *DatabaseInfo) CreateTransaction(from string, to string, amount float64) Transaction {
 	fmt.Println("CreateTransaction() called")
 	t := Transaction{
 		from,
@@ -25,9 +25,10 @@ func (dbInfo *DatabaseInfo) CreateTransaction(from string, to string, amount flo
 	}
 
 	fmt.Println(t)
+	return t
 }
 
-func (dbInfo *DatabaseInfo) CreateReward(to string, amount float64) {
+func (dbInfo *DatabaseInfo) CreateReward(to string, amount float64) Transaction {
 	fmt.Println("CreateReward() called")
 	r := Transaction{
 		"system",
@@ -39,4 +40,5 @@ func (dbInfo *DatabaseInfo) CreateReward(to string, amount float64) {
 	}
 
 	fmt.Println(r)
+	return r
 }
