@@ -14,9 +14,12 @@ import (
 // 	latestHash        string
 // }
 
+var state, _ = LoadState()
+
 func TestCreate(t *testing.T) {
 	t.Log("begin create transaction test")
-	tr := dbInfo.CreateTransaction("magn", "niels", 6969.0)
+
+	tr := state.CreateTransaction("magn", "niels", 6969.0)
 
 	if tr.Amount != 6969.0 {
 		t.Errorf("Amount is set wrong")
@@ -33,7 +36,7 @@ func TestCreate(t *testing.T) {
 }
 
 func TestReward(t *testing.T) {
-	r := dbInfo.CreateReward("niels", 1337.420)
+	r := state.CreateReward("niels", 1337.420)
 
 	if r.Amount != 1337.420 {
 		t.Errorf("Amount is set wrong")

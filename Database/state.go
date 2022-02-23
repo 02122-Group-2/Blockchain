@@ -3,11 +3,9 @@ package database
 import (
 	"fmt"
 	"os"
-<<<<<<< HEAD
-=======
-	"path/filepath"
+
+	// "path/filepath"
 	"time"
->>>>>>> a2c5cec84ec59caea216d43e7d3f4745d2e9de28
 )
 
 type State struct {
@@ -61,7 +59,7 @@ func LoadState() (*State, error) {
 	// scanner := bufio.NewScanner(file)
 
 	var file *os.File
-	state := &State{balances, make([]Transaction, 0), file, ""} //TODO fix missing hash
+	state := &State{balances, make([]Transaction, 0), file, 0, 0, ""} //TODO fix missing hash
 
 	loadedTransactions := LoadTransactions()
 
