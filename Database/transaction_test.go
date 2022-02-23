@@ -9,6 +9,7 @@ var dbInfo = DatabaseInfo{
 }
 
 func TestCreate(t *testing.T) {
+	t.Log("begin create transaction test")
 	tr := dbInfo.CreateTransaction("magn", "niels", 6969.0)
 
 	if tr.Amount != 6969.0 {
