@@ -1,6 +1,10 @@
 package database
 
-import "fmt"
+import (
+	"encoding/json"
+	"fmt"
+	"os"
+)
 
 type AccountAddress string
 
@@ -11,6 +15,12 @@ type Transaction struct {
 	Timestamp int64 // UNIX time
 	Type      string
 	SerialNo  int
+}
+
+type TransactionList []Transaction
+
+type LoadedTransactions struct {
+	Transactions TransactionList `json:"transactions"`
 }
 
 func (dbInfo *DatabaseInfo) CreateTransaction(from string, to string, amount float64) Transaction {
@@ -41,4 +51,16 @@ func (dbInfo *DatabaseInfo) CreateReward(to string, amount float64) Transaction 
 
 	fmt.Println(r)
 	return r
+}
+
+func LoadTransactions() TransactionList {
+	data, err := os.ReadFile("./Transactions.json")
+	if err != nil {
+		panic(err)
+	}
+
+	var loadedTransactions LoadedTransactions
+	json.Unmarshal(data, &loadedTransactions)
+
+	return loadedTransactions.Transactions
 }
