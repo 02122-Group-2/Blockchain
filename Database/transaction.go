@@ -19,7 +19,7 @@ func (dbInfo *DatabaseInfo) CreateTransaction(from string, to string, amount flo
 		amount,
 		makeTimestamp(),
 		"transaction",
-		dbInfo.getNextSerialNo(),
+		dbInfo.getNextTxSerialNo(),
 	}
 
 	fmt.Println(t)
@@ -34,7 +34,7 @@ func (dbInfo *DatabaseInfo) CreateReward(to string, amount float64) Transaction 
 		amount,
 		makeTimestamp(),
 		"reward",
-		dbInfo.getNextSerialNo(),
+		dbInfo.getNextTxSerialNo(),
 	}
 
 	fmt.Println(r)
