@@ -14,7 +14,7 @@ type BlockHeader struct {
 func (state *State) CreateBlock(txs []Transaction) Block {
 	return Block{
 		BlockHeader{
-			state.getLastHash(),
+			state.getLatestHash(),
 			makeTimestamp(),
 			state.getNextBlockSerialNo(),
 		},

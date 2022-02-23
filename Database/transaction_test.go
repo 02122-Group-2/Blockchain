@@ -4,11 +4,18 @@ import (
 	"testing"
 )
 
-var dbInfo = DatabaseInfo{
-	0,
-}
+// type State struct {
+// 	Balances  map[AccountAddress]uint
+// 	txMempool []Transaction
+// 	dbFile    *os.File
+
+// 	lastTxSerialNo    int
+// 	lastBlockSerialNo int
+// 	latestHash        string
+// }
 
 func TestCreate(t *testing.T) {
+	t.Log("begin create transaction test")
 	tr := dbInfo.CreateTransaction("magn", "niels", 6969.0)
 
 	if tr.Amount != 6969.0 {

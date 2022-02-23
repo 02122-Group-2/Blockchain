@@ -1,0 +1,28 @@
+{
+  "transactions": [
+    {
+      "To": "Magn",
+      "From": "Niels",
+      "Amount": 1000,
+      "TimeStamp": 1234,
+      "Type": "transaction",
+      "SerialNo": 0
+    },
+    {
+      "To": "Emilie",
+      "From": "Magn",
+      "Amount": 12,
+      "TimeStamp": 1235,
+      "Type": "transaction",
+      "SerialNo": 1
+    },
+    {
+      "To": "Asger",
+      "From": "Emilie",
+      "Amount": 3,
+      "TimeStamp": 1236,
+      "Type": "transaction",
+      "SerialNo": 2
+    }
+  ]
+}

@@ -1,6 +1,12 @@
 package database
 
-import "fmt"
+import (
+	"encoding/json"
+	"fmt"
+	"os"
+)
+
+type AccountAddress string
 
 type Transaction struct {
 	From      string
@@ -11,7 +17,13 @@ type Transaction struct {
 	SerialNo  int
 }
 
-func (dbInfo *DatabaseInfo) CreateTransaction(from string, to string, amount float64) Transaction {
+type TransactionList []Transaction
+
+type LoadedTransactions struct {
+	Transactions TransactionList `json:"transactions"`
+}
+
+func (state *State) CreateTransaction(from string, to string, amount float64) Transaction {
 	fmt.Println("CreateTransaction() called")
 	t := Transaction{
 		from,
@@ -19,14 +31,14 @@ func (dbInfo *DatabaseInfo) CreateTransaction(from string, to string, amount flo
 		amount,
 		makeTimestamp(),
 		"transaction",
-		dbInfo.getNextTxSerialNo(),
+		state.getNextTxSerialNo(),
 	}
 
 	fmt.Println(t)
 	return t
 }
 
-func (dbInfo *DatabaseInfo) CreateReward(to string, amount float64) Transaction {
+func (state *State) CreateReward(to string, amount float64) Transaction {
 	fmt.Println("CreateReward() called")
 	r := Transaction{
 		"system",
@@ -34,9 +46,21 @@ func (dbInfo *DatabaseInfo) CreateReward(to string, amount float64) Transaction 
 		amount,
 		makeTimestamp(),
 		"reward",
-		dbInfo.getNextTxSerialNo(),
+		state.getNextTxSerialNo(),
 	}
 
 	fmt.Println(r)
 	return r
+}
+
+func LoadTransactions() TransactionList {
+	data, err := os.ReadFile("./Transactions.json")
+	if err != nil {
+		panic(err)
+	}
+
+	var loadedTransactions LoadedTransactions
+	json.Unmarshal(data, &loadedTransactions)
+
+	return loadedTransactions.Transactions
 }
