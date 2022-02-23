@@ -3,12 +3,13 @@ package database
 import (
 	"bufio"
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 )
 
 type State struct {
-	Balances  map[Account]uint
+	Balances  map[AccountAddress]uint
 	txMempool []Transaction
 	dbFile    *os.File
 
@@ -21,12 +22,9 @@ func LoadState() (*State, error) {
 		return nil, err
 	}
 
-	genesis, err := loadGenesis()
-	if err != nil {
-		return nil, err
-	}
+	genesis := LoadGenesis()
 
-	balances := make(map[Account]uint)
+	balances := make(map[AccountAddress]uint)
 	for account, balance := range genesis.Balances {
 		balances[account] = uint(balance)
 	}
@@ -45,29 +43,40 @@ func LoadState() (*State, error) {
 			return nil, err
 		}
 
-		blockFsJson := scanner.Bytes()
-		var blockFs BlockFS
-		err = json.Unmarshal(blockFsJson, &blockFs)
+		var transaction Transaction
+		err = json.Unmarshal(scanner.Bytes(), &transaction)
 		if err != nil {
 			return nil, err
 		}
 
-		err = state.applyBlock(blockFs.Value)
-		if err != nil {
+		if err := state.ValidateTransaction(transaction); err != nil {
 			return nil, err
 		}
 
-		state.latestHash = blockFs.Key
 	}
 
 	return state, nil
+}
+
+func (state *State) AddTransaction(transaction Transaction) error {
+	if err := state.ValidateTransaction(transaction); err != nil {
+		return err
+	}
+
+	state.txMempool = append(state.txMempool, transaction)
+
+	return nil
 
 }
 
-func AddTransaction() {
+func (state *State) ValidateTransaction(transaction Transaction) error {
+	if state.Balances[AccountAddress(transaction.From)] < uint(transaction.Amount) {
+		return fmt.Errorf("u broke")
+	}
 
-}
+	state.Balances[AccountAddress(transaction.From)] -= uint(transaction.Amount)
+	state.Balances[AccountAddress(transaction.To)] += uint(transaction.Amount)
 
-func Persist() {
+	return nil
 
 }
