@@ -2,6 +2,8 @@ package database
 
 import "fmt"
 
+type AccountAddress string
+
 type Transaction struct {
 	From      string
 	To        string
