@@ -3,6 +3,11 @@ package database
 import (
 	"fmt"
 	"os"
+<<<<<<< HEAD
+=======
+	"path/filepath"
+	"time"
+>>>>>>> a2c5cec84ec59caea216d43e7d3f4745d2e9de28
 )
 
 type State struct {
@@ -10,7 +15,29 @@ type State struct {
 	txMempool TransactionList
 	dbFile    *os.File
 
-	latestHash string
+	lastTxSerialNo    int
+	lastBlockSerialNo int
+	latestHash        string
+}
+
+func makeTimestamp() int64 {
+	return time.Now().UnixNano()
+}
+
+func (s *State) getNextTxSerialNo() int {
+	curNo := s.lastTxSerialNo + 1
+	s.lastTxSerialNo = curNo
+	return curNo
+}
+
+func (s *State) getNextBlockSerialNo() int {
+	curNo := s.lastBlockSerialNo + 1
+	s.lastBlockSerialNo = curNo
+	return curNo
+}
+
+func (s *State) getLatestHash() string {
+	return s.latestHash
 }
 
 func LoadState() (*State, error) {

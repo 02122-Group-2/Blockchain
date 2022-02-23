@@ -23,7 +23,7 @@ type LoadedTransactions struct {
 	Transactions TransactionList `json:"transactions"`
 }
 
-func (dbInfo *DatabaseInfo) CreateTransaction(from string, to string, amount float64) Transaction {
+func (state *State) CreateTransaction(from string, to string, amount float64) Transaction {
 	fmt.Println("CreateTransaction() called")
 	t := Transaction{
 		from,
@@ -31,14 +31,14 @@ func (dbInfo *DatabaseInfo) CreateTransaction(from string, to string, amount flo
 		amount,
 		makeTimestamp(),
 		"transaction",
-		dbInfo.getNextSerialNo(),
+		state.getNextTxSerialNo(),
 	}
 
 	fmt.Println(t)
 	return t
 }
 
-func (dbInfo *DatabaseInfo) CreateReward(to string, amount float64) Transaction {
+func (state *State) CreateReward(to string, amount float64) Transaction {
 	fmt.Println("CreateReward() called")
 	r := Transaction{
 		"system",
@@ -46,7 +46,7 @@ func (dbInfo *DatabaseInfo) CreateReward(to string, amount float64) Transaction 
 		amount,
 		makeTimestamp(),
 		"reward",
-		dbInfo.getNextSerialNo(),
+		state.getNextTxSerialNo(),
 	}
 
 	fmt.Println(r)
