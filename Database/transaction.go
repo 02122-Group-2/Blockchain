@@ -23,19 +23,27 @@ type LoadedTransactions struct {
 	Transactions TransactionList `json:"transactions"`
 }
 
-func (state *State) CreateTransaction(from AccountAddress, to AccountAddress, amount float64) Transaction {
+func (state *State) CreateCustomTransaction(from AccountAddress, to AccountAddress, amount float64, _type string) Transaction {
 	fmt.Println("CreateTransaction() called")
 	t := Transaction{
 		from,
 		to,
 		amount,
 		makeTimestamp(),
-		"transaction",
+		_type,
 		state.getNextTxSerialNo(),
 	}
 
 	fmt.Println(t)
 	return t
+}
+
+func (state *State) CreateTransaction(from AccountAddress, to AccountAddress, amount float64) Transaction {
+	return state.CreateCustomTransaction(from, to, amount, "transaction")
+}
+
+func (state *State) CreateGenesisTransaction(accountAddress AccountAddress, amount float64) Transaction {
+	return state.CreateCustomTransaction(accountAddress, accountAddress, amount, "genesis")
 }
 
 func (state *State) CreateReward(to AccountAddress, amount float64) Transaction {

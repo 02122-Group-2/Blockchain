@@ -6,7 +6,7 @@
       "Amount": 1000,
       "TimeStamp": 1234,
       "Type": "transaction",
-      "SerialNo": 0
+      "SerialNo": 6
     },
     {
       "To": "Emilie",
@@ -14,7 +14,7 @@
       "Amount": 12,
       "TimeStamp": 1235,
       "Type": "transaction",
-      "SerialNo": 1
+      "SerialNo": 7
     },
     {
       "To": "Asger",
@@ -22,7 +22,7 @@
       "Amount": 3,
       "TimeStamp": 1236,
       "Type": "transaction",
-      "SerialNo": 2
+      "SerialNo": 8
     }
   ]
 }

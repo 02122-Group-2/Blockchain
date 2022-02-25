@@ -39,15 +39,15 @@ func (s *State) getLatestHash() string {
 }
 
 func LoadState() (*State, error) {
-	genesis := LoadGenesis()
-
-	balances := make(map[AccountAddress]uint)
-	for account, balance := range genesis.Balances {
-		balances[account] = uint(balance)
-	}
-
 	var file *os.File
-	state := &State{balances, make([]Transaction, 0), file, 0, 0, ""} //TODO fix missing hash
+	state := &State{make(map[AccountAddress]uint), make([]Transaction, 0), file, 0, 0, ""} //TODO fix missing hash
+
+	genesis := LoadGenesis()
+ 
+	for account, balance := range genesis.Balances {
+		t := state.CreateGenesisTransaction(account, (float64(balance)))
+		state.AddTransaction(t)
+	}
 
 	loadedTransactions := LoadTransactions()
 
@@ -55,6 +55,7 @@ func LoadState() (*State, error) {
 		if state.AddTransaction(t) != nil {
 			panic("Transaction not allowed")
 		}
+		state.getNextTxSerialNo() // Updates the serial number in state
 	}
 
 	return state, nil
@@ -70,15 +71,25 @@ func (state *State) AddTransaction(transaction Transaction) error {
 	state.ApplyTransaction(transaction)
 
 	return nil
-
 }
 
+
 func (state *State) ApplyTransaction(transaction Transaction) {
-	state.Balances[transaction.From] -= uint(transaction.Amount)
+	if transaction.Type != "genesis" && transaction.Type != "reward" {
+		state.Balances[transaction.From] -= uint(transaction.Amount)
+	}
 	state.Balances[transaction.To] += uint(transaction.Amount)
 }
 
 func (state *State) ValidateTransaction(transaction Transaction) error {
+	if state.lastBlockSerialNo == 0 && transaction.Type == "genesis" {
+		return nil
+	}
+
+	if transaction.SerialNo != (state.lastTxSerialNo+1) {
+		return fmt.Errorf("SerialNo. violates transaction order")
+	}
+
 	if _, err := state.Balances[transaction.From]; !err {
 		return fmt.Errorf("Sending from Undefined Account")
 	}
