@@ -48,3 +48,53 @@ func TestReward(t *testing.T) {
 		t.Errorf("Type is wrong")
 	}
 }
+
+func TestApplyLegalTransaction(t *testing.T) {
+	t.Log("begin create transaction test")
+
+	tr := state.CreateTransaction("Magn", "Niels", 42.0)
+	err := state.AddTransaction(tr)
+	if err != nil {
+		t.Error("Failed to add transaction. Error: " + err.Error())
+	}
+}
+
+func TestApplyIllegalTransaction(t *testing.T) {
+	t.Log("begin create transaction test")
+
+	tr := state.CreateTransaction("Magn", "Niels", 89898.0)
+	err := state.AddTransaction(tr)
+	if err == nil {
+		t.Error("Succesfully added transaction but expected to fail.")
+	}
+}
+
+func TestApplyTransactionWithNegativeAmount(t *testing.T) {
+	t.Log("begin create transaction test")
+
+	tr := state.CreateTransaction("Magn", "Niels", -10.0)
+	err := state.AddTransaction(tr)
+	if err == nil {
+		t.Error("Succesfully added transaction but expected to fail.")
+	}
+}
+
+func TestAddTransactionFromAnUnknownAccount(t *testing.T) {
+	t.Log("begin create transaction test")
+
+	tr := state.CreateTransaction("llll", "Niels", 1.0)
+	err := state.AddTransaction(tr)
+	if err == nil {
+		t.Error("Shouldnt be able to make a transaction from an unknown account")
+	}
+}
+
+func TestAddTransactionToAnUnknownAccount(t *testing.T) {
+	t.Log("begin create transaction test")
+
+	tr := state.CreateTransaction("Niels", "gggg", 1.0)
+	err := state.AddTransaction(tr)
+	if err != nil {
+		t.Error("Should be able to send to unknown account")
+	}
+}

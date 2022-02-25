@@ -39,24 +39,12 @@ func (s *State) getLatestHash() string {
 }
 
 func LoadState() (*State, error) {
-	// currWD, err := os.Getw()
-	// if err != ni {
-	// 	return nil, rr
-	// }
-
 	genesis := LoadGenesis()
 
 	balances := make(map[AccountAddress]uint)
 	for account, balance := range genesis.Balances {
 		balances[account] = uint(balance)
 	}
-
-	// file, err := os.OpenFile(filepath.Join(currWD, "database", "block.db"), os.O_APPEND|os.O_RDWR, 0600)
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	// scanner := bufio.NewScanner(file)
 
 	var file *os.File
 	state := &State{balances, make([]Transaction, 0), file, 0, 0, ""} //TODO fix missing hash
@@ -69,23 +57,6 @@ func LoadState() (*State, error) {
 		}
 	}
 
-	// for scanner.Scan() {
-	// 	if err := scanner.Err(); err != nil {
-	// 		return nil, err
-	// 	}
-
-	// 	var transaction Transaction
-	// 	err = json.Unmarshal(scanner.Bytes(), &transaction)
-	// 	if err != nil {
-	// 		return nil, err
-	// 	}
-
-	// 	if err := state.ValidateTransaction(transaction); err != nil {
-	// 		return nil, err
-	// 	}
-
-	// }
-
 	return state, nil
 }
 
@@ -96,17 +67,27 @@ func (state *State) AddTransaction(transaction Transaction) error {
 
 	state.txMempool = append(state.txMempool, transaction)
 
+	state.ApplyTransaction(transaction)
+
 	return nil
 
 }
 
+func (state *State) ApplyTransaction(transaction Transaction) {
+	state.Balances[transaction.From] -= uint(transaction.Amount)
+	state.Balances[transaction.To] += uint(transaction.Amount)
+}
+
 func (state *State) ValidateTransaction(transaction Transaction) error {
-	if state.Balances[AccountAddress(transaction.From)] < uint(transaction.Amount) {
+	if _, err := state.Balances[transaction.From]; !err {
+		return fmt.Errorf("Sending from Undefined Account")
+	}
+	if transaction.Amount <= 0 {
+		return fmt.Errorf("Illegal to make a transaction with 0 or less coins.")
+	}
+	if state.Balances[transaction.From] < uint(transaction.Amount) {
 		return fmt.Errorf("u broke")
 	}
-
-	state.Balances[AccountAddress(transaction.From)] -= uint(transaction.Amount)
-	state.Balances[AccountAddress(transaction.To)] += uint(transaction.Amount)
 
 	return nil
 }

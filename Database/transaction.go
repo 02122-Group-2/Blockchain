@@ -9,8 +9,8 @@ import (
 type AccountAddress string
 
 type Transaction struct {
-	From      string
-	To        string
+	From      AccountAddress
+	To        AccountAddress
 	Amount    float64
 	Timestamp int64 // UNIX time
 	Type      string
@@ -23,7 +23,7 @@ type LoadedTransactions struct {
 	Transactions TransactionList `json:"transactions"`
 }
 
-func (state *State) CreateTransaction(from string, to string, amount float64) Transaction {
+func (state *State) CreateTransaction(from AccountAddress, to AccountAddress, amount float64) Transaction {
 	fmt.Println("CreateTransaction() called")
 	t := Transaction{
 		from,
@@ -38,7 +38,7 @@ func (state *State) CreateTransaction(from string, to string, amount float64) Tr
 	return t
 }
 
-func (state *State) CreateReward(to string, amount float64) Transaction {
+func (state *State) CreateReward(to AccountAddress, amount float64) Transaction {
 	fmt.Println("CreateReward() called")
 	r := Transaction{
 		"system",
