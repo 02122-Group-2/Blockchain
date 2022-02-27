@@ -14,7 +14,7 @@ const Verbal = "TX Add && Balances List"
 
 func main() {
 	var tbbCmd = &cobra.Command{
-		Use:   "tbb",
+		Use:   "Monkeycoin",
 		Short: "The Blockchain Bar CLI",
 		Run: func(cmd *cobra.Command, args []string) {
 		},

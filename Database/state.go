@@ -77,7 +77,7 @@ func (state *State) ApplyTransaction(transaction Transaction) {
 }
 
 func (state *State) ValidateTransaction(transaction Transaction) error {
-	if state.lastBlockSerialNo == 0 && transaction.Type == "genesis" {
+	if (state.lastBlockSerialNo == 0 && transaction.Type == "genesis") || transaction.Type == "reward" {
 		return nil
 	}
 

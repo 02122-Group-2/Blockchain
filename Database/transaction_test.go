@@ -69,6 +69,16 @@ func TestApplyIllegalTransaction(t *testing.T) {
 	}
 }
 
+func TestSendMoneyToSameUser(t *testing.T) {
+	t.Log("begin create transaction test")
+
+	tr := state.CreateTransaction("Magn", "Magn", 100.0)
+	err := state.AddTransaction(tr)
+	if err != nil {
+		t.Error("Unable to send to own user")
+	}
+}
+
 func TestApplyTransactionWithNegativeAmount(t *testing.T) {
 	t.Log("begin create transaction test")
 
@@ -96,5 +106,15 @@ func TestAddTransactionToAnUnknownAccount(t *testing.T) {
 	err := state.AddTransaction(tr)
 	if err != nil {
 		t.Error("Should be able to send to unknown account")
+	}
+}
+
+func TestAddRewardToAccount(t *testing.T) {
+	t.Log("Begin test reward system")
+	tr := state.CreateReward("Alberto", 5000)
+	err := state.AddTransaction(tr)
+
+	if err != nil {
+		t.Error("Unable to add reward to user")
 	}
 }

@@ -43,22 +43,11 @@ func (state *State) CreateTransaction(from AccountAddress, to AccountAddress, am
 }
 
 func (state *State) CreateGenesisTransaction(accountAddress AccountAddress, amount float64) Transaction {
-	return state.CreateCustomTransaction(accountAddress, accountAddress, amount, "genesis")
+	return state.CreateCustomTransaction("system", accountAddress, amount, "genesis")
 }
 
-func (state *State) CreateReward(to AccountAddress, amount float64) Transaction {
-	fmt.Println("CreateReward() called")
-	r := Transaction{
-		"system",
-		to,
-		amount,
-		makeTimestamp(),
-		"reward",
-		state.getNextTxSerialNo(),
-	}
-
-	fmt.Println(r)
-	return r
+func (state *State) CreateReward(accountAddress AccountAddress, amount float64) Transaction {
+	return state.CreateCustomTransaction("system", accountAddress, amount, "reward")
 }
 
 func LoadTransactions() TransactionList {
