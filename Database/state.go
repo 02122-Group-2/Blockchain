@@ -85,6 +85,10 @@ func (state *State) ValidateTransaction(transaction Transaction) error {
 		return fmt.Errorf("SerialNo. violates transaction order")
 	}
 
+	if transaction.From == transaction.To {
+		return fmt.Errorf("A normal transaction is not allowed to same account")
+	}
+
 	if _, err := state.Balances[transaction.From]; !err {
 		return fmt.Errorf("Sending from Undefined Account")
 	}

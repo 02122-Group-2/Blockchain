@@ -74,8 +74,8 @@ func TestSendMoneyToSameUser(t *testing.T) {
 
 	tr := state.CreateTransaction("Magn", "Magn", 100.0)
 	err := state.AddTransaction(tr)
-	if err != nil {
-		t.Error("Unable to send to own user")
+	if err == nil {
+		t.Error("Normal transaction from account to itself is not allowed")
 	}
 }
 
