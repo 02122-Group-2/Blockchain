@@ -23,15 +23,11 @@ func makeTimestamp() int64 {
 }
 
 func (s *State) getNextTxSerialNo() int {
-	curNo := s.lastTxSerialNo + 1
-	s.lastTxSerialNo = curNo
-	return curNo
+	return s.lastTxSerialNo + 1
 }
 
 func (s *State) getNextBlockSerialNo() int {
-	curNo := s.lastBlockSerialNo + 1
-	s.lastBlockSerialNo = curNo
-	return curNo
+	return s.lastBlockSerialNo + 1
 }
 
 func (s *State) getLatestHash() string {
@@ -43,7 +39,7 @@ func LoadState() (*State, error) {
 	state := &State{make(map[AccountAddress]uint), make([]Transaction, 0), file, 0, 0, ""} //TODO fix missing hash
 
 	genesis := LoadGenesis()
- 
+
 	for account, balance := range genesis.Balances {
 		t := state.CreateGenesisTransaction(account, (float64(balance)))
 		state.AddTransaction(t)
@@ -55,7 +51,6 @@ func LoadState() (*State, error) {
 		if state.AddTransaction(t) != nil {
 			panic("Transaction not allowed")
 		}
-		state.getNextTxSerialNo() // Updates the serial number in state
 	}
 
 	return state, nil
@@ -70,9 +65,9 @@ func (state *State) AddTransaction(transaction Transaction) error {
 
 	state.ApplyTransaction(transaction)
 
+	state.lastTxSerialNo++
 	return nil
 }
-
 
 func (state *State) ApplyTransaction(transaction Transaction) {
 	if transaction.Type != "genesis" && transaction.Type != "reward" {
@@ -86,7 +81,7 @@ func (state *State) ValidateTransaction(transaction Transaction) error {
 		return nil
 	}
 
-	if transaction.SerialNo != (state.lastTxSerialNo+1) {
+	if transaction.SerialNo != (state.lastTxSerialNo + 1) {
 		return fmt.Errorf("SerialNo. violates transaction order")
 	}
 
