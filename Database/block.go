@@ -1,14 +1,14 @@
 package database
 
 type Block struct {
-	Header       BlockHeader
-	Transactions []Transaction
+	Header       BlockHeader   `json: "Header"`
+	Transactions []Transaction `json: "Transactions"`
 }
 
 type BlockHeader struct {
-	ParentHash string
-	CreatedAt  int64
-	SerialNo   int
+	ParentHash string `json: "ParentHash"`
+	CreatedAt  int64  `json: "CreatedAt"`
+	SerialNo   int    `json: "SerialNo"`
 }
 
 func (state *State) CreateBlock(txs []Transaction) Block {

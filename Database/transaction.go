@@ -16,7 +16,6 @@ type Transaction struct {
 	Amount    float64
 	Timestamp int64 // UNIX time
 	Type      string
-	SerialNo  int
 }
 
 type TransactionList []Transaction
@@ -33,7 +32,6 @@ func (state *State) CreateCustomTransaction(from AccountAddress, to AccountAddre
 		amount,
 		makeTimestamp(),
 		_type,
-		state.getNextTxSerialNo(),
 	}
 
 	fmt.Println(t)
