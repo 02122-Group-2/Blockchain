@@ -101,3 +101,5 @@ func (state *State) ValidateTransaction(transaction Transaction) error {
 
 	return nil
 }
+
+

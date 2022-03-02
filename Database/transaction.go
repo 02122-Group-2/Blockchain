@@ -3,6 +3,7 @@ package database
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"os"
 )
 
@@ -60,4 +61,29 @@ func LoadTransactions() TransactionList {
 	json.Unmarshal(data, &loadedTransactions)
 
 	return loadedTransactions.Transactions
+}
+
+func SaveTransaction(transactionList TransactionList) bool {
+	transactionListFiltered := Filter(transactionList, func(tx Transaction) bool {
+		return tx.Type != "genesis"
+	})
+	toSave := LoadedTransactions{transactionListFiltered}
+	txFile, _ := json.MarshalIndent(toSave, "", "  ")
+
+	err := ioutil.WriteFile("./Transactions.json", txFile, 0644)
+	if err != nil {
+		panic(err)
+	}
+
+	return true
+}
+
+func Filter(vs TransactionList, f func(Transaction) bool) []Transaction {
+	filtered := make([]Transaction, 0)
+	for _, v := range vs {
+			if f(v) {
+					filtered = append(filtered, v)
+			}
+	}
+	return filtered
 }

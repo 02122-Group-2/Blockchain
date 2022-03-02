@@ -1,28 +1,44 @@
 {
   "transactions": [
     {
-      "To": "Magn",
       "From": "Niels",
+      "To": "Magn",
       "Amount": 1000,
-      "TimeStamp": 1234,
+      "Timestamp": 1234,
       "Type": "transaction",
       "SerialNo": 6
     },
     {
-      "To": "Emilie",
       "From": "Magn",
+      "To": "Emilie",
       "Amount": 12,
-      "TimeStamp": 1235,
+      "Timestamp": 1235,
       "Type": "transaction",
       "SerialNo": 7
     },
     {
-      "To": "Asger",
       "From": "Emilie",
+      "To": "Asger",
       "Amount": 3,
-      "TimeStamp": 1236,
+      "Timestamp": 1236,
       "Type": "transaction",
       "SerialNo": 8
+    },
+    {
+      "From": "Magn",
+      "To": "Niels",
+      "Amount": 500,
+      "Timestamp": 1646227319032558300,
+      "Type": "transaction",
+      "SerialNo": 9
+    },
+    {
+      "From": "Magn",
+      "To": "Niels",
+      "Amount": 500,
+      "Timestamp": 1646227341074119300,
+      "Type": "transaction",
+      "SerialNo": 10
     }
   ]
 }
