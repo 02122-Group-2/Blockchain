@@ -16,6 +16,7 @@ type State struct {
 	lastBlockSerialNo int
 	latestHash        string
 	latestTimestamp   int64
+	// latestBlock 	  Block
 }
 
 func makeTimestamp() int64 {
