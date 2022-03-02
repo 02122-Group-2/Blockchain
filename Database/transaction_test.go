@@ -118,3 +118,14 @@ func TestAddRewardToAccount(t *testing.T) {
 		t.Error("Unable to add reward to user")
 	}
 }
+
+func TestCreateLegalTransactionAndPersist(t *testing.T) {
+	t.Log("Begin test persisting to transaction.JSON")
+	tr := state.CreateTransaction("Magn", "Niels", 500.0)
+	err := state.AddTransaction(tr)
+	if err != nil {
+		t.Error("Failed to add transaction. Error: " + err.Error())
+	}
+	
+	SaveTransaction(state.txMempool)
+}
