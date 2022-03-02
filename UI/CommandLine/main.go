@@ -29,6 +29,7 @@ func main() {
 	}
 
 	tbbCmd.AddCommand(versionCmd)
+	tbbCmd.AddCommand(transactionCmd())
 
 	err := tbbCmd.Execute()
 	if err != nil {
