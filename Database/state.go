@@ -45,8 +45,9 @@ func LoadState() (*State, error) {
 	loadedTransactions := LoadTransactions()
 
 	for _, t := range loadedTransactions {
-		if state.AddTransaction(t) != nil {
-			panic("Transaction not allowed")
+		// t.Timestamp = makeTimestamp()
+		if err := state.AddTransaction(t); err != nil {
+			panic("Transaction not allowed\n\t" + err.Error())
 		}
 	}
 
@@ -90,7 +91,7 @@ func (state *State) ValidateTransaction(transaction Transaction) error {
 	}
 
 	if transaction.Timestamp < state.latestTimestamp {
-		return fmt.Errorf("new tx must be newer than previous tx")
+		return fmt.Errorf("new tx must have newer timestamp than previous tx")
 	}
 
 	if state.Balances[transaction.From] < uint(transaction.Amount) {
