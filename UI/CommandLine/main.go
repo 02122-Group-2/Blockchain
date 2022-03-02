@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 
-	"../../database"
 	"github.com/spf13/cobra"
 )
 
@@ -14,8 +13,6 @@ const Fix = "0"
 const Verbal = "TX Add && Balances List"
 
 func main() {
-	state := database.State.LoadState()
-	state.getLatestHash()
 
 	var tbbCmd = &cobra.Command{
 		Use:   "Monkeycoin",

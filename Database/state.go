@@ -38,13 +38,6 @@ func LoadState() (*State, error) {
 	var file *os.File
 	state := &State{make(map[AccountAddress]uint), make([]Transaction, 0), file, 0, 0, ""} //TODO fix missing hash
 
-	genesis := LoadGenesis()
-
-	for account, balance := range genesis.Balances {
-		t := state.CreateGenesisTransaction(account, (float64(balance)))
-		state.AddTransaction(t)
-	}
-
 	loadedTransactions := LoadTransactions()
 
 	for _, t := range loadedTransactions {
