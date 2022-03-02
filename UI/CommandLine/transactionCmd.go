@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 
 	Database "github.com/blockchainProject/blockchain/Database"
 
@@ -33,15 +34,21 @@ func transactionCreateCmd() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			from, _ := cmd.Flags().GetString(flagFrom)
 			to, _ := cmd.Flags().GetString(flagTo)
-			amount, _ := cmd.Flags().GetFloat64(flagAmount)
-
+			amount, _ := cmd.Flags().GetUint(flagAmount)
 			state, _ := Database.LoadState()
-			fmt.Printf("%f", amount)
+			fmt.Printf("%v", amount)
 
-			transaction := state.CreateTransaction(Database.AccountAddress(from), Database.AccountAddress(to), amount)
+			transaction := state.CreateTransaction(Database.AccountAddress(from), Database.AccountAddress(to), float64(amount))
 			fmt.Println("Transaction created" + Database.TxToString(transaction))
 
 			//Get state, add transaction and save new state
+
+			err := state.AddTransaction(transaction)
+			if err != nil {
+				fmt.Fprintln(os.Stderr, err)
+				os.Exit(1)
+			}
+			fmt.Println("TX successfully added")
 
 		},
 	}
