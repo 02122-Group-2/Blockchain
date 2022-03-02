@@ -32,7 +32,7 @@ func (s *State) getLatestHash() string {
 
 func LoadState() (*State, error) {
 	var file *os.File
-	state := &State{make(map[AccountAddress]uint), make([]Transaction, 0), file, 0, 0, ""} //TODO fix missing hash
+	state := &State{make(map[AccountAddress]uint), make([]Transaction, 0), file, 0, "", 0} //TODO fix missing hash
 
 	genesis := LoadGenesis()
 
@@ -78,18 +78,18 @@ func (state *State) ValidateTransaction(transaction Transaction) error {
 	}
 
 	if transaction.From == transaction.To {
-		return fmt.Errorf("A normal transaction is not allowed to same account")
+		return fmt.Errorf("a normal transaction is not allowed to same account")
 	}
 
 	if _, ok := state.Balances[transaction.From]; !ok {
-		return fmt.Errorf("Sending from Undefined Account")
+		return fmt.Errorf("sending from Undefined Account")
 	}
 	if transaction.Amount <= 0 {
-		return fmt.Errorf("Illegal to make a transaction with 0 or less coins.")
+		return fmt.Errorf("illegal to make a transaction with 0 or less coins.")
 	}
 
 	if transaction.Timestamp < state.latestTimestamp {
-		return fmt.Errorf("New tx must be newer than previous tx")
+		return fmt.Errorf("new tx must be newer than previous tx")
 	}
 
 	if state.Balances[transaction.From] < uint(transaction.Amount) {
