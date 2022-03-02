@@ -70,10 +70,7 @@ func LoadTransactions() TransactionList {
 }
 
 func SaveTransaction(transactionList TransactionList) bool {
-	transactionListFiltered := Filter(transactionList, func(tx Transaction) bool {
-		return tx.Type != "genesis"
-	})
-	toSave := LoadedTransactions{transactionListFiltered}
+	toSave := LoadedTransactions{transactionList}
 	txFile, _ := json.MarshalIndent(toSave, "", "  ")
 
 	err := ioutil.WriteFile("./Transactions.json", txFile, 0644)
