@@ -81,9 +81,13 @@ func SaveTransaction(transactionList TransactionList) bool {
 func Filter(vs TransactionList, f func(Transaction) bool) []Transaction {
 	filtered := make([]Transaction, 0)
 	for _, v := range vs {
-			if f(v) {
-					filtered = append(filtered, v)
-			}
+		if f(v) {
+			filtered = append(filtered, v)
+		}
 	}
 	return filtered
+}
+
+func TxToString(transaction Transaction) string {
+	return "From: " + string(transaction.From) + "\n To: " + string(transaction.To) + "\n Amount: " + fmt.Sprintf("%v", transaction.Amount)
 }

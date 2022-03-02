@@ -36,6 +36,7 @@ func transactionCreateCmd() *cobra.Command {
 			amount, _ := cmd.Flags().GetFloat64(flagAmount)
 
 			state, _ := Database.LoadState()
+			fmt.Printf("%f", amount)
 
 			transaction := state.CreateTransaction(Database.AccountAddress(from), Database.AccountAddress(to), amount)
 			fmt.Println("Transaction created" + Database.TxToString(transaction))
