@@ -45,7 +45,6 @@ func LoadState() (*State, error) {
 	loadedTransactions := LoadTransactions()
 
 	for _, t := range loadedTransactions {
-		t.Timestamp = makeTimestamp()
 		if err := state.AddTransaction(t); err != nil {
 			panic("Transaction not allowed\n\t" + err.Error())
 		}
