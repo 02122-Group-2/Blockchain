@@ -16,7 +16,6 @@ type Transaction struct {
 	Amount    float64
 	Timestamp int64 // UNIX time
 	Type      string
-	SerialNo  int
 }
 
 type TransactionList []Transaction
@@ -33,7 +32,6 @@ func (state *State) CreateCustomTransaction(from AccountAddress, to AccountAddre
 		amount,
 		makeTimestamp(),
 		_type,
-		state.getNextTxSerialNo(),
 	}
 
 	fmt.Println(t)
@@ -81,15 +79,6 @@ func SaveTransaction(transactionList TransactionList) bool {
 	return true
 }
 
-func Filter(vs TransactionList, f func(Transaction) bool) []Transaction {
-	filtered := make([]Transaction, 0)
-	for _, v := range vs {
-		if f(v) {
-			filtered = append(filtered, v)
-		}
-	}
-	return filtered
-}
 
 func TxToString(transaction Transaction) string {
 	return "From: " + string(transaction.From) + "\n To: " + string(transaction.To) + "\n Amount: " + fmt.Sprintf("%v", transaction.Amount)

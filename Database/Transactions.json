@@ -5,64 +5,56 @@
       "To": "Alberto",
       "Amount": 100,
       "Timestamp": 1646234319049590500,
-      "Type": "genesis",
-      "SerialNo": 1
+      "Type": "genesis"
     },
     {
       "From": "system",
       "To": "Emilie",
       "Amount": 5,
       "Timestamp": 1646234319049590500,
-      "Type": "genesis",
-      "SerialNo": 2
+      "Type": "genesis"
     },
     {
       "From": "system",
       "To": "Niels",
       "Amount": 1000000,
       "Timestamp": 1646234319049590500,
-      "Type": "genesis",
-      "SerialNo": 3
+      "Type": "genesis"
     },
     {
       "From": "system",
       "To": "Asger",
       "Amount": 420,
       "Timestamp": 1646234319049590500,
-      "Type": "genesis",
-      "SerialNo": 4
+      "Type": "genesis"
     },
     {
       "From": "system",
       "To": "Magn",
       "Amount": 69,
       "Timestamp": 1646234319049590500,
-      "Type": "genesis",
-      "SerialNo": 5
+      "Type": "genesis"
     },
     {
       "From": "Niels",
       "To": "Magn",
       "Amount": 1000,
       "Timestamp": 1646234319049590501,
-      "Type": "transaction",
-      "SerialNo": 6
+      "Type": "transaction"
     },
     {
       "From": "Magn",
       "To": "Emilie",
       "Amount": 12,
       "Timestamp": 1646234319049590502,
-      "Type": "transaction",
-      "SerialNo": 7
+      "Type": "transaction"
     },
     {
       "From": "Emilie",
       "To": "Asger",
       "Amount": 3,
       "Timestamp": 1646234319049590503,
-      "Type": "transaction",
-      "SerialNo": 8
+      "Type": "transaction"
     }
   ]
 }
