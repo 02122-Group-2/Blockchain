@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 )
 
 type AccountAddress string
@@ -52,7 +53,12 @@ func (state *State) CreateReward(accountAddress AccountAddress, amount float64) 
 }
 
 func LoadTransactions() TransactionList {
-	data, err := os.ReadFile("./Transactions.json")
+	currWD, err := os.Getwd()
+	if err != nil {
+		panic(err)
+	}
+
+	data, err := os.ReadFile(filepath.Join(currWD, "Transactions.json"))
 	if err != nil {
 		panic(err)
 	}

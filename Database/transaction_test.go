@@ -121,7 +121,7 @@ func TestAddRewardToAccount(t *testing.T) {
 
 func TestCreateLegalTransactionAndPersist(t *testing.T) {
 	t.Log("Begin test persisting to transaction.JSON")
-	tr := state.CreateTransaction("Magn", "Niels", 500.0)
+	tr := state.CreateTransaction("Niels", "Magn", 200000.0)
 	err := state.AddTransaction(tr)
 	if err != nil {
 		t.Error("Failed to add transaction. Error: " + err.Error())
