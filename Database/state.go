@@ -85,7 +85,7 @@ func (state *State) ValidateTransaction(transaction Transaction) error {
 		return fmt.Errorf("sending from Undefined Account")
 	}
 	if transaction.Amount <= 0 {
-		return fmt.Errorf("illegal to make a transaction with 0 or less coins.")
+		return fmt.Errorf("illegal to make a transaction with 0 or less coins")
 	}
 
 	if transaction.Timestamp < state.latestTimestamp {
