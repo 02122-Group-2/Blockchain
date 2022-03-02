@@ -41,9 +41,9 @@ func transactionCreateCmd() *cobra.Command {
 			transaction := state.CreateTransaction(Database.AccountAddress(from), Database.AccountAddress(to), float64(amount))
 			fmt.Println("Transaction created" + Database.TxToString(transaction))
 
-			//Get state, add transaction and save new state
-
 			err := state.AddTransaction(transaction)
+			Database.SaveTransaction
+
 			if err != nil {
 				fmt.Fprintln(os.Stderr, err)
 				os.Exit(1)
