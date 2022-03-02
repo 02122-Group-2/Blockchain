@@ -23,15 +23,11 @@ func makeTimestamp() int64 {
 }
 
 func (s *State) getNextTxSerialNo() int {
-	curNo := s.lastTxSerialNo + 1
-	s.lastTxSerialNo = curNo
-	return curNo
+	return s.lastTxSerialNo + 1
 }
 
 func (s *State) getNextBlockSerialNo() int {
-	curNo := s.lastBlockSerialNo + 1
-	s.lastBlockSerialNo = curNo
-	return curNo
+	return s.lastBlockSerialNo + 1
 }
 
 func (s *State) getLatestHash() string {
@@ -39,27 +35,15 @@ func (s *State) getLatestHash() string {
 }
 
 func LoadState() (*State, error) {
-	// currWD, err := os.Getw()
-	// if err != ni {
-	// 	return nil, rr
-	// }
+	var file *os.File
+	state := &State{make(map[AccountAddress]uint), make([]Transaction, 0), file, 0, 0, ""} //TODO fix missing hash
 
 	genesis := LoadGenesis()
 
-	balances := make(map[AccountAddress]uint)
 	for account, balance := range genesis.Balances {
-		balances[account] = uint(balance)
+		t := state.CreateGenesisTransaction(account, (float64(balance)))
+		state.AddTransaction(t)
 	}
-
-	// file, err := os.OpenFile(filepath.Join(currWD, "database", "block.db"), os.O_APPEND|os.O_RDWR, 0600)
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	// scanner := bufio.NewScanner(file)
-
-	var file *os.File
-	state := &State{balances, make([]Transaction, 0), file, 0, 0, ""} //TODO fix missing hash
 
 	loadedTransactions := LoadTransactions()
 
@@ -68,23 +52,6 @@ func LoadState() (*State, error) {
 			panic("Transaction not allowed")
 		}
 	}
-
-	// for scanner.Scan() {
-	// 	if err := scanner.Err(); err != nil {
-	// 		return nil, err
-	// 	}
-
-	// 	var transaction Transaction
-	// 	err = json.Unmarshal(scanner.Bytes(), &transaction)
-	// 	if err != nil {
-	// 		return nil, err
-	// 	}
-
-	// 	if err := state.ValidateTransaction(transaction); err != nil {
-	// 		return nil, err
-	// 	}
-
-	// }
 
 	return state, nil
 }
@@ -96,17 +63,41 @@ func (state *State) AddTransaction(transaction Transaction) error {
 
 	state.txMempool = append(state.txMempool, transaction)
 
-	return nil
+	state.ApplyTransaction(transaction)
 
+	state.lastTxSerialNo++
+	return nil
+}
+
+func (state *State) ApplyTransaction(transaction Transaction) {
+	if transaction.Type != "genesis" && transaction.Type != "reward" {
+		state.Balances[transaction.From] -= uint(transaction.Amount)
+	}
+	state.Balances[transaction.To] += uint(transaction.Amount)
 }
 
 func (state *State) ValidateTransaction(transaction Transaction) error {
-	if state.Balances[AccountAddress(transaction.From)] < uint(transaction.Amount) {
-		return fmt.Errorf("u broke")
+	if (state.lastBlockSerialNo == 0 && transaction.Type == "genesis") || transaction.Type == "reward" {
+		return nil
 	}
 
-	state.Balances[AccountAddress(transaction.From)] -= uint(transaction.Amount)
-	state.Balances[AccountAddress(transaction.To)] += uint(transaction.Amount)
+	if transaction.SerialNo != (state.lastTxSerialNo + 1) {
+		return fmt.Errorf("SerialNo. violates transaction order")
+	}
+
+	if transaction.From == transaction.To {
+		return fmt.Errorf("A normal transaction is not allowed to same account")
+	}
+
+	if _, err := state.Balances[transaction.From]; !err {
+		return fmt.Errorf("Sending from Undefined Account")
+	}
+	if transaction.Amount <= 0 {
+		return fmt.Errorf("Illegal to make a transaction with 0 or less coins.")
+	}
+	if state.Balances[transaction.From] < uint(transaction.Amount) {
+		return fmt.Errorf("u broke")
+	}
 
 	return nil
 }

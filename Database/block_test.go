@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-var names = []string{"magn", "niels", "emilie", "asger", "alberto", "bill", "andrej"}
+var names = []AccountAddress{"Magn", "Niels", "Emilie", "Asger", "Alberto", "Bill", "Andrej"}
 
 func makeDummyTransaction() Transaction {
 	return state.CreateTransaction(names[rand.Int()*7], "niels", 6969.0)
