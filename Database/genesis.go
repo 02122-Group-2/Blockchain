@@ -3,6 +3,7 @@ package database
 import (
 	"encoding/json"
 	"os"
+	"path/filepath"
 )
 
 type Genesis struct {
@@ -10,7 +11,13 @@ type Genesis struct {
 }
 
 func LoadGenesis() *Genesis {
-	data, err := os.ReadFile("./Genesis.json")
+	currWD, err := os.Getwd()
+
+	if err != nil {
+		panic(err)
+	}
+
+	data, err := os.ReadFile(filepath.Join(currWD, "Genesis.json"))
 	if err != nil {
 		panic(err)
 	}
