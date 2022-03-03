@@ -10,7 +10,7 @@ import (
 
 type State struct {
 	Balances  map[AccountAddress]uint
-	txMempool TransactionList
+	TxMempool TransactionList
 	dbFile    *os.File
 
 	lastBlockSerialNo int
@@ -51,7 +51,7 @@ func (state *State) AddTransaction(transaction Transaction) error {
 		return err
 	}
 
-	state.txMempool = append(state.txMempool, transaction)
+	state.TxMempool = append(state.TxMempool, transaction)
 
 	state.ApplyTransaction(transaction)
 
