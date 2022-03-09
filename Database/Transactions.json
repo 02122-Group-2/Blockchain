@@ -125,6 +125,76 @@
       "Amount": 200000,
       "Timestamp": 1646832922058015400,
       "Type": "transaction"
+    },
+    {
+      "From": "Magn",
+      "To": "Niels",
+      "Amount": 42,
+      "Timestamp": 1646834145245220100,
+      "Type": "transaction"
+    },
+    {
+      "From": "Magn",
+      "To": "Niels",
+      "Amount": 89898,
+      "Timestamp": 1646834145245220100,
+      "Type": "transaction"
+    },
+    {
+      "From": "Niels",
+      "To": "gggg",
+      "Amount": 1,
+      "Timestamp": 1646834145245734500,
+      "Type": "transaction"
+    },
+    {
+      "From": "system",
+      "To": "Alberto",
+      "Amount": 5000,
+      "Timestamp": 1646834145245734500,
+      "Type": "reward"
+    },
+    {
+      "From": "Niels",
+      "To": "Magn",
+      "Amount": 200000,
+      "Timestamp": 1646834145245957200,
+      "Type": "transaction"
+    },
+    {
+      "From": "Magn",
+      "To": "Niels",
+      "Amount": 42,
+      "Timestamp": 1646834146536150700,
+      "Type": "transaction"
+    },
+    {
+      "From": "Magn",
+      "To": "Niels",
+      "Amount": 89898,
+      "Timestamp": 1646834146536150700,
+      "Type": "transaction"
+    },
+    {
+      "From": "Niels",
+      "To": "gggg",
+      "Amount": 1,
+      "Timestamp": 1646834146536150700,
+      "Type": "transaction"
+    },
+    {
+      "From": "system",
+      "To": "Alberto",
+      "Amount": 5000,
+      "Timestamp": 1646834146536150700,
+      "Type": "reward"
+    },
+    {
+      "From": "Niels",
+      "To": "Magn",
+      "Amount": 200000,
+      "Timestamp": 1646834146536150700,
+      "Type": "transaction"
     }
   ]
 }

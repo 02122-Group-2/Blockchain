@@ -92,3 +92,13 @@ func (state *State) ValidateTransaction(transaction Transaction) error {
 
 	return nil
 }
+
+func (state *State) ValidateTransactionList(transactionList TransactionList) error {
+	for i, t := range transactionList {
+		err := state.ValidateTransaction(t)
+		if err != nil {
+			return fmt.Errorf("Transaction nr. %d is not valid. Received Error: %s", i, err.Error())
+		}
+	} 
+	return nil
+}
