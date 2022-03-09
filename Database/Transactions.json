@@ -55,6 +55,48 @@
       "Amount": 3,
       "Timestamp": 1646234319049590503,
       "Type": "transaction"
+    },
+    {
+      "From": "Emilie",
+      "To": "Magn",
+      "Amount": 2,
+      "Timestamp": 1646310859945324600,
+      "Type": "transaction"
+    },
+    {
+      "From": "Emilie",
+      "To": "Niels",
+      "Amount": 2,
+      "Timestamp": 1646312051397971800,
+      "Type": "transaction"
+    },
+    {
+      "From": "system",
+      "To": "Emilie",
+      "Amount": 2,
+      "Timestamp": 1646312074438844000,
+      "Type": "reward"
+    },
+    {
+      "From": "system",
+      "To": "Emilie",
+      "Amount": 2,
+      "Timestamp": 1646312906754698200,
+      "Type": "reward"
+    },
+    {
+      "From": "Magn",
+      "To": "Niels",
+      "Amount": 69,
+      "Timestamp": 1646827676344040000,
+      "Type": "transaction"
+    },
+    {
+      "From": "Magn",
+      "To": "Niels",
+      "Amount": 69,
+      "Timestamp": 1646827721500560000,
+      "Type": "transaction"
     }
   ]
 }

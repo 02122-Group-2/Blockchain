@@ -2,6 +2,9 @@ package main
 
 import (
 	"fmt"
+	"os"
+
+	Database "blockchain/database"
 
 	"github.com/spf13/cobra"
 )
@@ -14,7 +17,7 @@ func balancesCmd() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 		},
 	}
-	balancesCmd.AddCommand(balancesCmd)
+	balancesCmd.AddCommand(balancesListCmd)
 
 	return balancesCmd
 }
@@ -24,11 +27,19 @@ var balancesListCmd = &cobra.Command{
 	Short: "Lists all balances.",
 	Run: func(cmd *cobra.Command, args []string) {
 		//Load balances here
+		state, err := Database.LoadState()
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
 
+		//Printing balances
 		fmt.Println("Accounts balances:")
 		fmt.Println("__________________")
 		fmt.Println("")
-		//Print balances here
+		for account, balance := range state.Balances {
+			fmt.Printf("%s:%d\n", account, balance)
+		}
 
 	},
 }

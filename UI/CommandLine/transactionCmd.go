@@ -2,8 +2,9 @@ package main
 
 import (
 	"fmt"
+	"os"
 
-	Database "github.com/blockchainProject/blockchain/Database"
+	Database "blockchain/database"
 
 	"github.com/spf13/cobra"
 )
@@ -11,6 +12,9 @@ import (
 const flagFrom = "from"
 const flagTo = "to"
 const flagAmount = "amount"
+const flagType = "type"
+
+var isCreated = false
 
 func transactionCmd() *cobra.Command {
 	var transactionCmd = &cobra.Command{
@@ -31,17 +35,59 @@ func transactionCreateCmd() *cobra.Command {
 		Use:   "create",
 		Short: "Create transaction to database",
 		Run: func(cmd *cobra.Command, args []string) {
+			//Initialize the flags
 			from, _ := cmd.Flags().GetString(flagFrom)
 			to, _ := cmd.Flags().GetString(flagTo)
-			amount, _ := cmd.Flags().GetFloat64(flagAmount)
+			amount, _ := cmd.Flags().GetUint(flagAmount)
+			typeT, _ := cmd.Flags().GetString(flagType)
 
-			state, _ := Database.LoadState()
-			fmt.Printf("%f", amount)
+			//get the current state
+			state, err := Database.LoadState()
+			if err != nil {
+				fmt.Fprintln(os.Stderr, err)
+				os.Exit(1)
+			}
+			var transaction Database.Transaction
 
-			transaction := state.CreateTransaction(Database.AccountAddress(from), Database.AccountAddress(to), amount)
-			fmt.Println("Transaction created" + Database.TxToString(transaction))
+			//Determine type of transaction
+			switch typeT {
+			case "genesis":
+				transaction = state.CreateGenesisTransaction(Database.AccountAddress(from), float64(amount))
 
-			//Get state, add transaction and save new state
+				fmt.Println("Genesis created" + Database.TxToString(transaction))
+
+				isCreated = true
+
+			case "reward":
+				transaction = state.CreateReward(Database.AccountAddress(from), float64(amount))
+
+				fmt.Println("Reward created" + Database.TxToString(transaction))
+
+				isCreated = true
+
+			case "transaction":
+				if to != "" {
+					transaction = state.CreateTransaction(Database.AccountAddress(from), Database.AccountAddress(to), float64(amount))
+
+					fmt.Println("Transaction created" + Database.TxToString(transaction))
+					isCreated = true
+				}
+			}
+
+			if isCreated {
+				//Add the transaction to the state and save the transactions
+				err := state.AddTransaction(transaction)
+				fmt.Println("Transaction succsesfully added")
+
+				Database.SaveTransaction(state.TxMempool)
+
+				if err != nil {
+					fmt.Fprintln(os.Stderr, err)
+					os.Exit(1)
+				}
+				fmt.Println("TX successfully saved")
+
+			}
 
 		},
 	}
@@ -49,10 +95,12 @@ func transactionCreateCmd() *cobra.Command {
 	cmd.MarkFlagRequired(flagFrom)
 
 	cmd.Flags().String(flagTo, "", "To what account to send tokens")
-	cmd.MarkFlagRequired(flagTo)
 
 	cmd.Flags().Uint(flagAmount, 0, "How many tokens to send")
 	cmd.MarkFlagRequired(flagAmount)
+
+	cmd.Flags().String(flagType, "", "What type of transaction")
+	cmd.MarkFlagRequired(flagType)
 
 	return cmd
 

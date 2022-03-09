@@ -126,6 +126,6 @@ func TestCreateLegalTransactionAndPersist(t *testing.T) {
 	if err != nil {
 		t.Error("Failed to add transaction. Error: " + err.Error())
 	}
-	
+
 	SaveTransaction(state.txMempool)
 }
