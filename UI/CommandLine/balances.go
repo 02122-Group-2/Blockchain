@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	Database "github.com/blockchainProject/blockchain/Database"
+	Database "blockchain/database"
+
 	"github.com/spf13/cobra"
 )
 
@@ -37,7 +38,7 @@ var balancesListCmd = &cobra.Command{
 		fmt.Println("__________________")
 		fmt.Println("")
 		for account, balance := range state.Balances {
-			fmt.Println(fmt.Sprintf("%s:%d", account, balance))
+			fmt.Printf("%s:%d\n", account, balance)
 		}
 
 	},

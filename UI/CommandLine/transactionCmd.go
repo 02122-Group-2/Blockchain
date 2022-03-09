@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	Database "github.com/blockchainProject/blockchain/Database"
+	Database "blockchain/database"
 
 	"github.com/spf13/cobra"
 )
@@ -71,10 +71,7 @@ func transactionCreateCmd() *cobra.Command {
 
 					fmt.Println("Transaction created" + Database.TxToString(transaction))
 					isCreated = true
-				} else {
-					//do nothing
 				}
-
 			}
 
 			if isCreated {

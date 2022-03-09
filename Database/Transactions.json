@@ -83,6 +83,20 @@
       "Amount": 2,
       "Timestamp": 1646312906754698200,
       "Type": "reward"
+    },
+    {
+      "From": "Magn",
+      "To": "Niels",
+      "Amount": 69,
+      "Timestamp": 1646827676344040000,
+      "Type": "transaction"
+    },
+    {
+      "From": "Magn",
+      "To": "Niels",
+      "Amount": 69,
+      "Timestamp": 1646827721500560000,
+      "Type": "transaction"
     }
   ]
 }
