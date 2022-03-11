@@ -1,5 +1,9 @@
 package database
 
+import (
+	Crypto "blockchain/Cryptography"
+)
+
 type Block struct {
 	Header       BlockHeader   `json: "Header"`
 	Transactions []Transaction `json: "Transactions"`
@@ -20,4 +24,22 @@ func (state *State) CreateBlock(txs []Transaction) Block {
 		},
 		txs,
 	}
+}
+
+func (state *State) validateBlock(block Block) bool {
+	if block.Header.ParentHash != state.latestHash {
+		return false
+	}
+
+	if block.Header.SerialNo != state.getNextBlockSerialNo() {
+		return false
+	}
+
+	if block.Header.CreatedAt <= state.getLatestBlock().Header.CreatedAt {
+		return false
+	}
+
+	if 
+
+	return true
 }
