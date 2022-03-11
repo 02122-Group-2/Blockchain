@@ -16,7 +16,6 @@ type State struct {
 	lastBlockSerialNo int
 	latestHash        string
 	latestTimestamp   int64
-	latestBlock 	    *Block
 }
 
 func makeTimestamp() int64 {
@@ -31,13 +30,10 @@ func (s *State) getLatestHash() string {
 	return s.latestHash
 }
 
-func (s *State) getLatestBlockPointer() *Block {
-	return s.latestBlock
-}
 
 func LoadState() (*State, error) {
 	var file *os.File
-	state := &State{make(map[AccountAddress]uint), make([]Transaction, 0), file, 0, "", 0, nil} 
+	state := &State{make(map[AccountAddress]uint), make([]Transaction, 0), file, 0, "", 0} 
 
 	loadedTransactions := LoadTransactions()
 
