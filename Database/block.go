@@ -16,9 +16,9 @@ type Block struct {
 }
 
 type BlockHeader struct {
-	ParentHash string `json: "ParentHash"`
-	CreatedAt  int64  `json: "CreatedAt"`
-	SerialNo   int    `json: "SerialNo"`
+	ParentHash [32]byte `json: "ParentHash"`
+	CreatedAt  int64    `json: "CreatedAt"`
+	SerialNo   int      `json: "SerialNo"`
 }
 
 type Blockchain struct {
@@ -53,7 +53,7 @@ func (state *State) ValidateBlock(block Block) error {
 		return fmt.Errorf("Block violates serial no. order")
 	}
 
-	if block.Header.CreatedAt <= state.latestTimestamp {
+	if block.Header.CreatedAt <= state.lastBlockTimestamp {
 		return fmt.Errorf("The new block must have a newer creation date than the latest block")
 	}
 
@@ -62,6 +62,39 @@ func (state *State) ValidateBlock(block Block) error {
 		return err
 	}
 
+	return nil
+}
+
+func (state *State) ApplyBlock(block Block) error {
+	err := state.ValidateBlock(block) 
+	if err != nil {
+		return err
+	}
+
+	err = state.AddTransactionList(block.Transactions)
+	if err != nil {
+		return err
+	}
+
+	jsonString, jsonErr := BlockToJsonString(block)
+	if jsonErr != nil {
+		return jsonErr
+	}
+	
+	state.latestHash = Crypto.HashBlock(jsonString)
+	state.lastBlockSerialNo = block.Header.SerialNo
+	state.lastBlockTimestamp = block.Header.CreatedAt
+	state.TxMempool = nil
+
+	return nil
+}
+
+func (state *State) ApplyBlocks(blocks []Block) error {
+	for _, t := range blocks {
+		if err := state.ApplyBlock(t); err != nil {
+			return fmt.Errorf("Block failed: " + err.Error())
+		}
+	}
 	return nil
 }
 
@@ -76,6 +109,12 @@ func (state *State) AddBlock(block Block) error {
 		return err
 	}
 
+	// This functionality is not working properly yet. Need a better system of applying eiher blocks or transactions. Both will result in applying transactions twice.
+	err = state.ApplyBlock(block) 
+	if err != nil {
+		return err
+	}
+
 	jsonString, jsonErr := BlockToJsonString(block)
 	if jsonErr != nil {
 		return jsonErr
@@ -83,7 +122,7 @@ func (state *State) AddBlock(block Block) error {
 
 	state.latestHash = Crypto.HashBlock(jsonString)
 	state.lastBlockSerialNo = block.Header.SerialNo
-	state.latestTimestamp = block.Header.CreatedAt
+	state.lastBlockTimestamp = block.Header.CreatedAt
 	state.TxMempool = nil
 
 

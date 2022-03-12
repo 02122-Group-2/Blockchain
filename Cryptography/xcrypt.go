@@ -5,7 +5,6 @@ import (
 )
 
 
-func HashBlock(blockString string) string {
-	_hash := sha256.Sum256([]byte(blockString)) 
-	return string(_hash[:])
+func HashBlock(blockString string) [32]byte {
+	return sha256.Sum256([]byte(blockString)) 
 }
