@@ -2,6 +2,7 @@ package database
 
 import (
 	Crypto "blockchain/Cryptography"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -137,6 +138,17 @@ func BlockToJsonString(block Block) (string, error) {
 	return string(json), nil
 }
 
+func (bh *BlockHeader) MarshalJSON() ([]byte, error) {
+	type BhAlias BlockHeader
+	return json.Marshal(&struct {
+		ParentHash string `json: "ParentHash"`
+		*BhAlias
+	}{
+		ParentHash: fmt.Sprintf("%x", bh.ParentHash),
+		BhAlias:    (*BhAlias)(bh),
+	})
+}
+
 func LoadBlockchain() []Block {
 	currWD, err := os.Getwd()
 	if err != nil {
@@ -152,6 +164,31 @@ func LoadBlockchain() []Block {
 	json.Unmarshal(data, &loadedBlockchain)
 
 	return loadedBlockchain.Blockchain
+}
+
+func (bh *BlockHeader) UnmarshalJSON(data []byte) error {
+	type BhAlias BlockHeader
+	aux := &struct {
+		ParentHash string `json: "ParentHash"`
+		*BhAlias
+	}{
+		BhAlias: (*BhAlias)(bh),
+	}
+
+	if err := json.Unmarshal(data, aux); err != nil {
+		return err
+	}
+
+	byte_arr, decode_err := hex.DecodeString(aux.ParentHash)
+	if decode_err != nil {
+		panic(decode_err)
+	}
+
+	for i := 0; i < 32; i++ {
+		bh.ParentHash[i] = byte_arr[i]
+	}
+
+	return nil
 }
 
 func SaveBlockchain(blockchain []Block) bool {

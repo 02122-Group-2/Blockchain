@@ -25,6 +25,8 @@ func TestCreateBlock(t *testing.T) {
 }
 
 func TestSaveBlock(t *testing.T) {
+	blockchain_original = LoadBlockchain()
+
 	// Create a block
 	tx1 := state_block.CreateTransaction("Niels", "Magn", 10)
 	tx2 := state_block.CreateTransaction("Magn", "Emilie", 4)
@@ -59,4 +61,9 @@ func TestAddBlockToBlockchain(t *testing.T) {
 
 	err = state_block.AddBlock(block2)
 	fmt.Println(err)
+}
+
+func TestMarshalBlock(t *testing.T) {
+	data, _ := blockchain_original[1].Header.MarshalJSON()
+	t.Logf("%s", data)
 }
