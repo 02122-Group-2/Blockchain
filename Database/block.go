@@ -181,3 +181,28 @@ func SaveBlockchain(blockchain []Block) bool {
 
 	return true
 }
+
+//Function to copy state 
+func (currState *State) copyState() State{
+	copy := State{}
+
+	copy.TxMempool = make([]Transaction, len(currState.TxMempool)) 
+	copy.Balances = make(map[AccountAddress]uint)
+
+	copy.lastBlockSerialNo = currState.lastBlockSerialNo
+	copy.lastBlockTimestamp = currState.lastBlockTimestamp
+	copy.latestHash = currState.latestHash
+	copy.latestTimestamp = currState.lastTimestamp
+
+	for accountA, balance := range currState.Balances {
+		copy.Balances[acccountA] = balance
+	}
+
+	for _, tx := range currState.TxMempool {
+		copy.TxMempool = append(copy.TxMempool, tx)
+	}
+
+	return copy
+}
+
+
