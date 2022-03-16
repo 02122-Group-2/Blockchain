@@ -99,18 +99,23 @@ func (state *State) ApplyBlocks(blocks []Block) error {
 }
 
 func (state *State) AddBlock(block Block) error {
-	err := state.ValidateBlock(block) 
+	//Copy of current state 
+	pendingState := state.copy()
+
+
+	err := pendingState.ValidateBlock(block) 
 	if err != nil {
 		return err
 	}
 
-	err = state.PersistBlockToDB(block)
+	err = pendingState.PersistBlockToDB(block)
 	if err != nil {
 		return err
 	}
 
 	// This functionality is not working properly yet. Need a better system of applying eiher blocks or transactions. Both will result in applying transactions twice.
-	err = state.ApplyBlock(block) 
+	//Apply to the pending state 
+	err = pendingState.ApplyBlock(block) 
 	if err != nil {
 		return err
 	}
@@ -120,10 +125,17 @@ func (state *State) AddBlock(block Block) error {
 		return jsonErr
 	}
 
+
+	//Everything went through so 
+	state.Balances = pendingState.Balances
+	
 	state.latestHash = Crypto.HashBlock(jsonString)
 	state.lastBlockSerialNo = block.Header.SerialNo
 	state.lastBlockTimestamp = block.Header.CreatedAt
 	state.TxMempool = nil
+
+
+	
 
 
 	return nil
