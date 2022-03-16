@@ -9,7 +9,6 @@ import (
 	"path/filepath"
 )
 
-
 type Block struct {
 	Header       BlockHeader   `json: "Header"`
 	Transactions []Transaction `json: "Transactions"`
@@ -57,7 +56,7 @@ func (state *State) ValidateBlock(block Block) error {
 		return fmt.Errorf("The new block must have a newer creation date than the latest block")
 	}
 
-	err := state.ValidateTransactionList(block.Transactions) 
+	err := state.ValidateTransactionList(block.Transactions)
 	if err != nil {
 		return err
 	}
@@ -66,7 +65,7 @@ func (state *State) ValidateBlock(block Block) error {
 }
 
 func (state *State) ApplyBlock(block Block) error {
-	err := state.ValidateBlock(block) 
+	err := state.ValidateBlock(block)
 	if err != nil {
 		return err
 	}
@@ -80,7 +79,7 @@ func (state *State) ApplyBlock(block Block) error {
 	if jsonErr != nil {
 		return jsonErr
 	}
-	
+
 	state.latestHash = Crypto.HashBlock(jsonString)
 	state.lastBlockSerialNo = block.Header.SerialNo
 	state.lastBlockTimestamp = block.Header.CreatedAt
@@ -99,7 +98,7 @@ func (state *State) ApplyBlocks(blocks []Block) error {
 }
 
 func (state *State) AddBlock(block Block) error {
-	err := state.ValidateBlock(block) 
+	err := state.ValidateBlock(block)
 	if err != nil {
 		return err
 	}
@@ -110,7 +109,7 @@ func (state *State) AddBlock(block Block) error {
 	}
 
 	// This functionality is not working properly yet. Need a better system of applying eiher blocks or transactions. Both will result in applying transactions twice.
-	err = state.ApplyBlock(block) 
+	err = state.ApplyBlock(block)
 	if err != nil {
 		return err
 	}
@@ -125,19 +124,18 @@ func (state *State) AddBlock(block Block) error {
 	state.lastBlockTimestamp = block.Header.CreatedAt
 	state.TxMempool = nil
 
-
 	return nil
 }
 
 func (state *State) PersistBlockToDB(block Block) error {
-	err := state.ValidateBlock(block) 
+	err := state.ValidateBlock(block)
 	if err != nil {
 		return err
 	}
 
 	oldBlocks := LoadBlockchain()
 	oldBlocks = append(oldBlocks, block)
-	
+
 	if !SaveBlockchain(oldBlocks) {
 		return fmt.Errorf("Failed to save Blockchain locally")
 	}
@@ -146,7 +144,7 @@ func (state *State) PersistBlockToDB(block Block) error {
 }
 
 func BlockToJsonString(block Block) (string, error) {
-	json, err  := json.Marshal(block)
+	json, err := json.Marshal(block)
 	if err != nil {
 		return "", fmt.Errorf("Unable to convert block to a json string")
 	}
@@ -182,20 +180,20 @@ func SaveBlockchain(blockchain []Block) bool {
 	return true
 }
 
-//Function to copy state 
-func (currState *State) copyState() State{
+//Function to copy state
+func (currState *State) copyState() State {
 	copy := State{}
 
-	copy.TxMempool = make([]Transaction, len(currState.TxMempool)) 
+	copy.TxMempool = make([]Transaction, len(currState.TxMempool))
 	copy.Balances = make(map[AccountAddress]uint)
 
 	copy.lastBlockSerialNo = currState.lastBlockSerialNo
 	copy.lastBlockTimestamp = currState.lastBlockTimestamp
 	copy.latestHash = currState.latestHash
-	copy.latestTimestamp = currState.lastTimestamp
+	copy.latestTimestamp = currState.latestTimestamp
 
 	for accountA, balance := range currState.Balances {
-		copy.Balances[acccountA] = balance
+		copy.Balances[accountA] = balance
 	}
 
 	for _, tx := range currState.TxMempool {
@@ -204,5 +202,3 @@ func (currState *State) copyState() State{
 
 	return copy
 }
-
-
