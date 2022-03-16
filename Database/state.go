@@ -9,14 +9,13 @@ import (
 )
 
 type State struct {
-	Balances  map[AccountAddress]uint
-	TxMempool TransactionList
-	dbFile    *os.File
-
-	lastBlockSerialNo  int
-	lastBlockTimestamp int64
-	latestHash         [32]byte
-	latestTimestamp    int64
+	Balances           map[AccountAddress]uint `json: "Balances"`
+	TxMempool          TransactionList         `json: "TxMempool"`
+	DbFile             *os.File                `json: "DbFile"`
+	LastBlockSerialNo  int                     `json: "LastBlockSerialNo"`
+	LastBlockTimestamp int64                   `json: "LastBlockTimestamp"`
+	LatestHash         [32]byte                `json: "LatestHash"`
+	LatestTimestamp    int64                   `json: "LatestTimestamp"`
 }
 
 func makeTimestamp() int64 {
@@ -24,17 +23,16 @@ func makeTimestamp() int64 {
 }
 
 func (s *State) getNextBlockSerialNo() int {
-	return s.lastBlockSerialNo + 1
+	return s.LastBlockSerialNo + 1
 }
 
 func (s *State) getLatestHash() [32]byte {
-	return s.latestHash
+	return s.LatestHash
 }
-
 
 func LoadState() (*State, error) {
 	var file *os.File
-	state := &State{make(map[AccountAddress]uint), make([]Transaction, 0), file, 0, 0, [32]byte{}, 0} 
+	state := &State{make(map[AccountAddress]uint), make([]Transaction, 0), file, 0, 0, [32]byte{}, 0}
 
 	// loadedTransactions := LoadTransactions()
 	// for _, t := range loadedTransactions {
@@ -61,7 +59,7 @@ func (state *State) AddTransaction(transaction Transaction) error {
 
 	state.ApplyTransaction(transaction)
 
-	state.latestTimestamp = transaction.Timestamp
+	state.LatestTimestamp = transaction.Timestamp
 	return nil
 }
 
@@ -73,7 +71,7 @@ func (state *State) ApplyTransaction(transaction Transaction) {
 }
 
 func (state *State) ValidateTransaction(transaction Transaction) error {
-	if (state.lastBlockSerialNo == 0 && transaction.Type == "genesis") || transaction.Type == "reward" {
+	if (state.LastBlockSerialNo == 0 && transaction.Type == "genesis") || transaction.Type == "reward" {
 		return nil
 	}
 
@@ -82,13 +80,13 @@ func (state *State) ValidateTransaction(transaction Transaction) error {
 	}
 
 	if _, ok := state.Balances[transaction.From]; !ok {
-		return fmt.Errorf("sending from Undefined Account")
+		return fmt.Errorf("sending from Undefined Account \"%s\"", transaction.From)
 	}
 	if transaction.Amount <= 0 {
 		return fmt.Errorf("illegal to make a transaction with 0 or less coins")
 	}
 
-	if transaction.Timestamp < state.latestTimestamp {
+	if transaction.Timestamp < state.LatestTimestamp {
 		return fmt.Errorf("new tx must have newer timestamp than previous tx")
 	}
 
@@ -105,7 +103,7 @@ func (state *State) ValidateTransactionList(transactionList TransactionList) err
 		if err != nil {
 			return fmt.Errorf("Transaction nr. %d is not valid. Received Error: %s", i, err.Error())
 		}
-	} 
+	}
 	return nil
 }
 
@@ -115,6 +113,6 @@ func (state *State) AddTransactionList(transactionList TransactionList) error {
 		if err != nil {
 			return fmt.Errorf("Transaction nr. %d is not able to be added. Received Error: %s", i, err.Error())
 		}
-	} 
+	}
 	return nil
 }

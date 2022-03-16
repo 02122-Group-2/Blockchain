@@ -36,7 +36,7 @@ func (state *State) CreateBlock(txs []Transaction) Block {
 }
 
 func (state *State) ValidateBlock(block Block) error {
-	if state.lastBlockSerialNo == 0 { // If no other block is added, add the block if the block has serialNo. 1
+	if state.LastBlockSerialNo == 0 { // If no other block is added, add the block if the block has serialNo. 1
 		if block.Header.SerialNo == 1 {
 			return nil
 		} else {
@@ -44,16 +44,16 @@ func (state *State) ValidateBlock(block Block) error {
 		}
 	}
 
-	if block.Header.ParentHash != state.latestHash {
-		return fmt.Errorf("The parent hash doesn't match the hash of the latest block")
+	if block.Header.ParentHash != state.LatestHash {
+		return fmt.Errorf("The parent hash doesn't match the hash of the Latest block")
 	}
 
 	if block.Header.SerialNo != state.getNextBlockSerialNo() {
 		return fmt.Errorf("Block violates serial no. order")
 	}
 
-	if block.Header.CreatedAt <= state.lastBlockTimestamp {
-		return fmt.Errorf("The new block must have a newer creation date than the latest block")
+	if block.Header.CreatedAt <= state.LastBlockTimestamp {
+		return fmt.Errorf("The new block must have a newer creation date than the Latest block")
 	}
 
 	err := state.ValidateTransactionList(block.Transactions)
@@ -64,13 +64,21 @@ func (state *State) ValidateBlock(block Block) error {
 	return nil
 }
 
-func (state *State) ApplyBlock(block Block) error {
-	err := state.ValidateBlock(block)
-	if err != nil {
-		return err
+func (state *State) ApplyBlocks(blocks []Block) error {
+	for _, t := range blocks {
+		validation_err := state.ValidateBlock(t)
+		if validation_err != nil {
+			return validation_err
+		}
+		if err := state.ApplyBlock(t); err != nil {
+			return fmt.Errorf("Block failed: " + err.Error())
+		}
 	}
+	return nil
+}
 
-	err = state.AddTransactionList(block.Transactions)
+func (state *State) ApplyBlock(block Block) error {
+	err := state.AddTransactionList(block.Transactions)
 	if err != nil {
 		return err
 	}
@@ -80,25 +88,16 @@ func (state *State) ApplyBlock(block Block) error {
 		return jsonErr
 	}
 
-	state.latestHash = Crypto.HashBlock(jsonString)
-	state.lastBlockSerialNo = block.Header.SerialNo
-	state.lastBlockTimestamp = block.Header.CreatedAt
+	state.LatestHash = Crypto.HashBlock(jsonString)
+	state.LastBlockSerialNo = block.Header.SerialNo
+	state.LastBlockTimestamp = block.Header.CreatedAt
 	state.TxMempool = nil
-
-	return nil
-}
-
-func (state *State) ApplyBlocks(blocks []Block) error {
-	for _, t := range blocks {
-		if err := state.ApplyBlock(t); err != nil {
-			return fmt.Errorf("Block failed: " + err.Error())
-		}
-	}
 	return nil
 }
 
 func (state *State) AddBlock(block Block) error {
-	err := state.ValidateBlock(block)
+	prevState := LoadSnapshot()
+	err := prevState.ValidateBlock(block)
 	if err != nil {
 		return err
 	}
@@ -114,25 +113,12 @@ func (state *State) AddBlock(block Block) error {
 		return err
 	}
 
-	jsonString, jsonErr := BlockToJsonString(block)
-	if jsonErr != nil {
-		return jsonErr
-	}
-
-	state.latestHash = Crypto.HashBlock(jsonString)
-	state.lastBlockSerialNo = block.Header.SerialNo
-	state.lastBlockTimestamp = block.Header.CreatedAt
-	state.TxMempool = nil
+	state.SaveSnapshot()
 
 	return nil
 }
 
 func (state *State) PersistBlockToDB(block Block) error {
-	err := state.ValidateBlock(block)
-	if err != nil {
-		return err
-	}
-
 	oldBlocks := LoadBlockchain()
 	oldBlocks = append(oldBlocks, block)
 
@@ -180,17 +166,44 @@ func SaveBlockchain(blockchain []Block) bool {
 	return true
 }
 
-//Function to copy state
+func LoadSnapshot() State {
+	currWD, err := os.Getwd()
+	if err != nil {
+		panic(err)
+	}
+
+	data, err := os.ReadFile(filepath.Join(currWD, "LatestSnapshot.json"))
+	if err != nil {
+		panic(err)
+	}
+
+	var state State
+	json.Unmarshal(data, &state)
+
+	return state
+}
+
+func (state *State) SaveSnapshot() bool {
+	txFile, _ := json.MarshalIndent(state, "", "  ")
+
+	err := ioutil.WriteFile("./LatestSnapshot.json", txFile, 0644)
+	if err != nil {
+		panic(err)
+	}
+
+	return true
+}
+
 func (currState *State) copyState() State {
 	copy := State{}
 
 	copy.TxMempool = make([]Transaction, len(currState.TxMempool))
 	copy.Balances = make(map[AccountAddress]uint)
 
-	copy.lastBlockSerialNo = currState.lastBlockSerialNo
-	copy.lastBlockTimestamp = currState.lastBlockTimestamp
-	copy.latestHash = currState.latestHash
-	copy.latestTimestamp = currState.latestTimestamp
+	copy.LastBlockSerialNo = currState.LastBlockSerialNo
+	copy.LastBlockTimestamp = currState.LastBlockTimestamp
+	copy.LatestHash = currState.LatestHash
+	copy.LatestTimestamp = currState.LatestTimestamp
 
 	for accountA, balance := range currState.Balances {
 		copy.Balances[accountA] = balance

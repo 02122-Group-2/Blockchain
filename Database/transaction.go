@@ -79,7 +79,6 @@ func SaveTransaction(transactionList TransactionList) bool {
 	return true
 }
 
-
 func TxToString(transaction Transaction) string {
 	return "From: " + string(transaction.From) + "\n To: " + string(transaction.To) + "\n Amount: " + fmt.Sprintf("%v", transaction.Amount)
 }
