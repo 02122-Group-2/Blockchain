@@ -13,10 +13,10 @@ type State struct {
 	TxMempool TransactionList
 	dbFile    *os.File
 
-	lastBlockSerialNo int
-	latestHash        string
-	latestTimestamp   int64
-	// latestBlock 	  Block
+	lastBlockSerialNo  int
+	lastBlockTimestamp int64
+	latestHash         [32]byte
+	latestTimestamp    int64
 }
 
 func makeTimestamp() int64 {
@@ -27,20 +27,26 @@ func (s *State) getNextBlockSerialNo() int {
 	return s.lastBlockSerialNo + 1
 }
 
-func (s *State) getLatestHash() string {
+func (s *State) getLatestHash() [32]byte {
 	return s.latestHash
 }
 
+
 func LoadState() (*State, error) {
 	var file *os.File
-	state := &State{make(map[AccountAddress]uint), make([]Transaction, 0), file, 0, "", 0} //TODO fix missing hash
+	state := &State{make(map[AccountAddress]uint), make([]Transaction, 0), file, 0, 0, [32]byte{}, 0} 
 
-	loadedTransactions := LoadTransactions()
+	// loadedTransactions := LoadTransactions()
+	// for _, t := range loadedTransactions {
+	// 	if err := state.AddTransaction(t); err != nil {
+	// 		panic("Transaction not allowed\n\t" + err.Error())
+	// 	}
+	// }
 
-	for _, t := range loadedTransactions {
-		if err := state.AddTransaction(t); err != nil {
-			panic("Transaction not allowed\n\t" + err.Error())
-		}
+	localBlockchain := LoadBlockchain()
+	err := state.ApplyBlocks(localBlockchain)
+	if err != nil {
+		panic(err)
 	}
 
 	return state, nil
@@ -98,6 +104,16 @@ func (state *State) ValidateTransactionList(transactionList TransactionList) err
 		err := state.ValidateTransaction(t)
 		if err != nil {
 			return fmt.Errorf("Transaction nr. %d is not valid. Received Error: %s", i, err.Error())
+		}
+	} 
+	return nil
+}
+
+func (state *State) AddTransactionList(transactionList TransactionList) error {
+	for i, t := range transactionList {
+		err := state.AddTransaction(t)
+		if err != nil {
+			return fmt.Errorf("Transaction nr. %d is not able to be added. Received Error: %s", i, err.Error())
 		}
 	} 
 	return nil
