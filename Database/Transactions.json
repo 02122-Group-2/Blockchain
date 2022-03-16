@@ -1,10 +1,31 @@
 {
   "transactions": [
     {
+      "From": "Magn",
+      "To": "Niels",
+      "Amount": 42,
+      "Timestamp": 1647450562149659000,
+      "Type": "transaction"
+    },
+    {
+      "From": "Niels",
+      "To": "gggg",
+      "Amount": 1,
+      "Timestamp": 1647450562149722000,
+      "Type": "transaction"
+    },
+    {
+      "From": "system",
+      "To": "Alberto",
+      "Amount": 5000,
+      "Timestamp": 1647450562149731000,
+      "Type": "reward"
+    },
+    {
       "From": "Niels",
       "To": "Magn",
       "Amount": 200000,
-      "Timestamp": 1647450180577939000,
+      "Timestamp": 1647450562149743000,
       "Type": "transaction"
     }
   ]
