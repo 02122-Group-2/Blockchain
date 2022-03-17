@@ -42,10 +42,9 @@ func TestSaveBlock(t *testing.T) {
 }
 
 func TestLoadBlockchain(t *testing.T) {
-	res := LoadBlockchain();
+	res := LoadBlockchain()
 	fmt.Println(res)
 }
-
 
 func TestAddBlockToBlockchain(t *testing.T) {
 	block := state_block.CreateBlock(state_block.TxMempool)
@@ -56,7 +55,7 @@ func TestAddBlockToBlockchain(t *testing.T) {
 	tx2 := state_block.CreateTransaction("Magn", "Emilie", 4)
 	// state_block.AddTransaction(tx1)
 	// state_block.AddTransaction(tx2)
-	block2 := state_block.CreateBlock(TransactionList{tx1,tx2})
+	block2 := state_block.CreateBlock(TransactionList{tx1, tx2})
 
 	err = state_block.AddBlock(block2)
 	fmt.Println(err)

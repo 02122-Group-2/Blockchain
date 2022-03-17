@@ -31,10 +31,9 @@ func (s *State) getLatestHash() [32]byte {
 	return s.latestHash
 }
 
-
 func LoadState() (*State, error) {
 	var file *os.File
-	state := &State{make(map[AccountAddress]uint), make([]Transaction, 0), file, 0, 0, [32]byte{}, 0} 
+	state := &State{make(map[AccountAddress]uint), make([]Transaction, 0), file, 0, 0, [32]byte{}, 0}
 
 	// loadedTransactions := LoadTransactions()
 	// for _, t := range loadedTransactions {
@@ -88,7 +87,7 @@ func (state *State) ValidateTransaction(transaction Transaction) error {
 		return fmt.Errorf("illegal to make a transaction with 0 or less coins")
 	}
 
-	if transaction.Timestamp < state.latestTimestamp {
+	if transaction.Timestamp <= state.latestTimestamp {
 		return fmt.Errorf("new tx must have newer timestamp than previous tx")
 	}
 
@@ -105,7 +104,7 @@ func (state *State) ValidateTransactionList(transactionList TransactionList) err
 		if err != nil {
 			return fmt.Errorf("Transaction nr. %d is not valid. Received Error: %s", i, err.Error())
 		}
-	} 
+	}
 	return nil
 }
 
@@ -115,6 +114,6 @@ func (state *State) AddTransactionList(transactionList TransactionList) error {
 		if err != nil {
 			return fmt.Errorf("Transaction nr. %d is not able to be added. Received Error: %s", i, err.Error())
 		}
-	} 
+	}
 	return nil
 }
