@@ -1,14 +1,14 @@
 {
-  "LatestHash": "906b210c7974651caafade304350b2d23ade3e389f871fc6b636eb3b5243b480",
+  "LatestHash": "a0f4c9d79b55cc2fd049de7d9b1edd147a22709ed7d24cd54a01f17ad21bf78d",
   "Balances": {
     "Alberto": 100,
-    "Asger": 516,
-    "Emilie": 69,
-    "Niels": 999840
+    "Asger": 552,
+    "Emilie": 93,
+    "Niels": 999780
   },
   "TxMempool": null,
   "DbFile": null,
-  "LastBlockSerialNo": 7,
-  "LastBlockTimestamp": 1647894174826874000,
-  "LatestTimestamp": 1647894174826871000
+  "LastBlockSerialNo": 9,
+  "LastBlockTimestamp": 1647894464857097000,
+  "LatestTimestamp": 1647894464857094000
 }

@@ -56,7 +56,6 @@ func (state *State) CreateReward(accountAddress AccountAddress, amount float64) 
 	return state.CreateCustomTransaction("system", accountAddress, amount, "reward")
 }
 
-
 // Given a list of transactions, it saves these transactions as a JSON string in a local text file.
 // Returns a boolean value indicating whether or not it was saved succesfully.
 // This is not used in older version of the blockchain.
@@ -64,7 +63,7 @@ func SaveTransaction(transactionList TransactionList) bool {
 	toSave := LoadedTransactions{transactionList}
 	txFile, _ := json.MarshalIndent(toSave, "", "  ")
 
-	err := ioutil.WriteFile("./Transactions.json", txFile, 0644)
+	err := ioutil.WriteFile("./Persistence/Transactions.json", txFile, 0644)
 	if err != nil {
 		panic(err)
 	}
@@ -80,7 +79,7 @@ func LoadTransactions() TransactionList {
 		panic(err)
 	}
 
-	data, err := os.ReadFile(filepath.Join(currWD, "Transactions.json"))
+	data, err := os.ReadFile(filepath.Join(currWD, "./Persistence/Transactions.json"))
 	if err != nil {
 		panic(err)
 	}
@@ -90,7 +89,6 @@ func LoadTransactions() TransactionList {
 
 	return loadedTransactions.Transactions
 }
-
 
 // Formats a given transaction to text format.
 func TxToString(transaction Transaction) string {
