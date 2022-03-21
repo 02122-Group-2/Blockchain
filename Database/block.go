@@ -139,6 +139,7 @@ func BlockToJsonString(block Block) (string, error) {
 }
 
 func (bh *BlockHeader) MarshalJSON() ([]byte, error) {
+	fmt.Println("123bh.MarshalJSON() called!!")
 	type BhAlias BlockHeader
 	return json.Marshal(&struct {
 		ParentHash string `json: "ParentHash"`
@@ -167,6 +168,7 @@ func LoadBlockchain() []Block {
 }
 
 func (bh *BlockHeader) UnmarshalJSON(data []byte) error {
+	fmt.Println("bh.UnmarshalJSON() called!!")
 	type BhAlias BlockHeader
 	aux := &struct {
 		ParentHash string `json: "ParentHash"`

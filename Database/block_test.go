@@ -1,6 +1,7 @@
 package database
 
 import (
+	"encoding/json"
 	"fmt"
 	"math/rand"
 	"testing"
@@ -60,10 +61,16 @@ func TestAddBlockToBlockchain(t *testing.T) {
 	block2 := state_block.CreateBlock(TransactionList{tx1, tx2})
 
 	err = state_block.AddBlock(block2)
+	if err != nil {
+		panic(err)
+	}
 	fmt.Println(err)
 }
 
-func TestMarshalBlock(t *testing.T) {
-	data, _ := blockchain_original[1].Header.MarshalJSON()
-	t.Logf("%s", data)
+func TestMarshalUnmarshalBlock(t *testing.T) {
+	jsonData, _ := json.Marshal(blockchain_original[1])
+	t.Logf("%s", jsonData)
+	data := Block{}
+	json.Unmarshal(jsonData, &data)
+	fmt.Println(data)
 }
