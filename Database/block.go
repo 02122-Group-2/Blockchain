@@ -123,7 +123,7 @@ func (state *State) AddBlock(block Block) error {
 		return err
 	}
 
-	// reset 
+	// reset
 	state.LatestTimestamp = prevState.LatestTimestamp
 
 	err = state.ApplyBlock(block)
@@ -155,7 +155,7 @@ func LoadBlockchain() []Block {
 		panic(err)
 	}
 
-	data, err := os.ReadFile(filepath.Join(currWD, "Blockchain.db"))
+	data, err := os.ReadFile(filepath.Join(currWD, "./Persistence/Blockchain.db"))
 	if err != nil {
 		panic(err)
 	}
@@ -174,7 +174,7 @@ func SaveBlockchain(blockchain []Block) bool {
 	toSave := Blockchain{blockchain}
 	txFile, _ := json.MarshalIndent(toSave, "", "  ")
 
-	err := ioutil.WriteFile("./Blockchain.db", txFile, 0644)
+	err := ioutil.WriteFile("./Persistence/Blockchain.db", txFile, 0644)
 	if err != nil {
 		panic(err)
 	}
@@ -250,7 +250,7 @@ func LoadSnapshot() State {
 		panic(err)
 	}
 
-	data, err := os.ReadFile(filepath.Join(currWD, "LatestSnapshot.json"))
+	data, err := os.ReadFile(filepath.Join(currWD, "Persistence/LatestSnapshot.json"))
 	if err != nil {
 		panic(err)
 	}
@@ -268,7 +268,7 @@ func LoadSnapshot2() State {
 		panic(err)
 	}
 
-	data, err := os.ReadFile(filepath.Join(currWD, "LatestSnapshot.json"))
+	data, err := os.ReadFile(filepath.Join(currWD, "Persistence/LatestSnapshot.json"))
 	if err != nil {
 		panic(err)
 	}
@@ -283,7 +283,7 @@ func LoadSnapshot2() State {
 func (state *State) SaveSnapshot() bool {
 	txFile, _ := json.MarshalIndent(state, "", "  ")
 
-	err := ioutil.WriteFile("./LatestSnapshot.json", txFile, 0644)
+	err := ioutil.WriteFile("./Persistence/LatestSnapshot.json", txFile, 0644)
 	if err != nil {
 		panic(err)
 	}
