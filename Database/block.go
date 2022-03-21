@@ -25,6 +25,7 @@ type Blockchain struct {
 	Blockchain []Block `json: "Blockchain"`
 }
 
+// Create a block object that matches the current state, given a list of transactions
 func (state *State) CreateBlock(txs []Transaction) Block {
 	return Block{
 		BlockHeader{
@@ -36,6 +37,8 @@ func (state *State) CreateBlock(txs []Transaction) Block {
 	}
 }
 
+// Validates a given block against the current state
+// It checks: The parent hash, Serial No., Timestamp, and the validity of the transactions within the block.
 func (state *State) ValidateBlock(block Block) error {
 	if state.LastBlockSerialNo == 0 { // If no other block is added, add the block if the block has serialNo. 1
 		if block.Header.SerialNo == 1 {
@@ -65,19 +68,10 @@ func (state *State) ValidateBlock(block Block) error {
 	return nil
 }
 
-func (state *State) ApplyBlocks(blocks []Block) error {
-	for _, t := range blocks {
-		validation_err := state.ValidateBlock(t)
-		if validation_err != nil {
-			return validation_err
-		}
-		if err := state.ApplyBlock(t); err != nil {
-			return fmt.Errorf("Block failed: " + err.Error())
-		}
-	}
-	return nil
-}
 
+// Applies a single block to the current state.
+// It validates the block and all the transactions within.
+// It applies all the transactions within the block to the state as well.
 func (state *State) ApplyBlock(block Block) error {
 	err := state.AddTransactionList(block.Transactions)
 	if err != nil {
@@ -96,6 +90,22 @@ func (state *State) ApplyBlock(block Block) error {
 	return nil
 }
 
+// Applies a list of blocks to the current state. Given a list of block (blockchain) it will apply each block to the state. 
+func (state *State) ApplyBlocks(blocks []Block) error {
+	for _, t := range blocks {
+		validation_err := state.ValidateBlock(t)
+		if validation_err != nil {
+			return validation_err
+		}
+		if err := state.ApplyBlock(t); err != nil {
+			return fmt.Errorf("Block failed: " + err.Error())
+		}
+	}
+	return nil
+}
+
+// This functions takes a block and validates it against the state, then saves the block to the local blackchain.db file.
+// It then applies the block to the state and saves a snapshot of the last "block"-state.
 func (state *State) AddBlock(block Block) error {
 	prevState := LoadSnapshot()
 	err := prevState.ValidateBlock(block)
@@ -108,7 +118,6 @@ func (state *State) AddBlock(block Block) error {
 		return err
 	}
 
-	// This functionality is not working properly yet. Need a better system of applying eiher blocks or transactions. Both will result in applying transactions twice.
 	err = state.ApplyBlock(block)
 	if err != nil {
 		return err
@@ -119,6 +128,7 @@ func (state *State) AddBlock(block Block) error {
 	return nil
 }
 
+// This updates the local blockchain.db file, by receiving a block and appending it to the list of blocks.
 func (state *State) PersistBlockToDB(block Block) error {
 	oldBlocks := LoadBlockchain()
 	oldBlocks = append(oldBlocks, block)
@@ -130,26 +140,7 @@ func (state *State) PersistBlockToDB(block Block) error {
 	return nil
 }
 
-func BlockToJsonString(block Block) (string, error) {
-	json, err := json.Marshal(block)
-	if err != nil {
-		return "", fmt.Errorf("Unable to convert block to a json string")
-	}
-	return string(json), nil
-}
-
-func (bh *BlockHeader) MarshalJSON() ([]byte, error) {
-	fmt.Println("123bh.MarshalJSON() called!!")
-	type BhAlias BlockHeader
-	return json.Marshal(&struct {
-		ParentHash string `json: "ParentHash"`
-		*BhAlias
-	}{
-		ParentHash: fmt.Sprintf("%x", bh.ParentHash),
-		BhAlias:    (*BhAlias)(bh),
-	})
-}
-
+// Load the local blockchain and return it as a list of blocks 
 func LoadBlockchain() []Block {
 	currWD, err := os.Getwd()
 	if err != nil {
@@ -167,6 +158,42 @@ func LoadBlockchain() []Block {
 	return loadedBlockchain.Blockchain
 }
 
+// Given a list of blocks, save the list as the local blockchain.
+func SaveBlockchain(blockchain []Block) bool {
+	toSave := Blockchain{blockchain}
+	txFile, _ := json.MarshalIndent(toSave, "", "  ")
+
+	err := ioutil.WriteFile("./Blockchain.db", txFile, 0644)
+	if err != nil {
+		panic(err)
+	}
+
+	return true
+}
+
+// Given a block, convert it to a JSON string
+func BlockToJsonString(block Block) (string, error) {
+	json, err := json.Marshal(block)
+	if err != nil {
+		return "", fmt.Errorf("Unable to convert block to a json string")
+	}
+	return string(json), nil
+}
+
+// Given a blockheader, convert it into a JSON string object. Performs sepcial formatting on the parent hash.
+func (bh *BlockHeader) MarshalJSON() ([]byte, error) {
+	fmt.Println("123bh.MarshalJSON() called!!")
+	type BhAlias BlockHeader
+	return json.Marshal(&struct {
+		ParentHash string `json: "ParentHash"`
+		*BhAlias
+	}{
+		ParentHash: fmt.Sprintf("%x", bh.ParentHash),
+		BhAlias:    (*BhAlias)(bh),
+	})
+}
+
+// Given a blockheader and an array of bytes, use the bytes to create a header with a parent hash of the correct formatting.
 func (bh *BlockHeader) UnmarshalJSON(data []byte) error {
 	fmt.Println("bh.UnmarshalJSON() called!!")
 	type BhAlias BlockHeader
@@ -193,18 +220,10 @@ func (bh *BlockHeader) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func SaveBlockchain(blockchain []Block) bool {
-	toSave := Blockchain{blockchain}
-	txFile, _ := json.MarshalIndent(toSave, "", "  ")
 
-	err := ioutil.WriteFile("./Blockchain.db", txFile, 0644)
-	if err != nil {
-		panic(err)
-	}
 
-	return true
-}
 
+// Loads the latest snapchat of the state. Each snapshat is meant as the state right after a block has been added.
 func LoadSnapshot() State {
 	currWD, err := os.Getwd()
 	if err != nil {
@@ -222,6 +241,7 @@ func LoadSnapshot() State {
 	return state
 }
 
+// Given a state, save the state as the local state snapshot.
 func (state *State) SaveSnapshot() bool {
 	txFile, _ := json.MarshalIndent(state, "", "  ")
 
@@ -233,6 +253,7 @@ func (state *State) SaveSnapshot() bool {
 	return true
 }
 
+// Given a state, make a deep copy of the state and return the copy.
 func (currState *State) copyState() State {
 	copy := State{}
 
