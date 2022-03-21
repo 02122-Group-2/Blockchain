@@ -90,6 +90,7 @@ func (state *State) ApplyBlock(block Block) error {
 	return nil
 }
 
+
 // Applies a list of blocks to the current state. Given a list of block (blockchain) it will apply each block to the state. 
 func (state *State) ApplyBlocks(blocks []Block) error {
 	for _, t := range blocks {
@@ -113,18 +114,24 @@ func (state *State) AddBlock(block Block) error {
 		return err
 	}
 
-	err = state.PersistBlockToDB(block)
+	err = prevState.PersistBlockToDB(block)
 	if err != nil {
 		return err
 	}
 
-	err = state.ApplyBlock(block)
+	err = prevState.ApplyBlock(block)
 	if err != nil {
 		return err
 	}
 
-	state.SaveSnapshot()
+	// Save the new newest block state
+	prevState.SaveSnapshot()
 
+	// Apply all the remaining transactions from the current memory pool
+	prevState.TryAddTransactions(state.TxMempool)
+
+	// Updates the current state
+	*state = prevState.copyState()
 	return nil
 }
 
@@ -255,16 +262,21 @@ func (state *State) SaveSnapshot() bool {
 func (currState *State) copyState() State {
 	copy := State{}
 
-	copy.TxMempool = make([]Transaction, len(currState.TxMempool))
-	copy.Balances = make(map[AccountAddress]uint)
+	copy.TxMempool = make([]Transaction, 0)
+	copy.AccountBalances = make(map[AccountAddress]uint)
+	copy.AccountNounces  = make(map[AccountAddress]uint)
 
 	copy.LastBlockSerialNo = currState.LastBlockSerialNo
 	copy.LastBlockTimestamp = currState.LastBlockTimestamp
 	copy.LatestHash = currState.LatestHash
 	copy.LatestTimestamp = currState.LatestTimestamp
 
-	for accountA, balance := range currState.Balances {
-		copy.Balances[accountA] = balance
+	for accountA, balance := range currState.AccountBalances {
+		copy.AccountBalances[accountA] = balance
+	}
+
+	for accountA, nounce := range currState.AccountNounces {
+		copy.AccountNounces[accountA] = nounce
 	}
 
 	for _, tx := range currState.TxMempool {
