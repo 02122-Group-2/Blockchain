@@ -3,7 +3,7 @@
     {
       "Header": {
         "ParentHash": "0000000000000000000000000000000000000000000000000000000000000000",
-        "CreatedAt": 1647079059647173900,
+        "CreatedAt": 1647730800000000000,
         "SerialNo": 1
       },
       "Transactions": [
@@ -11,250 +11,119 @@
           "From": "system",
           "To": "Alberto",
           "Amount": 100,
-          "Timestamp": 1646234319049590500,
+          "Timestamp": 1647730700000000001,
           "Type": "genesis"
         },
         {
           "From": "system",
           "To": "Emilie",
           "Amount": 5,
-          "Timestamp": 1646234319049590500,
+          "Timestamp": 1647730700000000002,
           "Type": "genesis"
         },
         {
           "From": "system",
           "To": "Niels",
           "Amount": 1000000,
-          "Timestamp": 1646234319049590500,
+          "Timestamp": 1647730700000000003,
           "Type": "genesis"
         },
         {
           "From": "system",
           "To": "Asger",
           "Amount": 420,
-          "Timestamp": 1646234319049590500,
+          "Timestamp": 1647730700000000004,
           "Type": "genesis"
-        },
-        {
-          "From": "system",
-          "To": "Magn",
-          "Amount": 69,
-          "Timestamp": 1646234319049590500,
-          "Type": "genesis"
-        },
-        {
-          "From": "Niels",
-          "To": "Magn",
-          "Amount": 1000,
-          "Timestamp": 1646234319049590501,
-          "Type": "transaction"
-        },
-        {
-          "From": "Magn",
-          "To": "Emilie",
-          "Amount": 12,
-          "Timestamp": 1646234319049590502,
-          "Type": "transaction"
-        },
-        {
-          "From": "Emilie",
-          "To": "Asger",
-          "Amount": 3,
-          "Timestamp": 1646234319049590503,
-          "Type": "transaction"
-        },
-        {
-          "From": "Emilie",
-          "To": "Magn",
-          "Amount": 2,
-          "Timestamp": 1646310859945324600,
-          "Type": "transaction"
-        },
-        {
-          "From": "Emilie",
-          "To": "Niels",
-          "Amount": 2,
-          "Timestamp": 1646312051397971800,
-          "Type": "transaction"
-        },
-        {
-          "From": "system",
-          "To": "Emilie",
-          "Amount": 2,
-          "Timestamp": 1646312074438844000,
-          "Type": "reward"
-        },
-        {
-          "From": "system",
-          "To": "Emilie",
-          "Amount": 2,
-          "Timestamp": 1646312906754698200,
-          "Type": "reward"
-        },
-        {
-          "From": "Magn",
-          "To": "Niels",
-          "Amount": 69,
-          "Timestamp": 1646827676344040000,
-          "Type": "transaction"
-        },
-        {
-          "From": "Magn",
-          "To": "Niels",
-          "Amount": 69,
-          "Timestamp": 1646827721500560000,
-          "Type": "transaction"
-        },
-        {
-          "From": "Magn",
-          "To": "Niels",
-          "Amount": 42,
-          "Timestamp": 1646832922056900900,
-          "Type": "transaction"
-        },
-        {
-          "From": "Niels",
-          "To": "gggg",
-          "Amount": 1,
-          "Timestamp": 1646832922057504300,
-          "Type": "transaction"
-        },
-        {
-          "From": "system",
-          "To": "Alberto",
-          "Amount": 5000,
-          "Timestamp": 1646832922058015400,
-          "Type": "reward"
-        },
-        {
-          "From": "Niels",
-          "To": "Magn",
-          "Amount": 200000,
-          "Timestamp": 1646832922058015400,
-          "Type": "transaction"
-        },
-        {
-          "From": "Magn",
-          "To": "Niels",
-          "Amount": 42,
-          "Timestamp": 1646834145245220100,
-          "Type": "transaction"
-        },
-        {
-          "From": "Magn",
-          "To": "Niels",
-          "Amount": 89898,
-          "Timestamp": 1646834145245220100,
-          "Type": "transaction"
-        },
-        {
-          "From": "Niels",
-          "To": "gggg",
-          "Amount": 1,
-          "Timestamp": 1646834145245734500,
-          "Type": "transaction"
-        },
-        {
-          "From": "system",
-          "To": "Alberto",
-          "Amount": 5000,
-          "Timestamp": 1646834145245734500,
-          "Type": "reward"
-        },
-        {
-          "From": "Niels",
-          "To": "Magn",
-          "Amount": 200000,
-          "Timestamp": 1646834145245957200,
-          "Type": "transaction"
-        },
-        {
-          "From": "Magn",
-          "To": "Niels",
-          "Amount": 42,
-          "Timestamp": 1646834146536150700,
-          "Type": "transaction"
-        },
-        {
-          "From": "Magn",
-          "To": "Niels",
-          "Amount": 89898,
-          "Timestamp": 1646834146536150700,
-          "Type": "transaction"
-        },
-        {
-          "From": "Niels",
-          "To": "gggg",
-          "Amount": 1,
-          "Timestamp": 1646834146536150700,
-          "Type": "transaction"
-        },
-        {
-          "From": "system",
-          "To": "Alberto",
-          "Amount": 5000,
-          "Timestamp": 1646834146536150700,
-          "Type": "reward"
-        },
-        {
-          "From": "Niels",
-          "To": "Magn",
-          "Amount": 200000,
-          "Timestamp": 1646834146536150700,
-          "Type": "transaction"
         }
       ]
     },
     {
       "Header": {
-        "ParentHash": "74af802c0691d25e9bac11f1a28f40b1822c817b6a84121a3d84393e578def1b",
-        "CreatedAt": 1647079078199210600,
+        "ParentHash": "d562a71a4ae3165358e9f093cd5bc3d3519f161cb0ee6db9457c7fb6698db8b4",
+        "CreatedAt": 1647893209983314000,
         "SerialNo": 2
-      },
-      "Transactions": [
-        {
-          "From": "Niels",
-          "To": "Magn",
-          "Amount": 10,
-          "Timestamp": 1647079071642275500,
-          "Type": "transaction"
-        },
-        {
-          "From": "Magn",
-          "To": "Emilie",
-          "Amount": 4,
-          "Timestamp": 1647079073778430800,
-          "Type": "transaction"
-        }
-      ]
-    },
-    {
-      "Header": {
-        "ParentHash": "546dde997ca17b1f2ba4f4460486c4811a0adaea53a47ea13a38a86a5346af72",
-        "CreatedAt": 1647079668341754000,
-        "SerialNo": 3
       },
       "Transactions": null
     },
     {
       "Header": {
-        "ParentHash": "d4b054173a82144cd6a7f4d7f2157f1504744626b6fe80eb0702cd688429ba43",
-        "CreatedAt": 1647079671155969900,
+        "ParentHash": "bb27d90c37ae6a98a5a2b0df8289124541743569d9b74f3795ae03b9d863af13",
+        "CreatedAt": 1647893209983717000,
+        "SerialNo": 3
+      },
+      "Transactions": [
+        {
+          "From": "Niels",
+          "To": "Asger",
+          "Amount": 10,
+          "Timestamp": 1647893209983709000,
+          "Type": "transaction"
+        },
+        {
+          "From": "Asger",
+          "To": "Emilie",
+          "Amount": 4,
+          "Timestamp": 1647893209983714000,
+          "Type": "transaction"
+        }
+      ]
+    },
+    {
+      "Header": {
+        "ParentHash": "0e763283a1c2f8c174b8f1b01a48e11e48f27a30280bdcd471581a485af8ed4b",
+        "CreatedAt": 1647893213012523000,
         "SerialNo": 4
       },
       "Transactions": [
         {
           "From": "Niels",
-          "To": "Magn",
+          "To": "Asger",
           "Amount": 10,
-          "Timestamp": 1647079670026215000,
+          "Timestamp": 1647893213011565000,
           "Type": "transaction"
         },
         {
-          "From": "Magn",
+          "From": "Asger",
           "To": "Emilie",
           "Amount": 4,
-          "Timestamp": 1647079670578703300,
+          "Timestamp": 1647893213011588000,
+          "Type": "transaction"
+        },
+        {
+          "From": "Niels",
+          "To": "Asger",
+          "Amount": 10,
+          "Timestamp": 1647893213011701000,
+          "Type": "transaction"
+        },
+        {
+          "From": "Asger",
+          "To": "Emilie",
+          "Amount": 4,
+          "Timestamp": 1647893213011704000,
+          "Type": "transaction"
+        }
+      ]
+    },
+    {
+      "Header": {
+        "ParentHash": "8fe1ceadd4ffc07e085db9d61bcc7ba229bc4d7d8927cc4bd15ff05d47baf989",
+        "CreatedAt": 1647893213012835000,
+        "SerialNo": 5
+      },
+      "Transactions": [
+        {
+          "From": "Niels",
+          "To": "Asger",
+          "Amount": 10,
+          "Timestamp": 1647893213012829000,
+          "Type": "transaction"
+        },
+        {
+          "From": "Asger",
+          "To": "Emilie",
+          "Amount": 4,
+          "Timestamp": 1647893213012833000,
           "Type": "transaction"
         }
       ]

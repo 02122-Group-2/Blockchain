@@ -1,0 +1,41 @@
+{
+  "Blockchain": [
+    {
+      "Header": {
+        "ParentHash": "0000000000000000000000000000000000000000000000000000000000000000",
+        "CreatedAt": 1647730800000000000,
+        "SerialNo": 1
+      },
+      "Transactions": [
+        {
+          "From": "system",
+          "To": "Alberto",
+          "Amount": 100,
+          "Timestamp": 1647730700000000001,
+          "Type": "genesis"
+        },
+        {
+          "From": "system",
+          "To": "Emilie",
+          "Amount": 5,
+          "Timestamp": 1647730700000000002,
+          "Type": "genesis"
+        },
+        {
+          "From": "system",
+          "To": "Niels",
+          "Amount": 1000000,
+          "Timestamp": 1647730700000000003,
+          "Type": "genesis"
+        },
+        {
+          "From": "system",
+          "To": "Asger",
+          "Amount": 420,
+          "Timestamp": 1647730700000000004,
+          "Type": "genesis"
+        }
+      ]
+    }
+  ]
+}

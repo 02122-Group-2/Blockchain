@@ -1,6 +1,8 @@
 package database
 
 import (
+	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"os"
 
@@ -9,13 +11,13 @@ import (
 )
 
 type State struct {
-	Balances           map[AccountAddress]uint `json: "Balances"`
-	TxMempool          TransactionList         `json: "TxMempool"`
-	DbFile             *os.File                `json: "DbFile"`
-	LastBlockSerialNo  int                     `json: "LastBlockSerialNo"`
-	LastBlockTimestamp int64                   `json: "LastBlockTimestamp"`
-	LatestHash         [32]byte                `json: "LatestHash"`
-	LatestTimestamp    int64                   `json: "LatestTimestamp"`
+	Balances           map[AccountAddress]uint `json:"Balances"`
+	TxMempool          TransactionList         `json:"TxMempool"`
+	DbFile             *os.File                `json:"DbFile"`
+	LastBlockSerialNo  int                     `json:"LastBlockSerialNo"`
+	LastBlockTimestamp int64                   `json:"LastBlockTimestamp"`
+	LatestHash         [32]byte                `json:"LatestHash"`
+	LatestTimestamp    int64                   `json:"LatestTimestamp"`
 }
 
 func makeTimestamp() int64 {
@@ -30,6 +32,39 @@ func (s *State) getLatestHash() [32]byte {
 	return s.LatestHash
 }
 
+func (s *State) MarshalJSON() ([]byte, error) {
+	type Alias State
+	return json.Marshal(&struct {
+		LatestHash string `json:"LatestHash"`
+		*Alias
+	}{
+		LatestHash: fmt.Sprintf("%x", s.LatestHash),
+		Alias:      (*Alias)(s),
+	})
+}
+
+func (s *State) UnmarshalJSON(data []byte) error {
+	type Alias State
+	aux := &struct {
+		LatestHash string `json:"LatestHash"`
+		*Alias
+	}{
+		Alias: (*Alias)(s),
+	}
+
+	if err := json.Unmarshal(data, aux); err != nil {
+		return err
+	}
+	lh, _ := hex.DecodeString(aux.LatestHash)
+	var lh32 [32]byte
+	for i := 0; i < 32; i++ {
+		lh32[i] = lh[i]
+	}
+	s.LatestHash = lh32
+
+	return nil
+}
+
 // Creates a state based from the data in the local blockchain.db file.
 func LoadState() (*State, error) {
 	var file *os.File
@@ -37,6 +72,12 @@ func LoadState() (*State, error) {
 
 	localBlockchain := LoadBlockchain()
 	err := state.ApplyBlocks(localBlockchain)
+
+	// set LatestHash property to hash of latest inserted block,
+	// since this is the hash that should be used to validate next block
+	// state.LatestHash = localBlockchain[len(localBlockchain)-1]
+
+	fmt.Printf("state.LatestHash:%x\n", state.LatestHash)
 	if err != nil {
 		panic(err)
 	}
@@ -45,7 +86,7 @@ func LoadState() (*State, error) {
 }
 
 // Adds a transaction to the state. It will validate the transaction, then apply the transaction to the state,
-// then add the transaction to its MemPool and update its latest timestamp field. 
+// then add the transaction to its MemPool and update its latest timestamp field.
 func (state *State) AddTransaction(transaction Transaction) error {
 	if err := state.ValidateTransaction(transaction); err != nil {
 		return err
@@ -111,7 +152,7 @@ func (state *State) AddTransactionList(transactionList TransactionList) error {
 	for i, t := range transactionList {
 		err := state.AddTransaction(t)
 		if err != nil {
-			return fmt.Errorf("Transaction nr. %d is not able to be added. Received Error: %s", i, err.Error())
+			return fmt.Errorf("Transaction idx[%d] is not able to be added. Received Error: %s", i, err.Error())
 		}
 	}
 	return nil
