@@ -68,7 +68,6 @@ func (state *State) ValidateBlock(block Block) error {
 	return nil
 }
 
-
 // Applies a single block to the current state.
 // It validates the block and all the transactions within.
 // It applies all the transactions within the block to the state as well.
@@ -90,7 +89,7 @@ func (state *State) ApplyBlock(block Block) error {
 	return nil
 }
 
-// Applies a list of blocks to the current state. Given a list of block (blockchain) it will apply each block to the state. 
+// Applies a list of blocks to the current state. Given a list of block (blockchain) it will apply each block to the state.
 func (state *State) ApplyBlocks(blocks []Block) error {
 	for _, t := range blocks {
 		validation_err := state.ValidateBlock(t)
@@ -140,7 +139,7 @@ func (state *State) PersistBlockToDB(block Block) error {
 	return nil
 }
 
-// Load the local blockchain and return it as a list of blocks 
+// Load the local blockchain and return it as a list of blocks
 func LoadBlockchain() []Block {
 	currWD, err := os.Getwd()
 	if err != nil {
@@ -219,9 +218,6 @@ func (bh *BlockHeader) UnmarshalJSON(data []byte) error {
 
 	return nil
 }
-
-
-
 
 // Loads the latest snapchat of the state. Each snapshat is meant as the state right after a block has been added.
 func LoadSnapshot() State {
