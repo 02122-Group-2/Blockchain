@@ -59,9 +59,52 @@ func TestAddBlockToBlockchain(t *testing.T) {
 	state_block.AddTransaction(tx3)
 
 	err := state_block.AddBlock(block2)
-	fmt.Println(err)
+	if err != nil || len(state_block.TxMempool) != 1 { 
+		t.Errorf("failed - expected zero errors and that the length of the TxMemPool is 1")
+	}
 
 	SaveBlockchain(blockchain_original) // Re-safe the original blockchain
+}
+
+// This tests makes sure the functionality of sharing the blocks work correctly.
+// Two states will be creates, who are orignally identical.
+// One state will create some transactions, Then create a block.
+// The other will create a few transactions too. The first and last should be invalidated when the block from the first state when it is synced.
+func TestSeperateStatesShareBlock(t *testing.T) {
+	original_state := state_block.copyState()
+	stateOne := state_block.copyState()
+	stateTwo := state_block.copyState()
+
+	stateOne.AddTransaction(stateOne.CreateTransaction("Magn", "Niels", 10))
+	stateOne.AddTransaction(stateOne.CreateTransaction("Niels", "Magn", 10))
+	stateOne.AddTransaction(stateOne.CreateTransaction("Magn", "Emilie", 10))
+
+	blockOne := stateOne.CreateBlock(stateOne.TxMempool)
+
+	stateTwo.AddTransaction(stateTwo.CreateTransaction("Magn", "Niels", 10))  // Should be invalid when merging the other block - Because of Nounces
+	stateTwo.AddTransaction(stateTwo.CreateTransaction("Asger", "Emilie", 10)) // Should be valid
+	stateTwo.AddTransaction(stateTwo.CreateTransaction("Niels", "Asger", 10)) // Should be invalid when merging the other block
+
+	err := stateOne.AddBlock(blockOne)
+	if err != nil {
+		SaveBlockchain(blockchain_original)
+		t.Errorf("failed to add block to first state...")
+	}
+
+	// Saves the snapshot, since the snapshot is still "outdated" for the other account. This error is due to the fact that we run the software on the same pc.
+	original_state.SaveSnapshot()
+
+	err = stateTwo.AddBlock(blockOne)
+	if err != nil {
+		SaveBlockchain(blockchain_original)
+		t.Errorf("failed to add block to second state...")
+	}
+
+	if len(stateOne.TxMempool) != 0 || len(stateTwo.TxMempool) != 1 {
+		t.Errorf("failed - all transactions should be removed from the first state and one should remain in the last")
+	}
+
+	SaveBlockchain(blockchain_original)
 }
 
 func TestMarshalBlock(t *testing.T) {

@@ -109,17 +109,12 @@ func (state *State) ApplyBlocks(blocks []Block) error {
 // It then applies the block to the state and saves a snapshot of the last "block"-state.
 func (state *State) AddBlock(block Block) error {
 	prevState := LoadSnapshot()
-	err := prevState.ValidateBlock(block)
+	err := prevState.ApplyBlock(block)
 	if err != nil {
 		return err
 	}
 
 	err = prevState.PersistBlockToDB(block)
-	if err != nil {
-		return err
-	}
-
-	err = prevState.ApplyBlock(block)
 	if err != nil {
 		return err
 	}
