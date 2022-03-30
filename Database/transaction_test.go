@@ -52,7 +52,7 @@ func TestReward(t *testing.T) {
 func TestApplyLegalTransaction(t *testing.T) {
 	t.Log("begin create transaction test")
 
-	tr := state.CreateTransaction("Magn", "Niels", 42.0)
+	tr := state.CreateTransaction("Asger", "Niels", 42.0)
 	err := state.AddTransaction(tr)
 	if err != nil {
 		t.Error("Failed to add transaction. Error: " + err.Error())

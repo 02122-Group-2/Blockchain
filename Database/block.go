@@ -11,18 +11,24 @@ import (
 )
 
 type Block struct {
-	Header       BlockHeader   `json: "Header"`
-	Transactions []Transaction `json: "Transactions"`
+	Header       BlockHeader   `json:"Header"`
+	Transactions []Transaction `json:"Transactions"`
 }
 
 type BlockHeader struct {
-	ParentHash [32]byte `json: "ParentHash"`
-	CreatedAt  int64    `json: "CreatedAt"`
-	SerialNo   int      `json: "SerialNo"`
+	ParentHash [32]byte `json:"ParentHash"`
+	CreatedAt  int64    `json:"CreatedAt"`
+	SerialNo   int      `json:"SerialNo"`
+}
+
+type BhDTO struct {
+	ParentHash string `json:"ParentHash"`
+	CreatedAt  int64  `json:"CreatedAt"` // make date
+	SerialNo   int    `json:"SerialNo"`
 }
 
 type Blockchain struct {
-	Blockchain []Block `json: "Blockchain"`
+	Blockchain []Block `json:"Blockchain"`
 }
 
 // Create a block object that matches the current state, given a list of transactions
@@ -44,20 +50,20 @@ func (state *State) ValidateBlock(block Block) error {
 		if block.Header.SerialNo == 1 {
 			return nil
 		} else {
-			return fmt.Errorf("The first block must have serial of 1")
+			return fmt.Errorf("the first block must have serial of 1")
 		}
 	}
 
 	if block.Header.ParentHash != state.LatestHash {
-		return fmt.Errorf("The parent hash doesn't match the hash of the Latest block")
+		return fmt.Errorf("the parent hash doesn't match the hash of the Latest block \nBlock.Parent: %x\nState.Latest: %x", block.Header.ParentHash, state.LatestHash)
 	}
 
 	if block.Header.SerialNo != state.getNextBlockSerialNo() {
-		return fmt.Errorf("Block violates serial no. order")
+		return fmt.Errorf("block violates serial no. order")
 	}
 
 	if block.Header.CreatedAt <= state.LastBlockTimestamp {
-		return fmt.Errorf("The new block must have a newer creation date than the Latest block")
+		return fmt.Errorf("the new block must have a newer creation date than the Latest block")
 	}
 
 	err := state.ValidateTransactionList(block.Transactions)
@@ -67,7 +73,6 @@ func (state *State) ValidateBlock(block Block) error {
 
 	return nil
 }
-
 
 // Applies a single block to the current state.
 // It validates the block and all the transactions within.
@@ -114,7 +119,7 @@ func (state *State) AddBlock(block Block) error {
 		return err
 	}
 
-	err = prevState.PersistBlockToDB(block)
+	err = PersistBlockToDB(block)
 	if err != nil {
 		return err
 	}
@@ -131,31 +136,34 @@ func (state *State) AddBlock(block Block) error {
 }
 
 // This updates the local blockchain.db file, by receiving a block and appending it to the list of blocks.
-func (state *State) PersistBlockToDB(block Block) error {
+func PersistBlockToDB(block Block) error {
 	oldBlocks := LoadBlockchain()
 	oldBlocks = append(oldBlocks, block)
 
 	if !SaveBlockchain(oldBlocks) {
-		return fmt.Errorf("Failed to save Blockchain locally")
+		return fmt.Errorf("failed to save Blockchain locally")
 	}
 
 	return nil
 }
 
-// Load the local blockchain and return it as a list of blocks 
+// Load the local blockchain and return it as a list of blocks
 func LoadBlockchain() []Block {
 	currWD, err := os.Getwd()
 	if err != nil {
 		panic(err)
 	}
 
-	data, err := os.ReadFile(filepath.Join(currWD, "Blockchain.db"))
+	data, err := os.ReadFile(filepath.Join(currWD, "./Persistence/Blockchain.db"))
 	if err != nil {
 		panic(err)
 	}
 
 	var loadedBlockchain Blockchain
-	json.Unmarshal(data, &loadedBlockchain)
+	unm_err := json.Unmarshal(data, &loadedBlockchain)
+	if unm_err != nil {
+		panic(unm_err)
+	}
 
 	return loadedBlockchain.Blockchain
 }
@@ -165,7 +173,7 @@ func SaveBlockchain(blockchain []Block) bool {
 	toSave := Blockchain{blockchain}
 	txFile, _ := json.MarshalIndent(toSave, "", "  ")
 
-	err := ioutil.WriteFile("./Blockchain.db", txFile, 0644)
+	err := ioutil.WriteFile("./Persistence/Blockchain.db", txFile, 0644)
 	if err != nil {
 		panic(err)
 	}
@@ -182,46 +190,57 @@ func BlockToJsonString(block Block) (string, error) {
 	return string(json), nil
 }
 
-// Given a blockheader, convert it into a JSON string object. Performs sepcial formatting on the parent hash.
-func (bh *BlockHeader) MarshalJSON() ([]byte, error) {
-	type BhAlias BlockHeader
+func (bh *BlockHeader) encodeBH() BhDTO {
+	dto := BhDTO{}
+	dto.ParentHash = fmt.Sprintf("%x", bh.ParentHash)
+	dto.CreatedAt = bh.CreatedAt
+	dto.SerialNo = bh.SerialNo
+
+	return dto
+}
+
+func (dto *BhDTO) decodeBH() BlockHeader {
+	bh := BlockHeader{}
+	ph, _ := hex.DecodeString(dto.ParentHash)
+	var ph32 [32]byte
+	for i := 0; i < 32; i++ {
+		ph32[i] = ph[i]
+	}
+	bh.ParentHash = ph32
+	bh.CreatedAt = dto.CreatedAt
+	bh.SerialNo = dto.SerialNo
+
+	return bh
+}
+
+func (block *Block) MarshalJSON() ([]byte, error) {
+	type Alias Block
 	return json.Marshal(&struct {
-		ParentHash string `json: "ParentHash"`
-		*BhAlias
+		Header BhDTO `json:"Header"`
+		*Alias
 	}{
-		ParentHash: fmt.Sprintf("%x", bh.ParentHash),
-		BhAlias:    (*BhAlias)(bh),
+		Header: block.Header.encodeBH(),
+		Alias:  (*Alias)(block),
 	})
 }
 
-// Given a blockheader and an array of bytes, use the bytes to create a header with a parent hash of the correct formatting.
-func (bh *BlockHeader) UnmarshalJSON(data []byte) error {
-	type BhAlias BlockHeader
+func (block *Block) UnmarshalJSON(data []byte) error {
+	type Alias Block
 	aux := &struct {
-		ParentHash string `json: "ParentHash"`
-		*BhAlias
+		Header BhDTO `json:"Header"`
+		*Alias
 	}{
-		BhAlias: (*BhAlias)(bh),
+		Alias: (*Alias)(block),
 	}
 
 	if err := json.Unmarshal(data, aux); err != nil {
 		return err
 	}
 
-	byte_arr, decode_err := hex.DecodeString(aux.ParentHash)
-	if decode_err != nil {
-		panic(decode_err)
-	}
-
-	for i := 0; i < 32; i++ {
-		bh.ParentHash[i] = byte_arr[i]
-	}
+	block.Header = aux.Header.decodeBH()
 
 	return nil
 }
-
-
-
 
 // Loads the latest snapchat of the state. Each snapshat is meant as the state right after a block has been added.
 func LoadSnapshot() State {
@@ -230,7 +249,25 @@ func LoadSnapshot() State {
 		panic(err)
 	}
 
-	data, err := os.ReadFile(filepath.Join(currWD, "LatestSnapshot.json"))
+	data, err := os.ReadFile(filepath.Join(currWD, "Persistence/LatestSnapshot.json"))
+	if err != nil {
+		panic(err)
+	}
+
+	var state State
+	json.Unmarshal(data, &state)
+
+	return state
+}
+
+func LoadSnapshot2() State {
+	fmt.Println("LoadSnapshot2() called")
+	currWD, err := os.Getwd()
+	if err != nil {
+		panic(err)
+	}
+
+	data, err := os.ReadFile(filepath.Join(currWD, "Persistence/LatestSnapshot.json"))
 	if err != nil {
 		panic(err)
 	}
@@ -245,7 +282,7 @@ func LoadSnapshot() State {
 func (state *State) SaveSnapshot() bool {
 	txFile, _ := json.MarshalIndent(state, "", "  ")
 
-	err := ioutil.WriteFile("./LatestSnapshot.json", txFile, 0644)
+	err := ioutil.WriteFile("./Persistence/LatestSnapshot.json", txFile, 0644)
 	if err != nil {
 		panic(err)
 	}
