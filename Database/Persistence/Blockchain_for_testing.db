@@ -3,7 +3,7 @@
     {
       "Header": {
         "ParentHash": "0000000000000000000000000000000000000000000000000000000000000000",
-        "CreatedAt": 1647730800000000000,
+        "CreatedAt": 1648641894921071900,
         "SerialNo": 1
       },
       "Transactions": [
@@ -11,29 +11,275 @@
           "From": "system",
           "To": "Alberto",
           "Amount": 100,
-          "Timestamp": 1647730700000000001,
+          "SenderNounce": 1,
+          "Timestamp": 1648641894920545400,
           "Type": "genesis"
         },
         {
           "From": "system",
           "To": "Emilie",
           "Amount": 5,
-          "Timestamp": 1647730700000000002,
+          "SenderNounce": 2,
+          "Timestamp": 1648641894920545400,
           "Type": "genesis"
         },
         {
           "From": "system",
           "To": "Niels",
           "Amount": 1000000,
-          "Timestamp": 1647730700000000003,
+          "SenderNounce": 3,
+          "Timestamp": 1648641894920545400,
           "Type": "genesis"
         },
         {
           "From": "system",
           "To": "Asger",
           "Amount": 420,
-          "Timestamp": 1647730700000000004,
+          "SenderNounce": 4,
+          "Timestamp": 1648641894920545400,
           "Type": "genesis"
+        },
+        {
+          "From": "system",
+          "To": "Magn",
+          "Amount": 69,
+          "SenderNounce": 5,
+          "Timestamp": 1648641894920545400,
+          "Type": "genesis"
+        },
+        {
+          "From": "Niels",
+          "To": "Magn",
+          "Amount": 1000,
+          "SenderNounce": 1,
+          "Timestamp": 1648641894920545400,
+          "Type": "transaction"
+        },
+        {
+          "From": "Magn",
+          "To": "Emilie",
+          "Amount": 12,
+          "SenderNounce": 1,
+          "Timestamp": 1648641894920545400,
+          "Type": "transaction"
+        },
+        {
+          "From": "Emilie",
+          "To": "Asger",
+          "Amount": 3,
+          "SenderNounce": 1,
+          "Timestamp": 1648641894920545400,
+          "Type": "transaction"
+        },
+        {
+          "From": "Emilie",
+          "To": "Magn",
+          "Amount": 2,
+          "SenderNounce": 2,
+          "Timestamp": 1648641894920545400,
+          "Type": "transaction"
+        },
+        {
+          "From": "Emilie",
+          "To": "Niels",
+          "Amount": 2,
+          "SenderNounce": 3,
+          "Timestamp": 1648641894920545400,
+          "Type": "transaction"
+        },
+        {
+          "From": "system",
+          "To": "Emilie",
+          "Amount": 2,
+          "SenderNounce": 6,
+          "Timestamp": 1648641894920545400,
+          "Type": "reward"
+        },
+        {
+          "From": "system",
+          "To": "Emilie",
+          "Amount": 2,
+          "SenderNounce": 7,
+          "Timestamp": 1648641894920545400,
+          "Type": "reward"
+        },
+        {
+          "From": "Magn",
+          "To": "Niels",
+          "Amount": 69,
+          "SenderNounce": 2,
+          "Timestamp": 1648641894920545400,
+          "Type": "transaction"
+        },
+        {
+          "From": "Magn",
+          "To": "Niels",
+          "Amount": 69,
+          "SenderNounce": 3,
+          "Timestamp": 1648641894920545400,
+          "Type": "transaction"
+        },
+        {
+          "From": "Magn",
+          "To": "Niels",
+          "Amount": 42,
+          "SenderNounce": 4,
+          "Timestamp": 1648641894920545400,
+          "Type": "transaction"
+        },
+        {
+          "From": "Niels",
+          "To": "gggg",
+          "Amount": 1,
+          "SenderNounce": 2,
+          "Timestamp": 1648641894920545400,
+          "Type": "transaction"
+        },
+        {
+          "From": "system",
+          "To": "Alberto",
+          "Amount": 5000,
+          "SenderNounce": 8,
+          "Timestamp": 1648641894920545400,
+          "Type": "reward"
+        },
+        {
+          "From": "Niels",
+          "To": "Magn",
+          "Amount": 200000,
+          "SenderNounce": 3,
+          "Timestamp": 1648641894920545400,
+          "Type": "transaction"
+        },
+        {
+          "From": "Magn",
+          "To": "Niels",
+          "Amount": 42,
+          "SenderNounce": 5,
+          "Timestamp": 1648641894920545400,
+          "Type": "transaction"
+        },
+        {
+          "From": "Magn",
+          "To": "Niels",
+          "Amount": 89898,
+          "SenderNounce": 6,
+          "Timestamp": 1648641894921050000,
+          "Type": "transaction"
+        },
+        {
+          "From": "Niels",
+          "To": "gggg",
+          "Amount": 1,
+          "SenderNounce": 4,
+          "Timestamp": 1648641894921071900,
+          "Type": "transaction"
+        },
+        {
+          "From": "system",
+          "To": "Alberto",
+          "Amount": 5000,
+          "SenderNounce": 9,
+          "Timestamp": 1648641894921071900,
+          "Type": "reward"
+        },
+        {
+          "From": "Niels",
+          "To": "Magn",
+          "Amount": 200000,
+          "SenderNounce": 5,
+          "Timestamp": 1648641894921071900,
+          "Type": "transaction"
+        },
+        {
+          "From": "Magn",
+          "To": "Niels",
+          "Amount": 42,
+          "SenderNounce": 7,
+          "Timestamp": 1648641894921071900,
+          "Type": "transaction"
+        },
+        {
+          "From": "Magn",
+          "To": "Niels",
+          "Amount": 89898,
+          "SenderNounce": 8,
+          "Timestamp": 1648641894921071900,
+          "Type": "transaction"
+        },
+        {
+          "From": "Niels",
+          "To": "gggg",
+          "Amount": 1,
+          "SenderNounce": 6,
+          "Timestamp": 1648641894921071900,
+          "Type": "transaction"
+        },
+        {
+          "From": "system",
+          "To": "Alberto",
+          "Amount": 5000,
+          "SenderNounce": 10,
+          "Timestamp": 1648641894921071900,
+          "Type": "reward"
+        },
+        {
+          "From": "Niels",
+          "To": "Magn",
+          "Amount": 200000,
+          "SenderNounce": 7,
+          "Timestamp": 1648641894921071900,
+          "Type": "transaction"
+        }
+      ]
+    },
+    {
+      "Header": {
+        "ParentHash": "c352edf51ac6fdf40de39d11a85c1f1a90620028905a6ead5fa78da04eee75cc",
+        "CreatedAt": 1648641894929076300,
+        "SerialNo": 2
+      },
+      "Transactions": [
+        {
+          "From": "Niels",
+          "To": "Magn",
+          "Amount": 10,
+          "SenderNounce": 8,
+          "Timestamp": 1648641894929076300,
+          "Type": "transaction"
+        },
+        {
+          "From": "Magn",
+          "To": "Emilie",
+          "Amount": 4,
+          "SenderNounce": 9,
+          "Timestamp": 1648641894929076300,
+          "Type": "transaction"
+        }
+      ]
+    },
+    {
+      "Header": {
+        "ParentHash": "0116adebf51528def8fdb441daa7620c017d1fe288fdb8071e24717aea74f81c",
+        "CreatedAt": 1648641894935865700,
+        "SerialNo": 3
+      },
+      "Transactions": [
+        {
+          "From": "Niels",
+          "To": "Magn",
+          "Amount": 10,
+          "SenderNounce": 9,
+          "Timestamp": 1648641894935865700,
+          "Type": "transaction"
+        },
+        {
+          "From": "Magn",
+          "To": "Emilie",
+          "Amount": 4,
+          "SenderNounce": 10,
+          "Timestamp": 1648641894935865700,
+          "Type": "transaction"
         }
       ]
     }
