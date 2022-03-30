@@ -7,8 +7,7 @@ import (
 	"testing"
 )
 
-// var state_block, _ = LoadState()
-var state_block = LoadSnapshot2()
+var state_block, _ = LoadState()
 var blockchain_original = LoadBlockchain()
 
 func TestCreateBlock(t *testing.T) {
