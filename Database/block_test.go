@@ -71,9 +71,9 @@ func TestAddBlockToBlockchain(t *testing.T) {
 // One state will create some transactions, Then create a block.
 // The other will create a few transactions too. The first and last should be invalidated when the block from the first state when it is synced.
 func TestSeperateStatesShareBlock(t *testing.T) {
-	original_state := state_block.copyState()
-	stateOne := state_block.copyState()
-	stateTwo := state_block.copyState()
+	original_state, _ := LoadState()
+	stateOne := original_state.copyState()
+	stateTwo := original_state.copyState()
 
 	stateOne.AddTransaction(stateOne.CreateTransaction("Magn", "Niels", 10))
 	stateOne.AddTransaction(stateOne.CreateTransaction("Niels", "Magn", 10))
