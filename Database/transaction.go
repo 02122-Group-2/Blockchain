@@ -24,6 +24,10 @@ type LoadedTransactions struct {
 	Transactions TransactionList `json:"transactions"`
 }
 
+func (state *State) newAccountAddr(value string) AccountAddress {
+	return AccountAddress(value)
+}
+
 // Create a custom transaction. Used as a helper function.
 func (state *State) CreateCustomTransaction(from AccountAddress, to AccountAddress, amount float64, _type string) Transaction {
 	t := Transaction{
