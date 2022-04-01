@@ -1,3 +1,3 @@
 package database
 
-const localDirToFileFolder = "Updated for testing purposes"
+const localDirToFileFolder = "E:\\DTU\\FagProjekt\\Blockchain\\Blockchain\\Database\\Persistence\\"
