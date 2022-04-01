@@ -85,6 +85,8 @@ func (state *State) AddTransaction(transaction Transaction) error {
 	state.ApplyTransaction(transaction)
 
 	state.LatestTimestamp = transaction.Timestamp
+
+	state.SaveState()
 	return nil
 }
 
@@ -177,14 +179,14 @@ func (state *State) SaveSnapshot() error {
 		return fmt.Errorf("cannot save snapshot of state with local changes")
 	}
 
-	return saveStateAsJSON(state, "LatestSnapshot.json")
+	return saveStateAsJSON(state, "./Persistence/LatestSnapshot.json")
 }
 
 // Function that saves a state as a json file
-func saveStateAsJSON(state *State, filename string) error {
+func saveStateAsJSON(state *State, url string) error {
 	txFile, _ := json.MarshalIndent(state, "", "  ")
 
-	err := ioutil.WriteFile(localDirToFileFolder+filename, txFile, 0644)
+	err := ioutil.WriteFile(url, txFile, 0644)
 	if err != nil {
 		panic(err)
 	}

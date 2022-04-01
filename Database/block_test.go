@@ -9,6 +9,8 @@ import (
 
 var state_block = LoadState()
 var blockchain_original = LoadBlockchain()
+var state_original = LoadState()
+var snapshot_orignal = LoadSnapshot()
 
 func TestCreateBlock(t *testing.T) {
 	tx1 := state_block.CreateTransaction("Niels", "Asger", 10)
@@ -17,6 +19,8 @@ func TestCreateBlock(t *testing.T) {
 	state_block.AddTransaction(tx2)
 	block := state_block.CreateBlock(state_block.TxMempool)
 	fmt.Println(block)
+
+	resetTest()
 }
 
 func TestSaveBlock(t *testing.T) {
@@ -35,12 +39,13 @@ func TestSaveBlock(t *testing.T) {
 
 	SaveBlockchain(blockList)
 
-	SaveBlockchain(blockchain_original)
+	resetTest()
 }
 
 func TestLoadBlockchain(t *testing.T) {
 	res := LoadBlockchain()
 	fmt.Println(res)
+	resetTest()
 }
 
 func TestAddBlockToBlockchain(t *testing.T) {
@@ -55,10 +60,10 @@ func TestAddBlockToBlockchain(t *testing.T) {
 
 	err := state_block.AddBlock(block2)
 	if err != nil || len(state_block.TxMempool) != 1 {
-		t.Errorf("failed - expected zero errors and that the length of the TxMemPool is 1")
+		t.Errorf("failed - expected no errors and that the length of the TxMemPool is 1")
 	}
 
-	SaveBlockchain(blockchain_original) // Re-safe the original blockchain
+	resetTest()
 }
 
 // This tests makes sure the functionality of sharing the blocks work correctly.
@@ -66,7 +71,7 @@ func TestAddBlockToBlockchain(t *testing.T) {
 // One state will create some transactions, Then create a block.
 // The other will create a few transactions too. The first and last should be invalidated when the block from the first state when it is synced.
 func TestSeperateStatesShareBlock(t *testing.T) {
-	original_state := LoadState()
+	original_state := LoadSnapshot()
 	stateOne := original_state.copyState()
 	stateTwo := original_state.copyState()
 
@@ -99,7 +104,7 @@ func TestSeperateStatesShareBlock(t *testing.T) {
 		t.Errorf("failed - all transactions should be removed from the first state and one should remain in the last")
 	}
 
-	SaveBlockchain(blockchain_original)
+	resetTest()
 }
 
 func TestMarshalUnmarshalBlock(t *testing.T) {
@@ -144,6 +149,14 @@ func TestMarshalUnmarshalBlock(t *testing.T) {
 	if phStr != fmt.Sprintf("%x", data.Header.ParentHash) {
 		t.Errorf("ParentHash has been altered by (un)marshaling process")
 	}
+
+	resetTest()
+}
+
+func resetTest() {
+	SaveBlockchain(blockchain_original)
+	state_original.SaveState()
+	snapshot_orignal.SaveSnapshot()
 }
 
 // Only run this to remake the local blockchain

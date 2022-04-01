@@ -1,6 +1,7 @@
 package database
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -33,6 +34,8 @@ func TestCreate(t *testing.T) {
 	if tr.Type != "transaction" {
 		t.Errorf("Type is wrong")
 	}
+
+	resetTest()
 }
 
 func TestReward(t *testing.T) {
@@ -47,6 +50,8 @@ func TestReward(t *testing.T) {
 	if r.Type != "reward" {
 		t.Errorf("Type is wrong")
 	}
+
+	resetTest()
 }
 
 func TestApplyLegalTransaction(t *testing.T) {
@@ -57,6 +62,8 @@ func TestApplyLegalTransaction(t *testing.T) {
 	if err != nil {
 		t.Error("Failed to add transaction. Error: " + err.Error())
 	}
+
+	resetTest()
 }
 
 func TestApplyIllegalTransaction(t *testing.T) {
@@ -67,6 +74,8 @@ func TestApplyIllegalTransaction(t *testing.T) {
 	if err == nil {
 		t.Error("Succesfully added transaction but expected to fail.")
 	}
+
+	resetTest()
 }
 
 func TestSendMoneyToSameUser(t *testing.T) {
@@ -77,6 +86,8 @@ func TestSendMoneyToSameUser(t *testing.T) {
 	if err == nil {
 		t.Error("Normal transaction from account to itself is not allowed")
 	}
+
+	resetTest()
 }
 
 func TestApplyTransactionWithNegativeAmount(t *testing.T) {
@@ -87,6 +98,8 @@ func TestApplyTransactionWithNegativeAmount(t *testing.T) {
 	if err == nil {
 		t.Error("Succesfully added transaction but expected to fail.")
 	}
+
+	resetTest()
 }
 
 func TestAddTransactionFromAnUnknownAccount(t *testing.T) {
@@ -97,6 +110,8 @@ func TestAddTransactionFromAnUnknownAccount(t *testing.T) {
 	if err == nil {
 		t.Error("Shouldnt be able to make a transaction from an unknown account")
 	}
+
+	resetTest()
 }
 
 func TestAddTransactionToAnUnknownAccount(t *testing.T) {
@@ -107,6 +122,8 @@ func TestAddTransactionToAnUnknownAccount(t *testing.T) {
 	if err != nil {
 		t.Error("Should be able to send to unknown account")
 	}
+
+	resetTest()
 }
 
 func TestAddRewardToAccount(t *testing.T) {
@@ -117,6 +134,8 @@ func TestAddRewardToAccount(t *testing.T) {
 	if err != nil {
 		t.Error("Unable to add reward to user")
 	}
+
+	resetTest()
 }
 
 func TestCreateLegalTransactionAndPersist(t *testing.T) {
@@ -128,4 +147,21 @@ func TestCreateLegalTransactionAndPersist(t *testing.T) {
 	}
 
 	SaveTransaction(state.TxMempool)
+	resetTest()
+}
+
+func TestAddTransactionAndCheckTheyAreSaved(t *testing.T) {
+	state1 := LoadState()
+	state1.AddTransaction(state.CreateTransaction("Magn", "Niels", 10))
+	state1.AddTransaction(state.CreateTransaction("Niels", "Magn", 10))
+
+	state2 := LoadState()
+
+	state1Json, _ := state1.MarshalJSON()
+	state2Json, _ := state2.MarshalJSON()
+	if string(state1Json) != string(state2Json) {
+		fmt.Errorf("the local changes should be saved but are not")
+	}
+
+	resetTest()
 }
