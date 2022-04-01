@@ -95,8 +95,7 @@ func (state *State) ApplyBlock(block Block) error {
 	return nil
 }
 
-
-// Applies a list of blocks to the current state. Given a list of block (blockchain) it will apply each block to the state. 
+// Applies a list of blocks to the current state. Given a list of block (blockchain) it will apply each block to the state.
 func (state *State) ApplyBlocks(blocks []Block) error {
 	for _, t := range blocks {
 		validation_err := state.ValidateBlock(t)
@@ -240,80 +239,4 @@ func (block *Block) UnmarshalJSON(data []byte) error {
 	block.Header = aux.Header.decodeBH()
 
 	return nil
-}
-
-// Loads the latest snapchat of the state. Each snapshat is meant as the state right after a block has been added.
-func LoadSnapshot() State {
-	currWD, err := os.Getwd()
-	if err != nil {
-		panic(err)
-	}
-
-	data, err := os.ReadFile(filepath.Join(currWD, "Persistence/LatestSnapshot.json"))
-	if err != nil {
-		panic(err)
-	}
-
-	var state State
-	json.Unmarshal(data, &state)
-
-	return state
-}
-
-func LoadSnapshot2() State {
-	fmt.Println("LoadSnapshot2() called")
-	currWD, err := os.Getwd()
-	if err != nil {
-		panic(err)
-	}
-
-	data, err := os.ReadFile(filepath.Join(currWD, "Persistence/LatestSnapshot.json"))
-	if err != nil {
-		panic(err)
-	}
-
-	var state State
-	json.Unmarshal(data, &state)
-
-	return state
-}
-
-// Given a state, save the state as the local state snapshot.
-func (state *State) SaveSnapshot() bool {
-	txFile, _ := json.MarshalIndent(state, "", "  ")
-
-	err := ioutil.WriteFile("./Persistence/LatestSnapshot.json", txFile, 0644)
-	if err != nil {
-		panic(err)
-	}
-
-	return true
-}
-
-// Given a state, make a deep copy of the state and return the copy.
-func (currState *State) copyState() State {
-	copy := State{}
-
-	copy.TxMempool = make([]Transaction, 0)
-	copy.AccountBalances = make(map[AccountAddress]uint)
-	copy.AccountNounces  = make(map[AccountAddress]uint)
-
-	copy.LastBlockSerialNo = currState.LastBlockSerialNo
-	copy.LastBlockTimestamp = currState.LastBlockTimestamp
-	copy.LatestHash = currState.LatestHash
-	copy.LatestTimestamp = currState.LatestTimestamp
-
-	for accountA, balance := range currState.AccountBalances {
-		copy.AccountBalances[accountA] = balance
-	}
-
-	for accountA, nounce := range currState.AccountNounces {
-		copy.AccountNounces[accountA] = nounce
-	}
-
-	for _, tx := range currState.TxMempool {
-		copy.TxMempool = append(copy.TxMempool, tx)
-	}
-
-	return copy
 }

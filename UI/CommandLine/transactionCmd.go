@@ -42,11 +42,7 @@ func transactionCreateCmd() *cobra.Command {
 			typeT, _ := cmd.Flags().GetString(flagType)
 
 			//get the current state
-			state, err := Database.LoadState()
-			if err != nil {
-				fmt.Fprintln(os.Stderr, err)
-				os.Exit(1)
-			}
+			state := Database.LoadState()
 			var transaction Database.Transaction
 
 			//Determine type of transaction

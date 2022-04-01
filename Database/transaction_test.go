@@ -14,7 +14,7 @@ import (
 // 	latestHash        string
 // }
 
-var state, _ = LoadState()
+var state = LoadState()
 
 func TestCreate(t *testing.T) {
 	t.Log("begin create transaction test")
@@ -129,6 +129,3 @@ func TestCreateLegalTransactionAndPersist(t *testing.T) {
 
 	SaveTransaction(state.TxMempool)
 }
-
-
-

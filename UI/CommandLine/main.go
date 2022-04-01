@@ -12,6 +12,8 @@ const Minor = "1"
 const Fix = "0"
 const Verbal = "TX Add && Balances List"
 
+const currentDir = "currentDir"
+
 func main() {
 
 	var tbbCmd = &cobra.Command{
@@ -40,4 +42,9 @@ func main() {
 		os.Exit(1)
 	}
 
+}
+
+func addDefaultRequiredFlags(cmd *cobra.Command) {
+	cmd.Flags().String(currentDir, "", "UI source code directory")
+	cmd.MarkFlagRequired(currentDir)
 }
