@@ -179,14 +179,14 @@ func (state *State) SaveSnapshot() error {
 		return fmt.Errorf("cannot save snapshot of state with local changes")
 	}
 
-	return saveStateAsJSON(state, "./Persistence/LatestSnapshot.json")
+	return saveStateAsJSON(state, "LatestSnapshot.json")
 }
 
 // Function that saves a state as a json file
-func saveStateAsJSON(state *State, url string) error {
+func saveStateAsJSON(state *State, filename string) error {
 	txFile, _ := json.MarshalIndent(state, "", "  ")
 
-	err := ioutil.WriteFile(url, txFile, 0644)
+	err := ioutil.WriteFile(localDirToFileFolder+filename, txFile, 0644)
 	if err != nil {
 		panic(err)
 	}
