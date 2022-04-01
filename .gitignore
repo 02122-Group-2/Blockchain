@@ -36,4 +36,4 @@ $RECYCLE.BIN/
 
 
 # Ignore the constant.go file inorder to avoid overwritting eachothers constants
-database/constants.go
+Database/constants.go
