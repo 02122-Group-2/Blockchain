@@ -11,11 +11,12 @@ import (
 type AccountAddress string
 
 type Transaction struct {
-	From      AccountAddress
-	To        AccountAddress
-	Amount    float64
-	Timestamp int64 // UNIX time
-	Type      string
+	From         AccountAddress
+	To           AccountAddress
+	Amount       float64
+	SenderNounce uint
+	Timestamp    int64 // UNIX time
+	Type         string
 }
 
 type TransactionList []Transaction
@@ -30,10 +31,12 @@ func (state *State) newAccountAddr(value string) AccountAddress {
 
 // Create a custom transaction. Used as a helper function.
 func (state *State) CreateCustomTransaction(from AccountAddress, to AccountAddress, amount float64, _type string) Transaction {
+	accountNounce := state.AccountNounces[from] + 1
 	t := Transaction{
 		from,
 		to,
 		amount,
+		accountNounce,
 		makeTimestamp(),
 		_type,
 	}

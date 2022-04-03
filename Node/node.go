@@ -1,8 +1,6 @@
 package node
 
-/*
 import (
-	"blockchain/database"
 	Database "blockchain/database"
 	"encoding/json"
 	"fmt"
@@ -46,7 +44,7 @@ func Run(dataDir string) error {
 	/*http.HandleFunc("/transaction/create", func(w http.ResponseWriter, r *http.Request) {
 		transactionHandler(w,r,state)
 	})
-
+	*/
 	return http.ListenAndServe(fmt.Sprintf(":%d", httpPort), nil)
 
 }
@@ -55,6 +53,7 @@ func balancesHandler(w http.ResponseWriter, r *http.Request, state *Database.Sta
 	writeResult(w, balancesResult{state.LatestHash, state.Balances})
 }
 
+/*
 func transactionHandler(w http.ResponseWriter, r http.Request, state *database.State) {
 	req := TxRequest{}
 	err := readRequest(r, &req)
@@ -79,6 +78,7 @@ func transactionHandler(w http.ResponseWriter, r http.Request, state *database.S
 
 	writeResult(w, TxResult{hash})
 }
+*/
 
 //When using get method
 func writeResult(w http.ResponseWriter, content interface{}) {
@@ -93,4 +93,3 @@ func writeResult(w http.ResponseWriter, content interface{}) {
 }
 
 func writeErrResult(w http.ResponseWriter)
-*/
