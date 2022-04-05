@@ -1,27 +1,35 @@
 {
   "transactions": [
     {
-      "From": "Magn",
-      "To": "Asger",
-      "Amount": 10000,
-      "SenderNounce": 11,
-      "Timestamp": 1648823722606297900,
+      "From": "Asger",
+      "To": "Niels",
+      "Amount": 42,
+      "SenderNounce": 1,
+      "Timestamp": 1649158602496920700,
       "Type": "transaction"
     },
     {
       "From": "Niels",
       "To": "gggg",
-      "Amount": 579000,
+      "Amount": 1,
       "SenderNounce": 10,
-      "Timestamp": 1648823830254234500,
+      "Timestamp": 1649158602517282400,
       "Type": "transaction"
     },
     {
-      "From": "Magn",
-      "To": "Asger",
-      "Amount": 10000,
-      "SenderNounce": 12,
-      "Timestamp": 1648823868997301600,
+      "From": "system",
+      "To": "Alberto",
+      "Amount": 5000,
+      "SenderNounce": 11,
+      "Timestamp": 1649158602527520300,
+      "Type": "reward"
+    },
+    {
+      "From": "Niels",
+      "To": "Magn",
+      "Amount": 200000,
+      "SenderNounce": 11,
+      "Timestamp": 1649158602534812900,
       "Type": "transaction"
     }
   ]
