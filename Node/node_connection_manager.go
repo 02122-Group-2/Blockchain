@@ -7,6 +7,7 @@ type Status int
 // enum
 const (
 	READY Status = iota
+	OK
 	BUSY
 	FAILED
 	NO_CONN
@@ -20,7 +21,7 @@ type NodeResponse struct {
 
 type NodeConnectionManager interface {
 	GetHeartBeat(fqdn string) NodeResponse
-	FetchStateData(fqdn string) (int, []byte)
+	FetchStateData(fqdn string) ([]byte, error)
 	// SendStateData(fqdn string)
 	// Fetch2ndLevelPeerList(fqdn string)
 }

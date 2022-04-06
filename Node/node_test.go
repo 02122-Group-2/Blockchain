@@ -62,10 +62,11 @@ func (ncm MockNodeConnectionManager) GetHeartBeat(fqdn string) NodeResponse {
 	return ncm.node2status[fqdn]
 }
 
-func (ncm MockNodeConnectionManager) FetchStateData(fqdn string) (int, []byte) {
-	return -1, []byte{}
+func (ncm MockNodeConnectionManager) FetchStateData(fqdn string) ([]byte, error) {
+	return []byte{}, nil
 }
 
+var mockNode Node
 var mockNcm MockNodeConnectionManager
 
 func (ncm MockNodeConnectionManager) printMockDB() string {
@@ -76,46 +77,58 @@ func (ncm MockNodeConnectionManager) printMockDB() string {
 	return s
 }
 
-func networkStatusToString(online int, healthy int) string {
-	return fmt.Sprintf("\nPeer Status\nOnline: %d Healthy: %d", online, healthy)
+func networkStatusToString(online int, ready int) string {
+	return fmt.Sprintf("\nPeer Status\nOnline: %d Ready: %d", online, ready)
 }
 
 func TestMockNodeConnectionManager(t *testing.T) {
 	mockNcm.seedNodeData(0.0)
+	mockNode = Node{NCM: mockNcm, FQDN: "nil", Peers: nil}
 	t.Log(mockNcm.printMockDB())
-	online, healthy, err := CheckNetworkStatus(mockNcm)
+	networkStatus, err := mockNode.CheckNetworkStatus()
 	if err != nil {
 		panic(err.Error())
 	}
-	t.Log(networkStatusToString(online, healthy))
+	ready, busy, failed, online := networkStatus.ExtractTuple()
+	t.Log(networkStatusToString(online, ready))
 
-	if online != 0 && healthy != 0 {
+	if online != 0 && ready != 0 {
 		panic("mockNcm should be seeded with 0 online peers")
 	}
 
 	mockNcm.seedNodeData(1.0)
+	mockNode.NCM = mockNcm
 	t.Log(mockNcm.printMockDB())
-	online, healthy, err = CheckNetworkStatus(mockNcm)
+	networkStatus, err = mockNode.CheckNetworkStatus()
 	if err != nil {
 		panic(err.Error())
 	}
-	t.Log(networkStatusToString(online, healthy))
+	//nolint:staticcheck
+	ready, busy, failed, online = networkStatus.ExtractTuple()
+	t.Log(networkStatusToString(online, ready))
 
 	noOfPeers := len(mockNcm.peers.Peers)
-	if online != noOfPeers && healthy != noOfPeers {
-		panic(fmt.Sprintf("mockNcm should be seeded with all online and healthy peers. Actual: (online) [%d/%d] (healthy) [%d/%d]", online, noOfPeers, healthy, noOfPeers))
+	if online != noOfPeers && ready != noOfPeers {
+		panic(fmt.Sprintf("mockNcm should be seeded with all online and ready peers. Actual: (online) [%d/%d] (ready) [%d/%d]", online, noOfPeers, ready, noOfPeers))
 	}
 
-	mockNcm.ensureStatusOnMockDB(2, FAILED)
-	mockNcm.ensureStatusOnMockDB(1, BUSY)
+	amountFailed, amountBusy := 2, 1
+	mockNcm.ensureStatusOnMockDB(amountFailed, FAILED)
+	mockNcm.ensureStatusOnMockDB(amountBusy, BUSY)
 	t.Log(mockNcm.printMockDB())
-	online, healthy, err = CheckNetworkStatus(mockNcm)
+	networkStatus, err = mockNode.CheckNetworkStatus()
 	if err != nil {
 		panic(err.Error())
 	}
-	t.Log(networkStatusToString(online, healthy))
-
-	if online != noOfPeers && healthy != (noOfPeers-2) {
-		panic("mockNcm should currently have 2 unhealthy peers at beginning of peer list")
+	ready, busy, failed, online = networkStatus.ExtractTuple()
+	t.Log(networkStatusToString(online, ready))
+	if online != noOfPeers || ready != (noOfPeers-amountFailed) {
+		panic(fmt.Sprintf("mockNcm should currently have %d ready peers at beginning of peer list", (noOfPeers - 2)))
+	}
+	if busy != amountBusy {
+		panic(fmt.Sprintf("mockNcm should have %d busy peers", amountBusy))
+	}
+	if failed != (amountFailed - amountBusy) {
+		panic(fmt.Sprintf("mockNcm should have %d failed peers (due to one of the failed being set as busy in previous assignments)", (amountFailed - amountBusy)))
 	}
 }
