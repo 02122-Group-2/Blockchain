@@ -35,7 +35,7 @@ func TestCreate(t *testing.T) {
 		t.Errorf("Type is wrong")
 	}
 
-	resetTest()
+	ResetTest()
 }
 
 func TestReward(t *testing.T) {
@@ -51,7 +51,7 @@ func TestReward(t *testing.T) {
 		t.Errorf("Type is wrong")
 	}
 
-	resetTest()
+	ResetTest()
 }
 
 func TestApplyLegalTransaction(t *testing.T) {
@@ -63,7 +63,7 @@ func TestApplyLegalTransaction(t *testing.T) {
 		t.Error("Failed to add transaction. Error: " + err.Error())
 	}
 
-	resetTest()
+	ResetTest()
 }
 
 func TestApplyIllegalTransaction(t *testing.T) {
@@ -75,7 +75,7 @@ func TestApplyIllegalTransaction(t *testing.T) {
 		t.Error("Succesfully added transaction but expected to fail.")
 	}
 
-	resetTest()
+	ResetTest()
 }
 
 func TestSendMoneyToSameUser(t *testing.T) {
@@ -87,7 +87,7 @@ func TestSendMoneyToSameUser(t *testing.T) {
 		t.Error("Normal transaction from account to itself is not allowed")
 	}
 
-	resetTest()
+	ResetTest()
 }
 
 func TestApplyTransactionWithNegativeAmount(t *testing.T) {
@@ -99,7 +99,7 @@ func TestApplyTransactionWithNegativeAmount(t *testing.T) {
 		t.Error("Succesfully added transaction but expected to fail.")
 	}
 
-	resetTest()
+	ResetTest()
 }
 
 func TestAddTransactionFromAnUnknownAccount(t *testing.T) {
@@ -111,7 +111,7 @@ func TestAddTransactionFromAnUnknownAccount(t *testing.T) {
 		t.Error("Shouldnt be able to make a transaction from an unknown account")
 	}
 
-	resetTest()
+	ResetTest()
 }
 
 func TestAddTransactionToAnUnknownAccount(t *testing.T) {
@@ -123,7 +123,7 @@ func TestAddTransactionToAnUnknownAccount(t *testing.T) {
 		t.Error("Should be able to send to unknown account")
 	}
 
-	resetTest()
+	ResetTest()
 }
 
 func TestAddRewardToAccount(t *testing.T) {
@@ -135,7 +135,7 @@ func TestAddRewardToAccount(t *testing.T) {
 		t.Error("Unable to add reward to user")
 	}
 
-	resetTest()
+	ResetTest()
 }
 
 func TestCreateLegalTransactionAndPersist(t *testing.T) {
@@ -147,7 +147,7 @@ func TestCreateLegalTransactionAndPersist(t *testing.T) {
 	}
 
 	SaveTransaction(state.TxMempool)
-	resetTest()
+	ResetTest()
 }
 
 func TestAddTransactionAndCheckTheyAreSaved(t *testing.T) {
@@ -163,5 +163,5 @@ func TestAddTransactionAndCheckTheyAreSaved(t *testing.T) {
 		fmt.Errorf("the local changes should be saved but are not")
 	}
 
-	resetTest()
+	ResetTest()
 }

@@ -11,6 +11,7 @@ const Major = "0"
 const Minor = "1"
 const Fix = "0"
 const Verbal = "TX Add && Balances List"
+const flagDataDir = "datadir"
 
 func main() {
 
@@ -30,6 +31,7 @@ func main() {
 	}
 
 	kbcCmd.AddCommand(versionCmd)
+	kbcCmd.AddCommand(runCmd())
 	kbcCmd.AddCommand(transactionCmd())
 	kbcCmd.AddCommand(balancesCmd())
 	kbcCmd.AddCommand(blockCmd())
@@ -39,5 +41,11 @@ func main() {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
+
+}
+
+func addDefaultRequiredFlags(cmd *cobra.Command) {
+	cmd.Flags().String(flagDataDir, "", "Absolute path to the node data dir where the DB will/is stored")
+	cmd.MarkFlagRequired(flagDataDir)
 
 }

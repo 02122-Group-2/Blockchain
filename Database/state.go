@@ -201,6 +201,10 @@ func loadStateFromJSON(filename string) State {
 		panic(err)
 	}
 
+	data, err = os.ReadFile(localDirToFileFolder + filename)
+	if err != nil {
+		panic(err)
+	}
 	var state State
 	json.Unmarshal(data, &state)
 
