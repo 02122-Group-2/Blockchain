@@ -95,8 +95,7 @@ func (state *State) ApplyBlock(block Block) error {
 	return nil
 }
 
-
-// Applies a list of blocks to the current state. Given a list of block (blockchain) it will apply each block to the state. 
+// Applies a list of blocks to the current state. Given a list of block (blockchain) it will apply each block to the state.
 func (state *State) ApplyBlocks(blocks []Block) error {
 	for _, t := range blocks {
 		validation_err := state.ValidateBlock(t)
@@ -241,5 +240,3 @@ func (block *Block) UnmarshalJSON(data []byte) error {
 
 	return nil
 }
-
-

@@ -165,6 +165,3 @@ func TestAddTransactionAndCheckTheyAreSaved(t *testing.T) {
 
 	resetTest()
 }
-
-
-
