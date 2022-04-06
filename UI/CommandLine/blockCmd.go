@@ -24,7 +24,7 @@ var blockCreateCmd = &cobra.Command{
 	Use:   "create",
 	Short: "creates a block and saves it",
 	Run: func(cmd *cobra.Command, args []string) {
-		var state_block, _ = Database.LoadState()
+		var state_block = Database.LoadState()
 
 		pendingTxs := Database.LoadTransactions()
 

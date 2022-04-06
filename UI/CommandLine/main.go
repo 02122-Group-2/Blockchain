@@ -14,8 +14,8 @@ const Verbal = "TX Add && Balances List"
 
 func main() {
 
-	var tbbCmd = &cobra.Command{
-		Use:   "Monkeycoin",
+	var kbcCmd = &cobra.Command{
+		Use:   "KBC",
 		Short: "The Blockchain Bar CLI",
 		Run: func(cmd *cobra.Command, args []string) {
 		},
@@ -29,12 +29,12 @@ func main() {
 		},
 	}
 
-	tbbCmd.AddCommand(versionCmd)
-	tbbCmd.AddCommand(transactionCmd())
-	tbbCmd.AddCommand(balancesCmd())
-	tbbCmd.AddCommand(blockCmd())
+	kbcCmd.AddCommand(versionCmd)
+	kbcCmd.AddCommand(transactionCmd())
+	kbcCmd.AddCommand(balancesCmd())
+	kbcCmd.AddCommand(blockCmd())
 
-	err := tbbCmd.Execute()
+	err := kbcCmd.Execute()
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
