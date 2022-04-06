@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"path/filepath"
 
 	// "path/filepath"
 	"time"
@@ -14,7 +13,7 @@ import (
 
 type State struct {
 	AccountBalances    map[AccountAddress]uint `json: "AccountBalances"`
-  AccountNounces     map[AccountAddress]uint `json: "AccountNounces"`
+	AccountNounces     map[AccountAddress]uint `json: "AccountNounces"`
 	TxMempool          TransactionList         `json: "TxMempool"`
 	DbFile             *os.File                `json: "DbFile"`
 	LastBlockSerialNo  int                     `json: "LastBlockSerialNo"`
@@ -70,7 +69,7 @@ func (s *State) UnmarshalJSON(data []byte) error {
 
 // Creates a state based from the data in the local blockchain.db file.
 func LoadState() *State {
-	state := loadStateFromJSON("Persistence/CurrentState.json") 
+	state := loadStateFromJSON("CurrentState.json")
 	return &state
 }
 
@@ -96,13 +95,13 @@ func (state *State) ApplyTransaction(transaction Transaction) {
 	if transaction.Type != "genesis" && transaction.Type != "reward" {
 		state.AccountBalances[transaction.From] -= uint(transaction.Amount)
 	}
-	state.AccountNounces[transaction.From]++;
+	state.AccountNounces[transaction.From]++
 	state.AccountBalances[transaction.To] += uint(transaction.Amount)
 }
 
 // Validates a given transaction against the state. It validate the sender and receiver and amount and timestamp and the balance of the sender.
 func (state *State) ValidateTransaction(transaction Transaction) error {
-	if state.AccountNounces[transaction.From]+1 != transaction.SenderNounce  {
+	if state.AccountNounces[transaction.From]+1 != transaction.SenderNounce {
 		return fmt.Errorf("Transaction Nounce doesn't match account nounce")
 	}
 
@@ -154,7 +153,7 @@ func (state *State) AddTransactionList(transactionList TransactionList) error {
 // This assumes that all the transactions that tries to be added have been validated before.
 // This function is meant to be used to add the remaining transactions in the local memory pool after receiving a block
 // Any transaction that has been validated before (is in the mempool) but is no more, must be invalidated (already applied) by the new block
-// This removes duplicates 
+// This removes duplicates
 func (state *State) TryAddTransactions(transactionList TransactionList) error {
 	for _, t := range transactionList {
 		state.AddTransaction(t) // It won't add the transaction if validation fails but will simply continue.
@@ -162,37 +161,32 @@ func (state *State) TryAddTransactions(transactionList TransactionList) error {
 	return nil
 }
 
-
-
-
-
-
 // Loads the latest snapchat of the state. Each snapshat is meant as the state right after a block has been added.
 func LoadSnapshot() State {
-	return loadStateFromJSON("Persistence/LatestSnapshot.json")
+	return loadStateFromJSON("LatestSnapshot.json")
 }
 
 // Given a state, save the state as the Current State, including local changes.
 // This is different from a snapshot, as the current state also saves local changes, aka. transactions.
 func (state *State) SaveState() error {
-	return saveStateAsJSON(state, "./Persistence/CurrentState.json")
+	return saveStateAsJSON(state, "CurrentState.json")
 }
 
 // Given a state, save the state as the local state snapshot.
 // I.e. the state at the moment a new block is added. Any local Tx's are therefore not included.
 func (state *State) SaveSnapshot() error {
-	if (len(state.TxMempool) > 0) { // Local transactions are not allowed
+	if len(state.TxMempool) > 0 { // Local transactions are not allowed
 		return fmt.Errorf("cannot save snapshot of state with local changes")
 	}
 
-	return saveStateAsJSON(state, "./Persistence/LatestSnapshot.json")
+	return saveStateAsJSON(state, "LatestSnapshot.json")
 }
 
 // Function that saves a state as a json file
-func saveStateAsJSON(state *State, url string) error {
+func saveStateAsJSON(state *State, filename string) error {
 	txFile, _ := json.MarshalIndent(state, "", "  ")
 
-	err := ioutil.WriteFile(url, txFile, 0644)
+	err := ioutil.WriteFile(localDirToFileFolder+filename, txFile, 0644)
 	if err != nil {
 		panic(err)
 	}
@@ -201,13 +195,8 @@ func saveStateAsJSON(state *State, url string) error {
 }
 
 // Function that loads a state from a JSON file
-func loadStateFromJSON(url string) State {
-	currWD, err := os.Getwd()
-	if err != nil {
-		panic(err)
-	}
-
-	data, err := os.ReadFile(filepath.Join(currWD, url))
+func loadStateFromJSON(filename string) State {
+	data, err := os.ReadFile(localDirToFileFolder + filename)
 	if err != nil {
 		panic(err)
 	}
@@ -224,7 +213,7 @@ func (currState *State) copyState() State {
 
 	copy.TxMempool = make([]Transaction, 0)
 	copy.AccountBalances = make(map[AccountAddress]uint)
-	copy.AccountNounces  = make(map[AccountAddress]uint)
+	copy.AccountNounces = make(map[AccountAddress]uint)
 
 	copy.LastBlockSerialNo = currState.LastBlockSerialNo
 	copy.LastBlockTimestamp = currState.LastBlockTimestamp
