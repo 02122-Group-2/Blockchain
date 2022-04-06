@@ -29,13 +29,10 @@ type TxResult struct {
 	Hash [32]byte `json:"block_hash"`
 }
 
-func Run(dataDir string) error {
+func Run() error {
 	fmt.Println(fmt.Sprintf("Listening on port %d", httpPort))
 
-	state, err := Database.LoadState() //TODO: Load from the dataDir path
-	if err != nil {
-		return err
-	}
+	state := Database.LoadState() //TODO: Load from the dataDir path
 
 	http.HandleFunc("/balances/list", func(w http.ResponseWriter, r *http.Request) {
 		balancesHandler(w, r, state)
@@ -50,7 +47,7 @@ func Run(dataDir string) error {
 }
 
 func balancesHandler(w http.ResponseWriter, r *http.Request, state *Database.State) {
-	writeResult(w, balancesResult{state.LatestHash, state.Balances})
+	writeResult(w, balancesResult{state.LatestHash, state.AccountBalances})
 }
 
 /*
