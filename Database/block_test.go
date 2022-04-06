@@ -20,7 +20,7 @@ func TestCreateBlock(t *testing.T) {
 	block := state_block.CreateBlock(state_block.TxMempool)
 	fmt.Println(block)
 
-	resetTest()
+	ResetTest()
 }
 
 func TestSaveBlock(t *testing.T) {
@@ -39,13 +39,13 @@ func TestSaveBlock(t *testing.T) {
 
 	SaveBlockchain(blockList)
 
-	resetTest()
+	ResetTest()
 }
 
 func TestLoadBlockchain(t *testing.T) {
 	res := LoadBlockchain()
 	fmt.Println(res)
-	resetTest()
+	ResetTest()
 }
 
 func TestAddBlockToBlockchain(t *testing.T) {
@@ -63,7 +63,7 @@ func TestAddBlockToBlockchain(t *testing.T) {
 		t.Errorf("failed - expected no errors and that the length of the TxMemPool is 1")
 	}
 
-	resetTest()
+	ResetTest()
 }
 
 // This tests makes sure the functionality of sharing the blocks work correctly.
@@ -104,7 +104,7 @@ func TestSeperateStatesShareBlock(t *testing.T) {
 		t.Errorf("failed - all transactions should be removed from the first state and one should remain in the last")
 	}
 
-	resetTest()
+	ResetTest()
 }
 
 func TestMarshalUnmarshalBlock(t *testing.T) {
@@ -150,10 +150,10 @@ func TestMarshalUnmarshalBlock(t *testing.T) {
 		t.Errorf("ParentHash has been altered by (un)marshaling process")
 	}
 
-	resetTest()
+	ResetTest()
 }
 
-func resetTest() {
+func ResetTest() {
 	SaveBlockchain(blockchain_original)
 	state_original.SaveState()
 	snapshot_orignal.SaveSnapshot()

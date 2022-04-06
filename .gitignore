@@ -33,7 +33,11 @@ $RECYCLE.BIN/
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
+<<<<<<< HEAD
+database/constants.go
+=======
 
 
 # Ignore the constant.go file inorder to avoid overwritting eachothers constants
 Database/constants.go
+>>>>>>> db98cb3356cd92bf2241369dd9f532f38d6f469b
