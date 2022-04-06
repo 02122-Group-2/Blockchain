@@ -32,6 +32,7 @@ const Major = "0"
 const Minor = "1"
 const Fix = "0"
 const Verbal = "TX Add && Balances List"
+const flagDataDir = "datadir"
 
 var versionCmd = &cobra.Command{
 	Use:   "version",
@@ -39,4 +40,10 @@ var versionCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Printf("Version: %s.%s.%s-beta %s.", Major, Minor, Fix, Verbal)
 	},
+}
+
+func addDefaultRequiredFlags(cmd *cobra.Command) {
+	cmd.Flags().String(flagDataDir, "", "Absolute path to the node data dir where the DB will/is stored")
+	cmd.MarkFlagRequired(flagDataDir)
+
 }
