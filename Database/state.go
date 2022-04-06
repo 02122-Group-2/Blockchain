@@ -69,7 +69,11 @@ func (s *State) UnmarshalJSON(data []byte) error {
 
 // Creates a state based from the data in the local blockchain.db file.
 func LoadState() *State {
+<<<<<<< HEAD
 	state := loadStateFromJSON(EmRootPath + "/Database/Persistence/CurrentState.json")
+=======
+	state := loadStateFromJSON("CurrentState.json")
+>>>>>>> db98cb3356cd92bf2241369dd9f532f38d6f469b
 	return &state
 }
 
@@ -163,13 +167,21 @@ func (state *State) TryAddTransactions(transactionList TransactionList) error {
 
 // Loads the latest snapchat of the state. Each snapshat is meant as the state right after a block has been added.
 func LoadSnapshot() State {
+<<<<<<< HEAD
 	return loadStateFromJSON(EmRootPath + "/Database/Persistence/LatestSnapshot.json")
+=======
+	return loadStateFromJSON("LatestSnapshot.json")
+>>>>>>> db98cb3356cd92bf2241369dd9f532f38d6f469b
 }
 
 // Given a state, save the state as the Current State, including local changes.
 // This is different from a snapshot, as the current state also saves local changes, aka. transactions.
 func (state *State) SaveState() error {
+<<<<<<< HEAD
 	return saveStateAsJSON(state, EmRootPath+"/Database/Persistence/CurrentState.json")
+=======
+	return saveStateAsJSON(state, "CurrentState.json")
+>>>>>>> db98cb3356cd92bf2241369dd9f532f38d6f469b
 }
 
 // Given a state, save the state as the local state snapshot.
@@ -179,14 +191,18 @@ func (state *State) SaveSnapshot() error {
 		return fmt.Errorf("cannot save snapshot of state with local changes")
 	}
 
+<<<<<<< HEAD
 	return saveStateAsJSON(state, EmRootPath+"/Database/Persistence/LatestSnapshot.json")
+=======
+	return saveStateAsJSON(state, "LatestSnapshot.json")
+>>>>>>> db98cb3356cd92bf2241369dd9f532f38d6f469b
 }
 
 // Function that saves a state as a json file
-func saveStateAsJSON(state *State, url string) error {
+func saveStateAsJSON(state *State, filename string) error {
 	txFile, _ := json.MarshalIndent(state, "", "  ")
 
-	err := ioutil.WriteFile(url, txFile, 0644)
+	err := ioutil.WriteFile(localDirToFileFolder+filename, txFile, 0644)
 	if err != nil {
 		panic(err)
 	}
@@ -195,6 +211,7 @@ func saveStateAsJSON(state *State, url string) error {
 }
 
 // Function that loads a state from a JSON file
+<<<<<<< HEAD
 func loadStateFromJSON(url string) State {
 	/*currWD, err := os.Getwd()
 	if err != nil {
@@ -202,6 +219,10 @@ func loadStateFromJSON(url string) State {
 	}
 
 	data, err := os.ReadFile(filepath.Join(currWD, url))
+=======
+func loadStateFromJSON(filename string) State {
+	data, err := os.ReadFile(localDirToFileFolder + filename)
+>>>>>>> db98cb3356cd92bf2241369dd9f532f38d6f469b
 	if err != nil {
 		panic(err)
 	}

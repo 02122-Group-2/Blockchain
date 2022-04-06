@@ -69,7 +69,11 @@ func SaveTransaction(transactionList TransactionList) bool {
 	toSave := LoadedTransactions{transactionList}
 	txFile, _ := json.MarshalIndent(toSave, "", "  ")
 
+<<<<<<< HEAD
 	err := ioutil.WriteFile(EmRootPath+"/Database/Persistence/Transactions.json", txFile, 0644)
+=======
+	err := ioutil.WriteFile(localDirToFileFolder+"Transactions.json", txFile, 0644)
+>>>>>>> db98cb3356cd92bf2241369dd9f532f38d6f469b
 	if err != nil {
 		panic(err)
 	}
@@ -80,6 +84,7 @@ func SaveTransaction(transactionList TransactionList) bool {
 // Loads the local transactions, saved in the transactions.json file. This is deprecated and only used in early versions of the blockchain.
 // It returns a list of transactions.
 func LoadTransactions() TransactionList {
+<<<<<<< HEAD
 	/*
 		currWD, err := os.Getwd()
 		if err != nil {
@@ -92,6 +97,9 @@ func LoadTransactions() TransactionList {
 		}
 	*/
 	data, err := os.ReadFile(EmRootPath + "/Database/Persistence/Transactions.json")
+=======
+	data, err := os.ReadFile(localDirToFileFolder + "Transactions.json")
+>>>>>>> db98cb3356cd92bf2241369dd9f532f38d6f469b
 	if err != nil {
 		panic(err)
 	}

@@ -16,8 +16,13 @@ const flagDataDir = "datadir"
 func main() {
 
 	var kbcCmd = &cobra.Command{
+<<<<<<< HEAD
 		Use:   "Monkeycoin",
 		Short: "KB Coin CLI",
+=======
+		Use:   "KBC",
+		Short: "The Blockchain Bar CLI",
+>>>>>>> db98cb3356cd92bf2241369dd9f532f38d6f469b
 		Run: func(cmd *cobra.Command, args []string) {
 		},
 	}
@@ -31,7 +36,10 @@ func main() {
 	}
 
 	kbcCmd.AddCommand(versionCmd)
+<<<<<<< HEAD
 	kbcCmd.AddCommand(runCmd())
+=======
+>>>>>>> db98cb3356cd92bf2241369dd9f532f38d6f469b
 	kbcCmd.AddCommand(transactionCmd())
 	kbcCmd.AddCommand(balancesCmd())
 	kbcCmd.AddCommand(blockCmd())
