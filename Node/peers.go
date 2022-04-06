@@ -36,39 +36,6 @@ func LoadPeers() (PeerList, error) {
 	return loaded_peers, err
 }
 
-// Check whether node has any registered peers and whether they are online and ready to communicate
-func CheckNetworkStatus() (int, error) {
-	peers, err := LoadPeers()
-	if err != nil {
-		panic(err)
-	}
-	noOfPeers := countPeers(peers)
-
-	if noOfPeers == 0 {
-		return 0, nil
-	}
-
-	var healthyPeers, onlinePeers int
-	for _, peer := range peers.Peers {
-		res, _ := Ping(peer.FQDN)
-		if res == 200 { // HTTP response code for OK
-			healthyPeers++
-			onlinePeers++
-		}
-		if res >= 300 { // HTTP response code for various errors
-			onlinePeers++
-		}
-	}
-
-	if onlinePeers == 0 {
-		return 0, nil
-	}
-
-	statusCode := (int)(healthyPeers / onlinePeers * 5)
-
-	return statusCode, err
-}
-
 func countPeers(peers PeerList) int {
 	c := 0
 	for _, peer := range peers.Peers {
@@ -81,9 +48,4 @@ func countPeers(peers PeerList) int {
 
 func isBootstrapNode(p Peer) bool {
 	return strings.Contains(p.Alias, "bootstrap")
-}
-
-// Ping peers to check if online and ready to communicate
-func Ping(fqdn string) (int, string) {
-	return 200, "Ready"
 }
