@@ -20,7 +20,7 @@ func TestCreateBlock(t *testing.T) {
 	block := state_block.CreateBlock(state_block.TxMempool)
 	fmt.Println(block)
 
-	resetTest()
+	ResetTest()
 }
 
 func TestSaveBlock(t *testing.T) {
@@ -39,13 +39,13 @@ func TestSaveBlock(t *testing.T) {
 
 	SaveBlockchain(blockList)
 
-	resetTest()
+	ResetTest()
 }
 
 func TestLoadBlockchain(t *testing.T) {
 	res := LoadBlockchain()
 	fmt.Println(res)
-	resetTest()
+	ResetTest()
 }
 
 func TestAddBlockToBlockchain(t *testing.T) {
@@ -59,11 +59,11 @@ func TestAddBlockToBlockchain(t *testing.T) {
 	state_block.AddTransaction(tx3)
 
 	err := state_block.AddBlock(block2)
-	if err != nil || len(state_block.TxMempool) != 1 { 
+	if err != nil || len(state_block.TxMempool) != 1 {
 		t.Errorf("failed - expected no errors and that the length of the TxMemPool is 1")
 	}
 
-	resetTest()
+	ResetTest()
 }
 
 // This tests makes sure the functionality of sharing the blocks work correctly.
@@ -81,9 +81,9 @@ func TestSeperateStatesShareBlock(t *testing.T) {
 
 	blockOne := stateOne.CreateBlock(stateOne.TxMempool)
 
-	stateTwo.AddTransaction(stateTwo.CreateTransaction("Magn", "Niels", 10))  // Should be invalid when merging the other block - Because of Nounces
+	stateTwo.AddTransaction(stateTwo.CreateTransaction("Magn", "Niels", 10))   // Should be invalid when merging the other block - Because of Nounces
 	stateTwo.AddTransaction(stateTwo.CreateTransaction("Asger", "Emilie", 10)) // Should be valid
-	stateTwo.AddTransaction(stateTwo.CreateTransaction("Niels", "Asger", 10)) // Should be invalid when merging the other block
+	stateTwo.AddTransaction(stateTwo.CreateTransaction("Niels", "Asger", 10))  // Should be invalid when merging the other block
 
 	err := stateOne.AddBlock(blockOne)
 	if err != nil {
@@ -104,7 +104,7 @@ func TestSeperateStatesShareBlock(t *testing.T) {
 		t.Errorf("failed - all transactions should be removed from the first state and one should remain in the last")
 	}
 
-	resetTest()
+	ResetTest()
 }
 
 func TestMarshalUnmarshalBlock(t *testing.T) {
@@ -150,16 +150,14 @@ func TestMarshalUnmarshalBlock(t *testing.T) {
 		t.Errorf("ParentHash has been altered by (un)marshaling process")
 	}
 
-	resetTest()
+	ResetTest()
 }
 
-
-func resetTest() {
+func ResetTest() {
 	SaveBlockchain(blockchain_original)
 	state_original.SaveState()
 	snapshot_orignal.SaveSnapshot()
 }
-
 
 // Only run this to remake the local blockchain
 // func TestCreateTestDatabase(t *testing.T) {
@@ -236,10 +234,9 @@ func resetTest() {
 // 	err  = state_block.AddTransaction(tx31)
 // 	tx32 := state_block.CreateTransaction("Magn", "Emilie", 4)
 // 	err  = state_block.AddTransaction(tx32)
-	
+
 // 	block = state_block.CreateBlock(state_block.TxMempool)
 // 	err = state_block.AddBlock(block)
-
 
 // 	if err != nil {
 // 		fmt.Println("d")
@@ -247,6 +244,4 @@ func resetTest() {
 // 	fmt.Print("Uo")
 // }
 
-// // func TestByteSliceToHexString (t *testing.T) 
-
-
+// // func TestByteSliceToHexString (t *testing.T)

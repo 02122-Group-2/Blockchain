@@ -2,6 +2,9 @@ package main
 
 import (
 	"fmt"
+	"os"
+
+	Node "blockchain/node"
 
 	"github.com/spf13/cobra"
 )
@@ -15,12 +18,12 @@ func runCmd() *cobra.Command {
 
 			fmt.Println("Starting up...")
 
-			/*err := Node.Run()
+			err := Node.Run(dataDir)
 			if err != nil {
 				fmt.Println(err)
 				os.Exit(1)
 			}
-			*/
+
 		},
 	}
 

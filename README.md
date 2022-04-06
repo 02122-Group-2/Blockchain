@@ -28,3 +28,11 @@ Blockchain and cryptocurrency implementation in Go
         ├── go.mod
         └── go.sum
 ```
+
+## How to use HTTP 
+Note: Test must be running
+For viewing balances 
+curl -X GET http://localhost:8080/balances/list 
+
+For adding balances
+curl -X POST http://localhost:8080/transaction/create -H "Content-Type: application/json" -d '{"From":"NAME HERE","To":"NAME","Amount":AMOUNT HERE, "Type":"TYPE HERE"}'
