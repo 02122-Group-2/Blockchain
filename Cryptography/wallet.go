@@ -1,19 +1,43 @@
 package cryptography
 
 import (
+	"crypto/ecdsa"
 	"fmt"
-	"log"
+	"io/ioutil"
 
 	"github.com/ethereum/go-ethereum/accounts/keystore"
 )
 
-func GetPrivateKey() () {
+func CreateNewWallet(password string) (string, error) {
 	ks := keystore.NewKeyStore("./wallet", keystore.StandardScryptN, keystore.StandardScryptP)
-	password := "secret"
-	account, err := ks.NewAccount(password)
+	newAcc, err := ks.NewAccount(password)
+	
 	if err != nil {
-			log.Fatal(err)
+		return "", fmt.Errorf(err.Error())
+	}
+	return newAcc.Address.Hex(), nil
+}
+
+func GetAddress() string {
+	ks := keystore.NewKeyStore("./wallet", keystore.StandardScryptN, keystore.StandardScryptP)
+	allAccs := ks.Accounts()
+	return allAccs[len(allAccs)-1].Address.Hex()
+}
+
+func GetPrivateKey(password string) (*ecdsa.PrivateKey, error) {
+	ks := keystore.NewKeyStore("./wallet", keystore.StandardScryptN, keystore.StandardScryptP)
+	allAccs := ks.Accounts()
+
+	accountJson, err := ioutil.ReadFile(allAccs[len(allAccs)-1].URL.Path)
+	if err != nil {
+		return nil, fmt.Errorf(err.Error())
 	}
 
-	fmt.Println(account.Address.Hex()) // 0x20F8D42FB0F667F2E53930fed426f225752453b3
+	privKey, err := keystore.DecryptKey(accountJson, password)
+
+	if err != nil {
+		return nil, fmt.Errorf(err.Error())
+	}
+
+	return privKey.PrivateKey, nil
 }
