@@ -1,6 +1,7 @@
 package cryptography
 
 import (
+	"bytes"
 	"os"
 	"testing"
 
@@ -8,6 +9,7 @@ import (
 )
 
 var testingPassword = "testingPassword123"
+var testingHashedTransaction = [32]byte{'h', 'e', 'j', 's', 'a','b','m','m','h', 'e', 'j', 's', 'a','b','m','m','h', 'e', 'j', 's', 'a','b','m','m','h', 'e', 'j', 's', 'a','b','m','m'}
 
 func removeNewestWallet() {
 	ks := keystore.NewKeyStore("./wallet", keystore.StandardScryptN, keystore.StandardScryptP)
@@ -42,6 +44,51 @@ func TestAccessWalletWithCorrectPassword(t *testing.T) {
 		removeNewestWallet()
 		t.Errorf("expected to be able to get private key with correct password, but couldn't\n")
 	}
+	removeNewestWallet()
+}
+
+
+func TestSignTransaction(t *testing.T) {
+	CreateNewWallet(testingPassword)
+	signature1, err := SignTransaction(testingPassword, testingHashedTransaction)
+
+	if err != nil {
+		removeNewestWallet()
+		t.Errorf("Failed to sign signature1\n")
+	}
+
+	signature2, err := SignTransaction(testingPassword, testingHashedTransaction)
+
+	if err != nil {
+		removeNewestWallet()
+		t.Errorf("Failed to sign signature2\n")
+	}
+
+	if bytes.Compare(signature1, signature2) != 0  {
+		removeNewestWallet()
+		t.Errorf("Signature of same transaction is not identical\n")
+	}
+
+
+	removeNewestWallet()
+}
+
+func TestRetrieveAddressFromSignature(t *testing.T) {
+	addr, _ := CreateNewWallet(testingPassword)
+	signature, _ := SignTransaction(testingPassword, testingHashedTransaction)
+	retrievedAddr, err := GetAddressFromSignedTransaction(signature, testingHashedTransaction)
+
+	if err != nil {
+		removeNewestWallet()
+		t.Errorf("failed to get address from signed transaction\n")
+	}
+
+	if addr != retrievedAddr {
+		removeNewestWallet()
+		t.Errorf("wallet address and address retrieved from signed transaction doesn't match.\n")
+	}
+
+
 	removeNewestWallet()
 }
 

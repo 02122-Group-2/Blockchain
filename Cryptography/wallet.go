@@ -5,7 +5,11 @@ import (
 	"fmt"
 	"io/ioutil"
 
+	"crypto/elliptic"
+
 	"github.com/ethereum/go-ethereum/accounts/keystore"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/crypto"
 )
 
 func CreateNewWallet(password string) (string, error) {
@@ -40,4 +44,32 @@ func GetPrivateKey(password string) (*ecdsa.PrivateKey, error) {
 	}
 
 	return privKey.PrivateKey, nil
+}
+
+// Given a password and a hashed transaction it will use the local wallet in order to sign the transaction.
+func SignTransaction(password string, hashedTransaction [32]byte) ([]byte, error) {
+	privKey, err := GetPrivateKey(password)
+	if err != nil {
+		return nil, err
+	}
+	signature, err := crypto.Sign(hashedTransaction[:], privKey)
+
+	if (err != nil) {
+		return nil, err
+	}
+
+	return signature, nil
+}
+
+func GetAddressFromSignedTransaction(signature []byte, hashedTransaction [32]byte) (string, error) {
+	addr, err := crypto.SigToPub(hashedTransaction[:], signature)
+	if err != nil {
+		return "", err
+	}
+	
+	addrBytes := elliptic.Marshal(crypto.S256(), addr.X, addr.Y)
+	addrHash := crypto.Keccak256(addrBytes[1:])
+	addrString := common.BytesToAddress(addrHash[:]).String()
+	
+	return addrString, nil
 }
