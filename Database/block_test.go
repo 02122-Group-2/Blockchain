@@ -67,7 +67,7 @@ func TestAddBlockToBlockchain(t *testing.T) {
 }
 
 // This tests makes sure the functionality of sharing the blocks work correctly.
-// Two states will be creates, who are orignally identical.
+// Two states will be created, who are orignally identical.
 // One state will create some transactions, Then create a block.
 // The other will create a few transactions too. The first and last should be invalidated when the block from the first state when it is synced.
 func TestSeperateStatesShareBlock(t *testing.T) {

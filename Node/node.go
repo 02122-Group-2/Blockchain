@@ -8,7 +8,13 @@ import (
 	"net/http"
 )
 
+type NodeState struct {
+	peerList []string
+	state    Database.State
+}
+
 const httpPort = 8080
+const bootstrapNode = "bootstrapNode"
 
 //Models the balances data recived
 type balancesResult struct {
@@ -31,8 +37,45 @@ type TxResult struct {
 
 func Run() error {
 	fmt.Println(fmt.Sprintf("Listening on port %d", httpPort))
+	startNode()
 
-	state := Database.LoadState() //TODO: Load from the dataDir path
+	nodeState := getNodeState()
+
+	for true {
+		for _, peer := range nodeState.peerList {
+			peerState := getPeerState(peer)
+
+			if peerState.state.LastBlockSerialNo > nodeState.state.LastBlockSerialNo {
+				peerBlocks := getPeerBlocks(peer)
+				nodeState.state.ApplyBlocks(peerBlocks)
+			}
+
+			nodeState.state.TryAddTransactions(peerState.state.TxMempool)
+
+		}
+	}
+
+	return nil
+}
+
+func getPeerBlocks(peerAddr string) []Database.Block {
+	return nil
+}
+
+func getPeerState(peerAddr string) NodeState {
+	resp, err := http.Get("localhost:")
+
+}
+
+func getNodeState() NodeState {
+	nodeState := NodeState{}
+	nodeState.state = *Database.LoadState()
+	nodeState.peerList = []string{bootstrapNode}
+	return nodeState
+}
+
+func startNode() error {
+	state := Database.LoadState()
 
 	http.HandleFunc("/balances/list", func(w http.ResponseWriter, r *http.Request) {
 		balancesHandler(w, r, state)
@@ -43,7 +86,6 @@ func Run() error {
 	})
 
 	return http.ListenAndServe(fmt.Sprintf(":%d", httpPort), nil)
-
 }
 
 func balancesHandler(w http.ResponseWriter, r *http.Request, state *Database.State) {
