@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"time"
 )
@@ -74,6 +75,13 @@ func Run() error {
 }
 
 func ping(peerAddr string) bool {
+	timeout := 1 * time.Second
+	conn, err := net.DialTimeout("tcp", peerAddr, timeout)
+	conn.Close()
+	if err != nil {
+		fmt.Println("Site unreachable, error: ", err)
+		return false
+	}
 	return true
 }
 
