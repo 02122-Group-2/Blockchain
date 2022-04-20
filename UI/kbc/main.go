@@ -19,6 +19,7 @@ func main() {
 	kbcCmd.AddCommand(versionCmd)
 	kbcCmd.AddCommand(transactionCmd())
 	kbcCmd.AddCommand(balancesCmd())
+	kbcCmd.AddCommand(runCmd())
 	kbcCmd.AddCommand(blockCmd())
 
 	err := kbcCmd.Execute()
