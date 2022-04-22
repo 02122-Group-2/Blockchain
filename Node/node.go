@@ -7,7 +7,9 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"net"
 	"net/http"
+	"time"
 )
 
 type NodeState struct {
@@ -44,7 +46,15 @@ func Run() error {
 	nodeState := getNodeState()
 
 	for true {
-		for _, peer := range nodeState.peerList {
+
+		updateNodeState(&nodeState) // Updates nodeState to get local changes in case any has been made
+
+		// Creates a copy of the peers to check, to avoid weird looping as we append to the slice in the loop
+		peersToCheck := make([]string, len(nodeState.peerList))
+		copy(peersToCheck, nodeState.peerList)
+
+		for _, peer := range peersToCheck {
+
 			peerState := getPeerState(peer)
 
 			if peerState.state.LastBlockSerialNo > nodeState.state.LastBlockSerialNo {
@@ -54,10 +64,36 @@ func Run() error {
 
 			nodeState.state.TryAddTransactions(peerState.state.TxMempool)
 
+			for _, peer2 := range peerState.peerList {
+				if !contains(nodeState.peerList, peer2) && ping(peer2) {
+					nodeState.peerList = append(nodeState.peerList, peer2)
+				}
+			}
 		}
+		time.Sleep(40 * time.Second)
 	}
 
 	return nil
+}
+
+func ping(peerAddr string) bool {
+	timeout := 1 * time.Second
+	conn, err := net.DialTimeout("tcp", peerAddr, timeout)
+	conn.Close()
+	if err != nil {
+		fmt.Println("Site unreachable, error: ", err)
+		return false
+	}
+	return true
+}
+
+func contains(s []string, e string) bool {
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+	return false
 }
 
 func getPeerBlocks(peerAddr string) []Database.Block {
@@ -90,6 +126,11 @@ func getNodeState() NodeState {
 	nodeState.state = *Database.LoadState()
 	nodeState.peerList = []string{bootstrapNode}
 	return nodeState
+}
+
+// Updated the current nodeState.State field to get latest local changes, in case the user has added local transactions.
+func updateNodeState(currentNodeState *NodeState) {
+	currentNodeState.state = *Database.LoadState()
 }
 
 func startNode() error {
