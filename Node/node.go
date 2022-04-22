@@ -2,15 +2,17 @@ package node
 
 import (
 	Database "blockchain/database"
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 )
 
 type NodeState struct {
-	peerList []string
-	state    Database.State
+	peerList []string       `json:"peer_list"`
+	state    Database.State `json:"state"`
 }
 
 const httpPort = 8080
@@ -62,9 +64,25 @@ func getPeerBlocks(peerAddr string) []Database.Block {
 	return nil
 }
 
+//The following is done using POST,
+//The header contain the address of the peer that is currently being accessed
+//The body should contain the current state of the requesting node
 func getPeerState(peerAddr string) NodeState {
-	resp, err := http.Get("localhost:")
 
+	currState := Database.LoadState()
+	jsonData, err := json.Marshal(currState)
+
+	resp, err := http.Post("http://"+peerAddr+"/getState", "application/json", bytes.NewBuffer(jsonData))
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	peerNodeState := NodeState{}
+
+	readResp(resp, &peerNodeState)
+	//At this point the data recived should have been saved into peerNodeState
+
+	return peerNodeState
 }
 
 func getNodeState() NodeState {
@@ -85,7 +103,27 @@ func startNode() error {
 		transactionHandler(w, r, state)
 	})
 
+	http.HandleFunc("/getState/", func(w http.ResponseWriter, r *http.Request) {
+		getStateHandler(w, r, state)
+	})
+
 	return http.ListenAndServe(fmt.Sprintf(":%d", httpPort), nil)
+}
+
+func getStateHandler(w http.ResponseWriter, r *http.Request, state *Database.State) {
+	//TODO: Read the body containing the state of the node requesting
+	/*getStateRequest := NodeState{}
+	err := readReq(r, &getStateRequest)
+
+	if err != nil {
+		return
+	}
+	*/
+
+	//Response: Send your current state
+	nodeState := getNodeState()
+	writeResult(w, NodeState{nodeState.peerList, *state})
+
 }
 
 func balancesHandler(w http.ResponseWriter, r *http.Request, state *Database.State) {
@@ -133,7 +171,7 @@ func transactionHandler(w http.ResponseWriter, r *http.Request, state *Database.
 	writeResult(w, TxResult{status})
 }
 
-//When using get method
+//Writing the result from the server
 func writeResult(w http.ResponseWriter, content interface{}) {
 	contentJson, err := json.Marshal(content)
 	if err != nil {
@@ -145,12 +183,11 @@ func writeResult(w http.ResponseWriter, content interface{}) {
 	w.Write(contentJson)
 }
 
-//When using post method
+//Reading the request when using POST method
 func readReq(r *http.Request, reqBody interface{}) error {
 	reqJson, err := ioutil.ReadAll(r.Body)
 
 	if err != nil {
-		fmt.Println("ERROR WAS NOT NIL READ")
 		return fmt.Errorf("unable to read request body. %s", err.Error())
 
 	}
@@ -158,10 +195,25 @@ func readReq(r *http.Request, reqBody interface{}) error {
 
 	err = json.Unmarshal(reqJson, reqBody)
 	if err != nil {
-		fmt.Printf("unable to unmarshal request body. %s", err.Error())
 		return fmt.Errorf("unable to unmarshal request body. %s", err.Error())
 	}
 
+	return nil
+}
+
+func readResp(r *http.Response, reqBody interface{}) error {
+	reqJson, err := ioutil.ReadAll(r.Body)
+
+	if err != nil {
+		return fmt.Errorf("unable to read request body. %s", err.Error())
+
+	}
+	defer r.Body.Close()
+
+	err = json.Unmarshal(reqJson, reqBody)
+	if err != nil {
+		return fmt.Errorf("unable to unmarshal request body. %s", err.Error())
+	}
 	return nil
 }
 
