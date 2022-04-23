@@ -8,3 +8,8 @@ import (
 func HashBlock(blockString string) [32]byte {
 	return sha256.Sum256([]byte(blockString)) 
 }
+
+// Takes a transationc is Json string format and hashes it - Yes it does exactly the same as above, just named differently.
+func HashTransaction(transactionString string) [32]byte {
+	return sha256.Sum256([]byte(transactionString)) 
+}

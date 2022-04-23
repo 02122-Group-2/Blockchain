@@ -11,8 +11,8 @@ import (
 )
 
 type Block struct {
-	Header       BlockHeader   `json:"Header"`
-	Transactions []Transaction `json:"Transactions"`
+	Header       BlockHeader            `json:"Header"`
+	SignedTx    SignedTransactionList   `json:"Transactions"`
 }
 
 type BlockHeader struct {
@@ -32,7 +32,7 @@ type Blockchain struct {
 }
 
 // Create a block object that matches the current state, given a list of transactions
-func (state *State) CreateBlock(txs []Transaction) Block {
+func (state *State) CreateBlock(txs SignedTransactionList) Block {
 	return Block{
 		BlockHeader{
 			state.getLatestHash(),
@@ -66,7 +66,7 @@ func (state *State) ValidateBlock(block Block) error {
 		return fmt.Errorf("the new block must have a newer creation date than the Latest block")
 	}
 
-	err := state.ValidateTransactionList(block.Transactions)
+	err := state.ValidateTransactionList(block.SignedTx)
 	if err != nil {
 		return err
 	}
@@ -75,10 +75,10 @@ func (state *State) ValidateBlock(block Block) error {
 }
 
 // Applies a single block to the current state.
-// It validates the block and all the transactions within.
+// It validates all the transactions within the block.
 // It applies all the transactions within the block to the state as well.
 func (state *State) ApplyBlock(block Block) error {
-	err := state.AddTransactionList(block.Transactions)
+	err := state.AddTransactionList(block.SignedTx)
 	if err != nil {
 		return err
 	}

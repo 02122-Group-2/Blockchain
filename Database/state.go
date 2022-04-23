@@ -1,6 +1,8 @@
 package database
 
 import (
+	Consts "blockchain/Constants"
+	Crypto "blockchain/Cryptography"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -14,7 +16,7 @@ import (
 type State struct {
 	AccountBalances    map[AccountAddress]uint `json: "AccountBalances"`
 	AccountNounces     map[AccountAddress]uint `json: "AccountNounces"`
-	TxMempool          TransactionList         `json: "TxMempool"`
+	TxMempool          SignedTransactionList   `json: "TxMempool"`
 	DbFile             *os.File                `json: "DbFile"`
 	LastBlockSerialNo  int                     `json: "LastBlockSerialNo"`
 	LastBlockTimestamp int64                   `json: "LastBlockTimestamp"`
@@ -75,7 +77,7 @@ func LoadState() *State {
 
 // Adds a transaction to the state. It will validate the transaction, then apply the transaction to the state,
 // then add the transaction to its MemPool and update its latest timestamp field.
-func (state *State) AddTransaction(transaction Transaction) error {
+func (state *State) AddTransaction(transaction SignedTransaction) error {
 	if err := state.ValidateTransaction(transaction); err != nil {
 		return err
 	}
@@ -84,43 +86,51 @@ func (state *State) AddTransaction(transaction Transaction) error {
 
 	state.ApplyTransaction(transaction)
 
-	state.LatestTimestamp = transaction.Timestamp
+	state.LatestTimestamp = transaction.Tx.Timestamp
 
 	state.SaveState()
 	return nil
 }
 
 // Apply the transaction by updating the balances of the affected users.
-func (state *State) ApplyTransaction(transaction Transaction) {
-	if transaction.Type != "genesis" && transaction.Type != "reward" {
-		state.AccountBalances[transaction.From] -= uint(transaction.Amount)
+func (state *State) ApplyTransaction(transaction SignedTransaction) {
+	if transaction.Tx.Type != "genesis" && transaction.Tx.Type != "reward" {
+		state.AccountBalances[transaction.Tx.From] -= uint(transaction.Tx.Amount)
 	}
-	state.AccountNounces[transaction.From]++
-	state.AccountBalances[transaction.To] += uint(transaction.Amount)
+	state.AccountNounces[transaction.Tx.From]++
+	state.AccountBalances[transaction.Tx.To] += uint(transaction.Tx.Amount)
 }
 
-// Validates a given transaction against the state. It validate the sender and receiver and amount and timestamp and the balance of the sender.
-func (state *State) ValidateTransaction(transaction Transaction) error {
-	if state.AccountNounces[transaction.From]+1 != transaction.SenderNounce {
+// Validates a given signed transaction against the state. It validate the sender and receiver and amount and timestamp and the balance of the sender.
+func (state *State) ValidateTransaction(signedTx SignedTransaction) error {
+	if state.AccountNounces[signedTx.Tx.From]+1 != signedTx.Tx.SenderNounce {
 		return fmt.Errorf("Transaction Nounce doesn't match account nounce")
 	}
 
-	if (state.LastBlockSerialNo == 0 && transaction.Type == "genesis") || transaction.Type == "reward" {
+	if (state.LastBlockSerialNo == 0 && signedTx.Tx.Type == "genesis") || signedTx.Tx.Type == "reward" {
 		return nil
 	}
 
-	if transaction.From == transaction.To {
+	addrOfTransaction, err := Crypto.GetAddressFromSignedTransaction(signedTx.Signature, signedTx.Tx.hash())
+	if err != nil {
+		return err
+	}
+	if AccountAddress(addrOfTransaction) != signedTx.Tx.From {
+		return fmt.Errorf("sender of the transaction did not create the transaction!")
+	}
+
+	if signedTx.Tx.From == signedTx.Tx.To {
 		return fmt.Errorf("a normal transaction is not allowed to same account")
 	}
 
-	if _, ok := state.AccountBalances[transaction.From]; !ok {
-		return fmt.Errorf("sending from Undefined Account \"%s\"", transaction.From)
+	if _, ok := state.AccountBalances[signedTx.Tx.From]; !ok {
+		return fmt.Errorf("sending from Undefined Account \"%s\"", signedTx.Tx.From)
 	}
-	if transaction.Amount <= 0 {
+	if signedTx.Tx.Amount <= 0 {
 		return fmt.Errorf("illegal to make a transaction with 0 or less coins")
 	}
 
-	if state.AccountBalances[transaction.From] < uint(transaction.Amount) {
+	if state.AccountBalances[signedTx.Tx.From] < uint(signedTx.Tx.Amount) {
 		return fmt.Errorf("Sender ain't that liquid right now")
 	}
 
@@ -128,7 +138,7 @@ func (state *State) ValidateTransaction(transaction Transaction) error {
 }
 
 // Validates a list of transactions against the state.
-func (state *State) ValidateTransactionList(transactionList TransactionList) error {
+func (state *State) ValidateTransactionList(transactionList SignedTransactionList) error {
 	for i, t := range transactionList {
 		err := state.ValidateTransaction(t)
 		if err != nil {
@@ -139,7 +149,7 @@ func (state *State) ValidateTransactionList(transactionList TransactionList) err
 }
 
 // Adds a list of transaction to the state.
-func (state *State) AddTransactionList(transactionList TransactionList) error {
+func (state *State) AddTransactionList(transactionList SignedTransactionList) error {
 	for i, t := range transactionList {
 		err := state.AddTransaction(t)
 		if err != nil {
@@ -154,7 +164,7 @@ func (state *State) AddTransactionList(transactionList TransactionList) error {
 // This function is meant to be used to add the remaining transactions in the local memory pool after receiving a block
 // Any transaction that has been validated before (is in the mempool) but is no more, must be invalidated (already applied) by the new block
 // This removes duplicates
-func (state *State) TryAddTransactions(transactionList TransactionList) error {
+func (state *State) TryAddTransactions(transactionList SignedTransactionList) error {
 	for _, t := range transactionList {
 		state.AddTransaction(t) // It won't add the transaction if validation fails but will simply continue.
 	}
@@ -186,7 +196,7 @@ func (state *State) SaveSnapshot() error {
 func saveStateAsJSON(state *State, filename string) error {
 	txFile, _ := json.MarshalIndent(state, "", "  ")
 
-	err := ioutil.WriteFile(localDirToFileFolder+filename, txFile, 0644)
+	err := ioutil.WriteFile(Consts.LocalDirToFileFolder+filename, txFile, 0644)
 	if err != nil {
 		panic(err)
 	}
@@ -196,12 +206,12 @@ func saveStateAsJSON(state *State, filename string) error {
 
 // Function that loads a state from a JSON file
 func loadStateFromJSON(filename string) State {
-	data, err := os.ReadFile(localDirToFileFolder + filename)
+	data, err := os.ReadFile(Consts.LocalDirToFileFolder + filename)
 	if err != nil {
 		panic(err)
 	}
 
-	data, err = os.ReadFile(localDirToFileFolder + filename)
+	data, err = os.ReadFile(Consts.LocalDirToFileFolder + filename)
 	if err != nil {
 		panic(err)
 	}
@@ -215,7 +225,7 @@ func loadStateFromJSON(filename string) State {
 func (currState *State) copyState() State {
 	copy := State{}
 
-	copy.TxMempool = make([]Transaction, 0)
+	copy.TxMempool = make([]SignedTransaction, 0)
 	copy.AccountBalances = make(map[AccountAddress]uint)
 	copy.AccountNounces = make(map[AccountAddress]uint)
 

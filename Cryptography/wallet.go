@@ -1,6 +1,7 @@
 package cryptography
 
 import (
+	Consts "blockchain/constants"
 	"crypto/ecdsa"
 	"fmt"
 	"io/ioutil"
@@ -14,7 +15,7 @@ import (
 
 // Given a password, this function will create a new wallet in the ./wallet folder. It will not delete the old wallets.
 func CreateNewWallet(password string) (string, error) {
-	ks := keystore.NewKeyStore("./wallet", keystore.StandardScryptN, keystore.StandardScryptP)
+	ks := keystore.NewKeyStore(Consts.LocalDirToWallets, keystore.StandardScryptN, keystore.StandardScryptP)
 	newAcc, err := ks.NewAccount(password)
 
 	if err != nil {
@@ -25,14 +26,14 @@ func CreateNewWallet(password string) (string, error) {
 
 // Gets the public address from the latest created wallet
 func GetAddress() string {
-	ks := keystore.NewKeyStore("./wallet", keystore.StandardScryptN, keystore.StandardScryptP)
+	ks := keystore.NewKeyStore(Consts.LocalDirToWallets, keystore.StandardScryptN, keystore.StandardScryptP)
 	allAccs := ks.Accounts()
 	return allAccs[len(allAccs)-1].Address.Hex()
 }
 
 // Given a password, it returns the private key from the newest wallet, unless the password is incorrect for the newest wallet.
 func GetPrivateKey(password string) (*ecdsa.PrivateKey, error) {
-	ks := keystore.NewKeyStore("./wallet", keystore.StandardScryptN, keystore.StandardScryptP)
+	ks := keystore.NewKeyStore(Consts.LocalDirToWallets, keystore.StandardScryptN, keystore.StandardScryptP)
 	allAccs := ks.Accounts()
 
 	accountJson, err := ioutil.ReadFile(allAccs[len(allAccs)-1].URL.Path)
