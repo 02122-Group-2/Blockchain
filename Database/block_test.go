@@ -1,25 +1,30 @@
 package database
 
+/*
 import (
 	Crypto "blockchain/Cryptography"
 	"fmt"
 	"testing"
 )
 
+*/
 var state_block = LoadState()
 var blockchain_original = LoadBlockchain()
 var state_original = LoadState()
 var snapshot_orignal = LoadSnapshot()
-
+/*
 func TestCreateBlock(t *testing.T) {
 	// Create a wallet to test the functionality
 	pswd := "password"
+	wallet1 := "testingWallet1"
+	wallet2 := "testingWallet2"
+
 	Crypto.CreateNewWallet(pswd)
 
-	// Dynamically set balance of wallet account for testing purposes. 
+	// Dynamically set balance of wallet account for testing purposes.
 	// This exploit would easily be detected in other systems. As the money would come from nowhere.
 	state_block.AccountBalances[AccountAddress(Crypto.GetAddress())] = 100
-	
+
 	// Create the transactions and sign them with the created wallet
 	tx1 := state_block.CreateTransaction(AccountAddress(Crypto.GetAddress()), "Asger", 10)
 	tx2 := state_block.CreateTransaction(AccountAddress(Crypto.GetAddress()), "Emilie", 4)
@@ -65,7 +70,7 @@ func TestSaveBlock(t *testing.T) {
 		t.Error("failed to sign the transaction")
 	}
 
-	
+
 	state_block.AddTransaction(signedTx1)
 	state_block.AddTransaction(signedTx2)
 	block := state_block.CreateBlock(state_block.TxMempool)
@@ -85,7 +90,7 @@ func TestLoadBlockchain(t *testing.T) {
 	ResetTest()
 }
 
-/*
+
 func TestAddBlockToBlockchain(t *testing.T) {
 	tx1 := state_block.CreateTransaction("Niels", "Magn", 10)
 	tx2 := state_block.CreateTransaction("Magn", "Emilie", 4)
@@ -191,12 +196,12 @@ func TestMarshalUnmarshalBlock(t *testing.T) {
 	ResetTest()
 }
 */
-
 func ResetTest() {
 	SaveBlockchain(blockchain_original)
 	state_original.SaveState()
 	snapshot_orignal.SaveSnapshot()
 }
+
 
 // Only run this to remake the local blockchain
 // func TestCreateTestDatabase(t *testing.T) {

@@ -30,7 +30,7 @@ type SignedTransaction struct {
 type SignedTransactionList []SignedTransaction
 
 type LoadedTransactions struct {
-	Transactions TransactionList `json:"transactions"`
+	Transactions SignedTransactionList `json:"transactions"`
 }
 
 func (transaction Transaction_Old) toJsonString() string {
@@ -72,27 +72,40 @@ func (state *State) CreateTransaction(from AccountAddress, to AccountAddress, am
 	return state.CreateCustomTransaction(from, to, amount, "transaction")
 }
 
+// Takes a wallet, password, receiver, amount and returns a signed transaction 
+func (state *State) CreateSignedTransaction(wallet Crypto.Account, password string, receiver AccountAddress, amount float64) (SignedTransaction, error) {
+	tx := state.CreateTransaction(AccountAddress(wallet.Address), receiver, amount)
+	return state.SignTransaction(wallet, password, tx)
+}
+
 // Creates a genesis type transaction from the system to a certain user.
 // Takes the receiver address (string) and the amount sent (float)
-func (state *State) CreateGenesisTransaction(accountAddress AccountAddress, amount float64) Transaction_Old {
-	return state.CreateCustomTransaction("system", accountAddress, amount, "genesis")
+func (state *State) CreateGenesisTransaction(accountAddress AccountAddress, amount float64) SignedTransaction {
+	return SignedTransaction{
+		Signature: []byte{},
+		Tx: state.CreateCustomTransaction("system", accountAddress, amount, "genesis"),
+	}
 }
 
 // Creates a reward type transaction from the system to a certain user.
 // Takes the receiver address (string) and the amount sent (float)
-func (state *State) CreateReward(accountAddress AccountAddress, amount float64) Transaction_Old {
-	return state.CreateCustomTransaction("system", accountAddress, amount, "reward")
+// Is automatically created as signed transaction
+func (state *State) CreateReward(accountAddress AccountAddress, amount float64) SignedTransaction {
+	return SignedTransaction{
+		Signature: []byte{},
+		Tx: state.CreateCustomTransaction("system", accountAddress, amount, "reward"),
+	}
 }
 
 
 // Given the password for the wallet and a regular transaction, sign the transaction, if the sender is equal to the address of the wallet
 // Returns the signed transaction or an error
-func (state *State) SignTransaction(password string, transaction Transaction_Old) (SignedTransaction, error) {
-	if transaction.From != AccountAddress(Crypto.GetAddress()) {
-		return SignedTransaction{}, fmt.Errorf("this transaction is now able to be signed by you!")
+func (state *State) SignTransaction(wallet Crypto.Account, password string, transaction Transaction_Old) (SignedTransaction, error) {
+	if transaction.From != AccountAddress(wallet.Address) {
+		return SignedTransaction{}, fmt.Errorf("this transaction is not able to be signed by you!")
 	}
 	txHash := transaction.hash()
-	signature, err := Crypto.SignTransaction(password, txHash)
+	signature, err := wallet.SignTransaction(password, txHash)
 	if err != nil {
 		return SignedTransaction{}, err
 	}
@@ -102,7 +115,7 @@ func (state *State) SignTransaction(password string, transaction Transaction_Old
 // Given a list of transactions, it saves these transactions as a JSON string in a local text file.
 // Returns a boolean value indicating whether or not it was saved succesfully.
 // This is not used in older version of the blockchain.
-func SaveTransaction(transactionList TransactionList) bool {
+func SaveTransaction(transactionList SignedTransactionList) bool {
 	toSave := LoadedTransactions{transactionList}
 	txFile, _ := json.MarshalIndent(toSave, "", "  ")
 
@@ -116,7 +129,7 @@ func SaveTransaction(transactionList TransactionList) bool {
 
 // Loads the local transactions, saved in the transactions.json file. This is deprecated and only used in early versions of the blockchain.
 // It returns a list of transactions.
-func LoadTransactions() TransactionList {
+func LoadTransactions() SignedTransactionList {
 	data, err := os.ReadFile(Consts.LocalDirToFileFolder + "Transactions.json")
 	if err != nil {
 		panic(err)

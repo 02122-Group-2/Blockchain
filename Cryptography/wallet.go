@@ -1,21 +1,25 @@
 package cryptography
 
 import (
-	Consts "blockchain/constants"
+	Consts "blockchain/Constants"
 	"crypto/ecdsa"
 	"fmt"
 	"io/ioutil"
 
 	"crypto/elliptic"
 
+	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/accounts/keystore"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
+
+	"os"
+	"path/filepath"
 )
 
 // Given a password, this function will create a new wallet in the ./wallet folder. It will not delete the old wallets.
-func CreateNewWallet(password string) (string, error) {
-	ks := keystore.NewKeyStore(Consts.LocalDirToWallets, keystore.StandardScryptN, keystore.StandardScryptP)
+func CreateNewWallet(username string, password string) (string, error) {
+	ks := keystore.NewKeyStore(filepath.Join(Consts.LocalDirToWallets, username), keystore.StandardScryptN, keystore.StandardScryptP)
 	newAcc, err := ks.NewAccount(password)
 
 	if err != nil {
@@ -24,35 +28,61 @@ func CreateNewWallet(password string) (string, error) {
 	return newAcc.Address.Hex(), nil
 }
 
-// Gets the public address from the latest created wallet
-func GetAddress() string {
-	ks := keystore.NewKeyStore(Consts.LocalDirToWallets, keystore.StandardScryptN, keystore.StandardScryptP)
-	allAccs := ks.Accounts()
-	return allAccs[len(allAccs)-1].Address.Hex()
+
+type Account struct {
+	Username string
+	Address string
+	Wallet   accounts.Account
 }
 
-// Given a password, it returns the private key from the newest wallet, unless the password is incorrect for the newest wallet.
-func GetPrivateKey(password string) (*ecdsa.PrivateKey, error) {
-	ks := keystore.NewKeyStore(Consts.LocalDirToWallets, keystore.StandardScryptN, keystore.StandardScryptP)
+func AccessWallet(username string, password string) (Account, error) {
+	ks := keystore.NewKeyStore(filepath.Join(Consts.LocalDirToWallets, username), keystore.StandardScryptN, keystore.StandardScryptP)
 	allAccs := ks.Accounts()
+	if len(allAccs) == 0 {
+		return Account{}, fmt.Errorf("not able to find the account")
+	}
+	wallet := allAccs[len(allAccs)-1]
 
-	accountJson, err := ioutil.ReadFile(allAccs[len(allAccs)-1].URL.Path)
+	account := Account{
+		Username: username,
+		Address: wallet.Address.Hex(),
+		Wallet: wallet,
+	}
+	
+	err := account.tryLogIn(password)
+
 	if err != nil {
-		return nil, fmt.Errorf(err.Error())
+		return Account{}, err
+	}
+
+	return account, nil
+}
+
+// Tries to log in with the password. This is done when accessing the wallet
+func (account *Account) tryLogIn(password string) error {
+	_, err := account.GetPrivateKey(password)
+	return err
+}
+
+// Given a password, it gets the private key from the wallet.
+func (account *Account) GetPrivateKey(password string) (*ecdsa.PrivateKey, error) {
+	accountJson, err := ioutil.ReadFile(account.Wallet.URL.Path)
+	if err != nil {
+		return nil, err
 	}
 
 	privKey, err := keystore.DecryptKey(accountJson, password)
 
 	if err != nil {
-		return nil, fmt.Errorf(err.Error())
+		return nil, err
 	}
 
 	return privKey.PrivateKey, nil
 }
 
-// Given a password and a hashed transaction it will use the local wallet in order to sign the transaction.
-func SignTransaction(password string, hashedTransaction [32]byte) ([]byte, error) {
-	privKey, err := GetPrivateKey(password)
+// Given a password and a hashed transaction it will use the wallet in order to sign the transaction.
+func (account *Account) SignTransaction(password string, hashedTransaction [32]byte) ([]byte, error) {
+	privKey, err := account.GetPrivateKey(password)
 	if err != nil {
 		return nil, err
 	}
@@ -64,6 +94,13 @@ func SignTransaction(password string, hashedTransaction [32]byte) ([]byte, error
 
 	return signature, nil
 }
+
+
+// Deletes the wallet - should require some verification before doing this
+func (account *Account) Delete() error {
+	return os.Remove(account.Wallet.URL.Path)
+}
+
 
 // Given a signature and a signed transaction, it will return the public address of the signer
 // This can be used with the transaction, which was hashed, to ensure the sender of the transaction is the one who signed it,
@@ -80,3 +117,5 @@ func GetAddressFromSignedTransaction(signature []byte, hashedTransaction [32]byt
 
 	return addrString, nil
 }
+
+
