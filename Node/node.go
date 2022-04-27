@@ -13,8 +13,8 @@ import (
 )
 
 type NodeState struct {
-	peerList []string       `json:"peer_list"`
-	state    Database.State `json:"state"`
+	PeerList []string       `json:"peer_list"`
+	State    Database.State `json:"state"`
 }
 
 const httpPort = 8080
@@ -43,30 +43,30 @@ func Run() error {
 	fmt.Println(fmt.Sprintf("Listening on port %d", httpPort))
 	startNode()
 
-	nodeState := getNodeState()
+	nodeState := GetNodeState()
 
 	for true {
 
 		updateNodeState(&nodeState) // Updates nodeState to get local changes in case any has been made
 
 		// Creates a copy of the peers to check, to avoid weird looping as we append to the slice in the loop
-		peersToCheck := make([]string, len(nodeState.peerList))
-		copy(peersToCheck, nodeState.peerList)
+		peersToCheck := make([]string, len(nodeState.PeerList))
+		copy(peersToCheck, nodeState.PeerList)
 
 		for _, peer := range peersToCheck {
 
-			peerState := getPeerState(peer)
+			peerState := GetPeerState(peer)
 
-			if peerState.state.LastBlockSerialNo > nodeState.state.LastBlockSerialNo {
+			if peerState.State.LastBlockSerialNo > nodeState.State.LastBlockSerialNo {
 				peerBlocks := getPeerBlocks(peer)
-				nodeState.state.ApplyBlocks(peerBlocks)
+				nodeState.State.ApplyBlocks(peerBlocks)
 			}
 
-			nodeState.state.TryAddTransactions(peerState.state.TxMempool)
+			nodeState.State.TryAddTransactions(peerState.State.TxMempool)
 
-			for _, peer2 := range peerState.peerList {
-				if !contains(nodeState.peerList, peer2) && ping(peer2) {
-					nodeState.peerList = append(nodeState.peerList, peer2)
+			for _, peer2 := range peerState.PeerList {
+				if !contains(nodeState.PeerList, peer2) && ping(peer2) {
+					nodeState.PeerList = append(nodeState.PeerList, peer2)
 				}
 			}
 		}
@@ -103,15 +103,17 @@ func getPeerBlocks(peerAddr string) []Database.Block {
 //The following is done using POST,
 //The header contain the address of the peer that is currently being accessed
 //The body should contain the current state of the requesting node
-func getPeerState(peerAddr string) NodeState {
+func GetPeerState(peerAddr string) NodeState {
 
-	currState := Database.LoadState()
-	jsonData, err := json.Marshal(currState)
+	currNodeState := GetNodeState()
+	jsonData, err := json.Marshal(currNodeState)
 
 	resp, err := http.Post("http://"+peerAddr+"/getState", "application/json", bytes.NewBuffer(jsonData))
 	if err != nil {
 		log.Fatalln(err)
+		fmt.Println("something went wrong when posting")
 	}
+	fmt.Println("Successfully posted current state")
 
 	peerNodeState := NodeState{}
 
@@ -121,16 +123,16 @@ func getPeerState(peerAddr string) NodeState {
 	return peerNodeState
 }
 
-func getNodeState() NodeState {
+func GetNodeState() NodeState {
 	nodeState := NodeState{}
-	nodeState.state = *Database.LoadState()
-	nodeState.peerList = []string{bootstrapNode}
+	nodeState.State = *Database.LoadState()
+	nodeState.PeerList = []string{bootstrapNode}
 	return nodeState
 }
 
 // Updated the current nodeState.State field to get latest local changes, in case the user has added local transactions.
 func updateNodeState(currentNodeState *NodeState) {
-	currentNodeState.state = *Database.LoadState()
+	currentNodeState.State = *Database.LoadState()
 }
 
 func startNode() error {
@@ -139,31 +141,37 @@ func startNode() error {
 	http.HandleFunc("/balances/list", func(w http.ResponseWriter, r *http.Request) {
 		balancesHandler(w, r, state)
 	})
+	fmt.Println("/balances/list setup complete")
 
 	http.HandleFunc("/transaction/create", func(w http.ResponseWriter, r *http.Request) {
 		transactionHandler(w, r, state)
 	})
+	fmt.Println("/transaction/create setup complete")
 
-	http.HandleFunc("/getState/", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/getState", func(w http.ResponseWriter, r *http.Request) {
 		getStateHandler(w, r, state)
 	})
+	fmt.Println("/getState setup complete")
 
 	return http.ListenAndServe(fmt.Sprintf(":%d", httpPort), nil)
 }
 
 func getStateHandler(w http.ResponseWriter, r *http.Request, state *Database.State) {
-	//TODO: Read the body containing the state of the node requesting
-	/*getStateRequest := NodeState{}
-	err := readReq(r, &getStateRequest)
+	// Read the body containing the state of the node requesting
+	getStateRequest := NodeState{}
 
+	err := readReq(r, &getStateRequest)
 	if err != nil {
 		return
 	}
-	*/
+
+	//TODO: Do something with the peer state
 
 	//Response: Send your current state
-	nodeState := getNodeState()
-	writeResult(w, NodeState{nodeState.peerList, *state})
+	nodeState := GetNodeState()
+
+	fmt.Println(nodeState.PeerList)
+	writeResult(w, NodeState{PeerList: nodeState.PeerList, State: nodeState.State})
 
 }
 
@@ -222,6 +230,7 @@ func writeResult(w http.ResponseWriter, content interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 	w.Write(contentJson)
+	fmt.Println("Server response sent")
 }
 
 //Reading the request when using POST method
