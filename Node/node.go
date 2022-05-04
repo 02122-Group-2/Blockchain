@@ -9,6 +9,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -58,7 +59,7 @@ func Run() error {
 			peerState := GetPeerState(peer)
 
 			if peerState.State.LastBlockSerialNo > nodeState.State.LastBlockSerialNo {
-				peerBlocks := getPeerBlocks(peer)
+				peerBlocks := getPeerBlocks(peer, nodeState.State.LastBlockSerialNo)
 				nodeState.State.ApplyBlocks(peerBlocks)
 			}
 
@@ -96,8 +97,20 @@ func contains(s []string, e string) bool {
 	return false
 }
 
-func getPeerBlocks(peerAddr string) []Database.Block {
-	return nil
+func getPeerBlocks(peerAddr string, lastLocalBlockSerialNo int) []Database.Block {
+	URI := fmt.Sprintf("http://"+peerAddr+"/blockDelta?lastLocalBlockSerialNo=%d", lastLocalBlockSerialNo)
+	resp, err := http.Get(URI)
+
+	if err != nil {
+		log.Fatalln(err)
+		fmt.Printf("something went wrong when sending GET req to %s\n", URI)
+	}
+
+	var blockDelta []Database.Block
+
+	readResp(resp, blockDelta)
+
+	return blockDelta
 }
 
 //The following is done using POST,
@@ -108,10 +121,12 @@ func GetPeerState(peerAddr string) NodeState {
 	currNodeState := GetNodeState()
 	jsonData, _ := json.Marshal(currNodeState)
 
-	resp, err := http.Post("http://"+peerAddr+"/getState", "application/json", bytes.NewBuffer(jsonData))
+	URI := "http://" + peerAddr + "/getState"
+
+	resp, err := http.Post(URI, "application/json", bytes.NewBuffer(jsonData))
 	if err != nil {
 		log.Fatalln(err)
-		fmt.Println("something went wrong when posting")
+		fmt.Printf("something went wrong when sending POST req to %s\n", URI)
 	}
 	fmt.Println("Successfully posted current state")
 
@@ -153,7 +168,27 @@ func startNode() error {
 	})
 	fmt.Println("/getState setup complete")
 
+	http.HandleFunc("/blockDelta", func(w http.ResponseWriter, r *http.Request) {
+		blockDeltaHandler(w, r, state)
+	})
+	fmt.Println("/blockDelta setup complete")
+
 	return http.ListenAndServe(fmt.Sprintf(":%d", httpPort), nil)
+}
+
+func blockDeltaHandler(w http.ResponseWriter, r *http.Request, state *Database.State) {
+	localBlockChain := Database.LoadBlockchain()
+	serialNoParam := r.URL.Query().Get("lastLocalBlockSerialNo")
+	var fromSerial int
+	if serialNoParam == "" {
+		fmt.Errorf("no serial number was provided in GET request\n")
+		return
+	}
+
+	fromSerial, _ = strconv.Atoi(serialNoParam)
+	delta := Database.GetBlockChainDelta(localBlockChain, fromSerial)
+
+	writeResult(w, delta)
 }
 
 func getStateHandler(w http.ResponseWriter, r *http.Request, state *Database.State) {
@@ -172,7 +207,6 @@ func getStateHandler(w http.ResponseWriter, r *http.Request, state *Database.Sta
 
 	fmt.Println(nodeState.PeerList)
 	writeResult(w, NodeState{PeerList: nodeState.PeerList, State: nodeState.State})
-
 }
 
 func balancesHandler(w http.ResponseWriter, r *http.Request, state *Database.State) {

@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"path/filepath"
 )
 
 type Block struct {
@@ -157,12 +156,7 @@ func PersistBlockToDB(block Block) error {
 
 // Load the local blockchain and return it as a list of blocks
 func LoadBlockchain() []Block {
-	currWD, err := os.Getwd()
-	if err != nil {
-		panic(err)
-	}
-
-	data, err := os.ReadFile(filepath.Join(currWD, "./Persistence/Blockchain.db"))
+	data, err := os.ReadFile(localDirToFileFolder + "Blockchain.db")
 	if err != nil {
 		panic(err)
 	}
@@ -187,6 +181,29 @@ func SaveBlockchain(blockchain []Block) bool {
 	}
 
 	return true
+}
+
+// Load difference in contents of blockchain (for sending deltas to peer)
+// TODO: data structure of blockchain not the most scalable... 🤔
+func GetBlockChainDelta(blockchain []Block, fromBlockSerialNo int) []Block {
+	// if 0, special case -> send entire blockchain
+	if fromBlockSerialNo == 0 {
+		return blockchain
+	}
+
+	startIdx := -1
+	for i, b := range blockchain {
+		if b.Header.SerialNo == fromBlockSerialNo {
+			startIdx = i + 1
+			break
+		}
+	}
+
+	if startIdx == -1 || (len(blockchain)-1 < startIdx) {
+		return nil
+	}
+
+	return blockchain[(startIdx):]
 }
 
 // Given a block, convert it to a JSON string
