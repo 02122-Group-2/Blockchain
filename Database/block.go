@@ -1,7 +1,7 @@
 package database
 
 import (
-	Crypto "blockchain/Cryptography"
+	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -74,6 +74,11 @@ func (state *State) ValidateBlock(block Block) error {
 	return nil
 }
 
+// Takes a Block in JSON string format and calculates the 32-byte hash of this block and returns it.
+func HashBlock(blockString string) [32]byte {
+	return sha256.Sum256([]byte(blockString))
+}
+
 // Applies a single block to the current state.
 // It validates the block and all the transactions within.
 // It applies all the transactions within the block to the state as well.
@@ -88,7 +93,7 @@ func (state *State) ApplyBlock(block Block) error {
 		return jsonErr
 	}
 
-	state.LatestHash = Crypto.HashBlock(jsonString)
+	state.LatestHash = HashBlock(jsonString)
 	state.LastBlockSerialNo = block.Header.SerialNo
 	state.LastBlockTimestamp = block.Header.CreatedAt
 	state.TxMempool = nil
