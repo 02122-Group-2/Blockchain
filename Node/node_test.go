@@ -33,6 +33,12 @@ func TestGetPeerState(t *testing.T) {
 
 }
 
+func TestGetPeerBlocks(t *testing.T) {
+	res := GetPeerBlocks("localhost:8080", 0)
+
+	fmt.Println(res)
+}
+
 func TestPingActiveConnection(t *testing.T) {
 	addr := "localhost:8080"
 	if !Ping(addr) {
