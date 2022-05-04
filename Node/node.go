@@ -22,8 +22,8 @@ const bootstrapNode = "bootstrapNode"
 
 //Models the balances data recived
 type balancesResult struct {
-	Hash     [32]byte                         `json:"block_hash`
-	Balances map[Database.AccountAddress]uint `json:"balances`
+	Hash     [32]byte                         `json:"block_hash"`
+	Balances map[Database.AccountAddress]uint `json:"balances"`
 }
 
 //Models the data for sending
@@ -40,12 +40,12 @@ type TxResult struct {
 }
 
 func Run() error {
-	fmt.Println(fmt.Sprintf("Listening on port %d", httpPort))
+	fmt.Printf("Listening on port %d\n", httpPort)
 	startNode()
 
 	nodeState := GetNodeState()
 
-	for true {
+	for {
 
 		updateNodeState(&nodeState) // Updates nodeState to get local changes in case any has been made
 
@@ -106,7 +106,7 @@ func getPeerBlocks(peerAddr string) []Database.Block {
 func GetPeerState(peerAddr string) NodeState {
 
 	currNodeState := GetNodeState()
-	jsonData, err := json.Marshal(currNodeState)
+	jsonData, _ := json.Marshal(currNodeState)
 
 	resp, err := http.Post("http://"+peerAddr+"/getState", "application/json", bytes.NewBuffer(jsonData))
 	if err != nil {
