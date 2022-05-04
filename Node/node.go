@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net"
 	"net/http"
 	"time"
@@ -42,37 +41,37 @@ type TxResult struct {
 func Run() error {
 	fmt.Printf("Listening on port %d\n", httpPort)
 	startNode()
+	/*
+		nodeState := GetNodeState()
 
-	nodeState := GetNodeState()
+		for {
 
-	for {
+			updateNodeState(&nodeState) // Updates nodeState to get local changes in case any has been made
 
-		updateNodeState(&nodeState) // Updates nodeState to get local changes in case any has been made
+			// Creates a copy of the peers to check, to avoid weird looping as we append to the slice in the loop
+			peersToCheck := make([]string, len(nodeState.PeerList))
+			copy(peersToCheck, nodeState.PeerList)
 
-		// Creates a copy of the peers to check, to avoid weird looping as we append to the slice in the loop
-		peersToCheck := make([]string, len(nodeState.PeerList))
-		copy(peersToCheck, nodeState.PeerList)
+			for _, peer := range peersToCheck {
 
-		for _, peer := range peersToCheck {
+				peerState := GetPeerState(peer)
 
-			peerState := GetPeerState(peer)
+				if peerState.State.LastBlockSerialNo > nodeState.State.LastBlockSerialNo {
+					peerBlocks := getPeerBlocks(peer)
+					nodeState.State.ApplyBlocks(peerBlocks)
+				}
 
-			if peerState.State.LastBlockSerialNo > nodeState.State.LastBlockSerialNo {
-				peerBlocks := getPeerBlocks(peer)
-				nodeState.State.ApplyBlocks(peerBlocks)
-			}
+				nodeState.State.TryAddTransactions(peerState.State.TxMempool)
 
-			nodeState.State.TryAddTransactions(peerState.State.TxMempool)
-
-			for _, peer2 := range peerState.PeerList {
-				if !contains(nodeState.PeerList, peer2) && ping(peer2) {
-					nodeState.PeerList = append(nodeState.PeerList, peer2)
+				for _, peer2 := range peerState.PeerList {
+					if !contains(nodeState.PeerList, peer2) && ping(peer2) {
+						nodeState.PeerList = append(nodeState.PeerList, peer2)
+					}
 				}
 			}
+			time.Sleep(40 * time.Second)
 		}
-		time.Sleep(40 * time.Second)
-	}
-
+	*/
 	return nil
 }
 
@@ -104,20 +103,33 @@ func getPeerBlocks(peerAddr string) []Database.Block {
 //The header contain the address of the peer that is currently being accessed
 //The body should contain the current state of the requesting node
 func GetPeerState(peerAddr string) NodeState {
+	httpposturl := "http://" + peerAddr + "/getState"
 
 	currNodeState := GetNodeState()
-	jsonData, _ := json.Marshal(currNodeState)
-
-	resp, err := http.Post("http://"+peerAddr+"/getState", "application/json", bytes.NewBuffer(jsonData))
+	jsonData, err := json.Marshal(currNodeState)
 	if err != nil {
-		log.Fatalln(err)
-		fmt.Println("something went wrong when posting")
+		panic(err)
 	}
+
+	request, error := http.NewRequest("POST", httpposturl, bytes.NewBuffer(jsonData))
+	request.Header.Set("Content-Type", "application/json; charset=UTF-8")
+
+	client := &http.Client{}
+	response, error := client.Do(request)
+	if error != nil {
+		fmt.Println("something went wrong when posting")
+		panic(error)
+	}
+	defer response.Body.Close()
 	fmt.Println("Successfully posted current state")
 
-	peerNodeState := NodeState{}
+	fmt.Println("response Status:", response.Status)
+	fmt.Println("response Headers:", response.Header)
+	body, _ := ioutil.ReadAll(response.Body)
+	fmt.Println("response Body:", string(body))
 
-	readResp(resp, &peerNodeState)
+	peerNodeState := NodeState{}
+	readResp(response, &peerNodeState)
 	//At this point the data recived should have been saved into peerNodeState
 
 	return peerNodeState
@@ -162,7 +174,7 @@ func getStateHandler(w http.ResponseWriter, r *http.Request, state *Database.Sta
 
 	err := readReq(r, &getStateRequest)
 	if err != nil {
-		return
+		panic(err)
 	}
 
 	//TODO: Do something with the peer state
@@ -255,14 +267,14 @@ func readResp(r *http.Response, reqBody interface{}) error {
 	reqJson, err := ioutil.ReadAll(r.Body)
 
 	if err != nil {
-		return fmt.Errorf("unable to read request body. %s", err.Error())
+		return fmt.Errorf("unable to read response body. %s", err.Error())
 
 	}
 	defer r.Body.Close()
 
 	err = json.Unmarshal(reqJson, reqBody)
 	if err != nil {
-		return fmt.Errorf("unable to unmarshal request body. %s", err.Error())
+		return fmt.Errorf("unable to unmarshal response body. %s", err.Error())
 	}
 	return nil
 }
