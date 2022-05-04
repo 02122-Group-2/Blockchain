@@ -1,7 +1,6 @@
 package database
 
 import (
-	"fmt"
 	"testing"
 )
 
@@ -160,7 +159,7 @@ func TestAddTransactionAndCheckTheyAreSaved(t *testing.T) {
 	state1Json, _ := state1.MarshalJSON()
 	state2Json, _ := state2.MarshalJSON()
 	if string(state1Json) != string(state2Json) {
-		fmt.Errorf("the local changes should be saved but are not")
+		panic("the local changes should be saved but are not")
 	}
 
 	ResetTest()
