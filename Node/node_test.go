@@ -16,13 +16,11 @@ func TestRun(t *testing.T) {
 func TestGetPeerState(t *testing.T) {
 	t.Log("begin get peer state test")
 
-	/*
-		err := startNode()
-		if err != nil {
-			t.Errorf("Node could not start")
-		}
-		t.Log("sucessfully loaded the current state")
-	*/
+	err := startNode()
+	if err != nil {
+		t.Errorf("Node could not start")
+	}
+	t.Log("sucessfully loaded the current state")
 
 	nodeState := GetPeerState("localhost:8080")
 
@@ -34,4 +32,12 @@ func TestGetPeerState(t *testing.T) {
 	}
 	fmt.Println(nodeState.State)
 
+}
+
+
+func TestPingActiveConnection(t *testing.T) {
+	addr := "localhost:8080"
+	if !Ping(addr) {
+		t.Error("Connection not active")
+	}
 }

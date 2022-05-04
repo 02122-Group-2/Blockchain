@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"net"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -56,17 +57,30 @@ func Run() error {
 
 				peerState := GetPeerState(peer)
 
+<<<<<<< HEAD
 				if peerState.State.LastBlockSerialNo > nodeState.State.LastBlockSerialNo {
 					peerBlocks := getPeerBlocks(peer)
 					nodeState.State.ApplyBlocks(peerBlocks)
 				}
+=======
+			if peerState.State.LastBlockSerialNo > nodeState.State.LastBlockSerialNo {
+				peerBlocks := getPeerBlocks(peer, nodeState.State.LastBlockSerialNo)
+				nodeState.State.ApplyBlocks(peerBlocks)
+			}
+>>>>>>> 80975d67a75476e040570f4a413a672c4b55c0bd
 
 				nodeState.State.TryAddTransactions(peerState.State.TxMempool)
 
+<<<<<<< HEAD
 				for _, peer2 := range peerState.PeerList {
 					if !contains(nodeState.PeerList, peer2) && ping(peer2) {
 						nodeState.PeerList = append(nodeState.PeerList, peer2)
 					}
+=======
+			for _, peer2 := range peerState.PeerList {
+				if !contains(nodeState.PeerList, peer2) && Ping(peer2) {
+					nodeState.PeerList = append(nodeState.PeerList, peer2)
+>>>>>>> 80975d67a75476e040570f4a413a672c4b55c0bd
 				}
 			}
 			time.Sleep(40 * time.Second)
@@ -75,14 +89,14 @@ func Run() error {
 	return nil
 }
 
-func ping(peerAddr string) bool {
+func Ping(peerAddr string) bool {
 	timeout := 1 * time.Second
 	conn, err := net.DialTimeout("tcp", peerAddr, timeout)
-	conn.Close()
 	if err != nil {
 		fmt.Println("Site unreachable, error: ", err)
 		return false
 	}
+	conn.Close()
 	return true
 }
 
@@ -95,8 +109,20 @@ func contains(s []string, e string) bool {
 	return false
 }
 
-func getPeerBlocks(peerAddr string) []Database.Block {
-	return nil
+func getPeerBlocks(peerAddr string, lastLocalBlockSerialNo int) []Database.Block {
+	URI := fmt.Sprintf("http://"+peerAddr+"/blockDelta?lastLocalBlockSerialNo=%d", lastLocalBlockSerialNo)
+	resp, err := http.Get(URI)
+
+	if err != nil {
+		log.Fatalln(err)
+		fmt.Printf("something went wrong when sending GET req to %s\n", URI)
+	}
+
+	var blockDelta []Database.Block
+
+	readResp(resp, blockDelta)
+
+	return blockDelta
 }
 
 //The following is done using POST,
@@ -106,6 +132,7 @@ func GetPeerState(peerAddr string) NodeState {
 	httpposturl := "http://" + peerAddr + "/getState"
 
 	currNodeState := GetNodeState()
+<<<<<<< HEAD
 	jsonData, err := json.Marshal(currNodeState)
 	if err != nil {
 		panic(err)
@@ -119,6 +146,16 @@ func GetPeerState(peerAddr string) NodeState {
 	if error != nil {
 		fmt.Println("something went wrong when posting")
 		panic(error)
+=======
+	jsonData, _ := json.Marshal(currNodeState)
+
+	URI := "http://" + peerAddr + "/getState"
+
+	resp, err := http.Post(URI, "application/json", bytes.NewBuffer(jsonData))
+	if err != nil {
+		log.Fatalln(err)
+		fmt.Printf("something went wrong when sending POST req to %s\n", URI)
+>>>>>>> 80975d67a75476e040570f4a413a672c4b55c0bd
 	}
 	defer response.Body.Close()
 	fmt.Println("Successfully posted current state")
@@ -165,7 +202,27 @@ func startNode() error {
 	})
 	fmt.Println("/getState setup complete")
 
+	http.HandleFunc("/blockDelta", func(w http.ResponseWriter, r *http.Request) {
+		blockDeltaHandler(w, r, state)
+	})
+	fmt.Println("/blockDelta setup complete")
+
 	return http.ListenAndServe(fmt.Sprintf(":%d", httpPort), nil)
+}
+
+func blockDeltaHandler(w http.ResponseWriter, r *http.Request, state *Database.State) {
+	localBlockChain := Database.LoadBlockchain()
+	serialNoParam := r.URL.Query().Get("lastLocalBlockSerialNo")
+	var fromSerial int
+	if serialNoParam == "" {
+		fmt.Errorf("no serial number was provided in GET request\n")
+		return
+	}
+
+	fromSerial, _ = strconv.Atoi(serialNoParam)
+	delta := Database.GetBlockChainDelta(localBlockChain, fromSerial)
+
+	writeResult(w, delta)
 }
 
 func getStateHandler(w http.ResponseWriter, r *http.Request, state *Database.State) {
@@ -184,7 +241,6 @@ func getStateHandler(w http.ResponseWriter, r *http.Request, state *Database.Sta
 
 	fmt.Println(nodeState.PeerList)
 	writeResult(w, NodeState{PeerList: nodeState.PeerList, State: nodeState.State})
-
 }
 
 func balancesHandler(w http.ResponseWriter, r *http.Request, state *Database.State) {
