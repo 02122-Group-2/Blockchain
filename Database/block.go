@@ -31,6 +31,10 @@ type Blockchain struct {
 	Blockchain []Block `json:"Blockchain"`
 }
 
+type Genesis struct {
+	Balances map[AccountAddress]int `json:"balances"`
+}
+
 // Create a block object that matches the current state, given a list of transactions
 func (state *State) CreateBlock(txs []Transaction) Block {
 	return Block{
