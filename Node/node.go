@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net"
 	"net/http"
 	"strconv"
@@ -57,30 +58,16 @@ func Run() error {
 
 				peerState := GetPeerState(peer)
 
-<<<<<<< HEAD
-				if peerState.State.LastBlockSerialNo > nodeState.State.LastBlockSerialNo {
-					peerBlocks := getPeerBlocks(peer)
-					nodeState.State.ApplyBlocks(peerBlocks)
-				}
-=======
 			if peerState.State.LastBlockSerialNo > nodeState.State.LastBlockSerialNo {
-				peerBlocks := getPeerBlocks(peer, nodeState.State.LastBlockSerialNo)
+				peerBlocks := GetPeerBlocks(peer, nodeState.State.LastBlockSerialNo)
 				nodeState.State.ApplyBlocks(peerBlocks)
 			}
->>>>>>> 80975d67a75476e040570f4a413a672c4b55c0bd
 
 				nodeState.State.TryAddTransactions(peerState.State.TxMempool)
 
-<<<<<<< HEAD
-				for _, peer2 := range peerState.PeerList {
-					if !contains(nodeState.PeerList, peer2) && ping(peer2) {
-						nodeState.PeerList = append(nodeState.PeerList, peer2)
-					}
-=======
 			for _, peer2 := range peerState.PeerList {
 				if !contains(nodeState.PeerList, peer2) && Ping(peer2) {
 					nodeState.PeerList = append(nodeState.PeerList, peer2)
->>>>>>> 80975d67a75476e040570f4a413a672c4b55c0bd
 				}
 			}
 			time.Sleep(40 * time.Second)
@@ -109,7 +96,7 @@ func contains(s []string, e string) bool {
 	return false
 }
 
-func getPeerBlocks(peerAddr string, lastLocalBlockSerialNo int) []Database.Block {
+func GetPeerBlocks(peerAddr string, lastLocalBlockSerialNo int) []Database.Block {
 	URI := fmt.Sprintf("http://"+peerAddr+"/blockDelta?lastLocalBlockSerialNo=%d", lastLocalBlockSerialNo)
 	resp, err := http.Get(URI)
 
@@ -120,7 +107,9 @@ func getPeerBlocks(peerAddr string, lastLocalBlockSerialNo int) []Database.Block
 
 	var blockDelta []Database.Block
 
-	readResp(resp, blockDelta)
+	bytes, err := readResp(resp)
+
+	json.Unmarshal(bytes, &blockDelta)
 
 	return blockDelta
 }
@@ -132,9 +121,9 @@ func GetPeerState(peerAddr string) NodeState {
 	httpposturl := "http://" + peerAddr + "/getState"
 
 	currNodeState := GetNodeState()
-<<<<<<< HEAD
 	jsonData, err := json.Marshal(currNodeState)
 	if err != nil {
+		fmt.Println("Could not marshal current node state")
 		panic(err)
 	}
 
@@ -146,27 +135,13 @@ func GetPeerState(peerAddr string) NodeState {
 	if error != nil {
 		fmt.Println("something went wrong when posting")
 		panic(error)
-=======
-	jsonData, _ := json.Marshal(currNodeState)
-
-	URI := "http://" + peerAddr + "/getState"
-
-	resp, err := http.Post(URI, "application/json", bytes.NewBuffer(jsonData))
-	if err != nil {
-		log.Fatalln(err)
-		fmt.Printf("something went wrong when sending POST req to %s\n", URI)
->>>>>>> 80975d67a75476e040570f4a413a672c4b55c0bd
 	}
 	defer response.Body.Close()
 	fmt.Println("Successfully posted current state")
 
-	fmt.Println("response Status:", response.Status)
-	fmt.Println("response Headers:", response.Header)
-	body, _ := ioutil.ReadAll(response.Body)
-	fmt.Println("response Body:", string(body))
-
 	peerNodeState := NodeState{}
-	readResp(response, &peerNodeState)
+	bytes, _ := readResp(response)
+	json.Unmarshal(bytes, &peerNodeState)
 	//At this point the data recived should have been saved into peerNodeState
 
 	return peerNodeState
@@ -228,11 +203,11 @@ func blockDeltaHandler(w http.ResponseWriter, r *http.Request, state *Database.S
 func getStateHandler(w http.ResponseWriter, r *http.Request, state *Database.State) {
 	// Read the body containing the state of the node requesting
 	getStateRequest := NodeState{}
-
-	err := readReq(r, &getStateRequest)
+	bytes, err := readReq(r)
 	if err != nil {
 		panic(err)
 	}
+	json.Unmarshal(bytes, &getStateRequest)
 
 	//TODO: Do something with the peer state
 
@@ -249,11 +224,11 @@ func balancesHandler(w http.ResponseWriter, r *http.Request, state *Database.Sta
 
 func transactionHandler(w http.ResponseWriter, r *http.Request, state *Database.State) {
 	req := TxRequest{}
-	err := readReq(r, &req)
-
+	bytes, err := readReq(r)
 	if err != nil {
 		return
 	}
+	json.Unmarshal(bytes, &req)
 
 	var transaction Database.Transaction
 	println("TYPE OF REQUEST " + req.Type)
@@ -302,35 +277,22 @@ func writeResult(w http.ResponseWriter, content interface{}) {
 }
 
 //Reading the request when using POST method
-func readReq(r *http.Request, reqBody interface{}) error {
+func readReq(r *http.Request) ([]byte, error) {
 	reqJson, err := ioutil.ReadAll(r.Body)
 
 	if err != nil {
-		return fmt.Errorf("unable to read request body. %s", err.Error())
-
-	}
-	defer r.Body.Close()
-
-	err = json.Unmarshal(reqJson, reqBody)
-	if err != nil {
-		return fmt.Errorf("unable to unmarshal request body. %s", err.Error())
+		return nil, fmt.Errorf("unable to read request body. %s", err.Error())
 	}
 
-	return nil
+	return reqJson, nil
 }
 
-func readResp(r *http.Response, reqBody interface{}) error {
+func readResp(r *http.Response) ([]byte, error) {
 	reqJson, err := ioutil.ReadAll(r.Body)
 
 	if err != nil {
-		return fmt.Errorf("unable to read response body. %s", err.Error())
-
+		return nil, fmt.Errorf("unable to read reqsponse body. %s", err.Error())
 	}
-	defer r.Body.Close()
 
-	err = json.Unmarshal(reqJson, reqBody)
-	if err != nil {
-		return fmt.Errorf("unable to unmarshal response body. %s", err.Error())
-	}
-	return nil
+	return reqJson, nil
 }
