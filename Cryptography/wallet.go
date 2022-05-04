@@ -19,7 +19,8 @@ import (
 
 // Given a password, this function will create a new wallet in the ./wallet folder. It will not delete the old wallets.
 func CreateNewWallet(username string, password string) (string, error) {
-	ks := keystore.NewKeyStore(filepath.Join(Consts.LocalDirToWallets, username), keystore.StandardScryptN, keystore.StandardScryptP)
+	hashedUsername := crypto.Keccak256Hash([]byte(username)).Hex()
+	ks := keystore.NewKeyStore(filepath.Join(Consts.LocalDirToWallets, hashedUsername), keystore.StandardScryptN, keystore.StandardScryptP)
 	newAcc, err := ks.NewAccount(password)
 
 	if err != nil {
@@ -30,21 +31,26 @@ func CreateNewWallet(username string, password string) (string, error) {
 
 
 type Account struct {
-	Username string
-	Address string
-	Wallet   accounts.Account
+	Username string           // Stores the username of the wallet
+	Address string						// Stores the address of the wallet
+	Wallet   accounts.Account // Stores the actual wallet.
 }
 
+
 func AccessWallet(username string, password string) (Account, error) {
-	ks := keystore.NewKeyStore(filepath.Join(Consts.LocalDirToWallets, username), keystore.StandardScryptN, keystore.StandardScryptP)
+	hashedUsername := crypto.Keccak256Hash([]byte(username)).Hex()
+	ks := keystore.NewKeyStore(filepath.Join(Consts.LocalDirToWallets, hashedUsername), keystore.StandardScryptN, keystore.StandardScryptP)
 	allAccs := ks.Accounts()
 	if len(allAccs) == 0 {
 		return Account{}, fmt.Errorf("not able to find the account")
 	}
+	
 	wallet := allAccs[len(allAccs)-1]
 
+	crypto.Keccak256Hash([]byte(username))
+
 	account := Account{
-		Username: username,
+		Username: hashedUsername,
 		Address: wallet.Address.Hex(),
 		Wallet: wallet,
 	}

@@ -86,7 +86,7 @@ func TestAddBlockToBlockchain(t *testing.T) {
 	state_block.AccountBalances[AccountAddress(testWallet.Address)] = 1000
 
 	// Save the block as the latest snapshot, as it would otherwise fail as the account is undefined.
-	state_block.SaveSnapshot()
+	err := state_block.SaveSnapshot()
 
 	// Create a block by creating the transactions and signing them with the new wallet
 	signedTx1, _ := state_block.CreateSignedTransaction(testWallet, pswd, "Asger", 10)
@@ -100,7 +100,7 @@ func TestAddBlockToBlockchain(t *testing.T) {
 	signedTx3, _ := state_block.CreateSignedTransaction(testWallet, pswd, "Niels", 89)
 	state_block.AddTransaction(signedTx3)
 
-	err := state_block.AddBlock(block2)
+	err = state_block.AddBlock(block2)
 	if err != nil || len(state_block.TxMempool) != 1 {
 		t.Errorf("failed - expected no errors and that the length of the TxMemPool is 1")
 	}
