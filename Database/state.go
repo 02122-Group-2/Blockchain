@@ -12,14 +12,14 @@ import (
 )
 
 type State struct {
-	AccountBalances    map[AccountAddress]uint `json: "AccountBalances"`
-	AccountNounces     map[AccountAddress]uint `json: "AccountNounces"`
-	TxMempool          TransactionList         `json: "TxMempool"`
-	DbFile             *os.File                `json: "DbFile"`
-	LastBlockSerialNo  int                     `json: "LastBlockSerialNo"`
-	LastBlockTimestamp int64                   `json: "LastBlockTimestamp"`
-	LatestHash         [32]byte                `json: "LatestHash"`
-	LatestTimestamp    int64                   `json: "LatestTimestamp"`
+	AccountBalances    map[AccountAddress]uint `json:"AccountBalances"`
+	AccountNounces     map[AccountAddress]uint `json:"AccountNounces"`
+	TxMempool          TransactionList         `json:"TxMempool"`
+	DbFile             *os.File                `json:"DbFile"`
+	LastBlockSerialNo  int                     `json:"LastBlockSerialNo"`
+	LastBlockTimestamp int64                   `json:"LastBlockTimestamp"`
+	LatestHash         [32]byte                `json:"LatestHash"`
+	LatestTimestamp    int64                   `json:"LatestTimestamp"`
 }
 
 func makeTimestamp() int64 {
@@ -121,7 +121,7 @@ func (state *State) ValidateTransaction(transaction Transaction) error {
 	}
 
 	if state.AccountBalances[transaction.From] < uint(transaction.Amount) {
-		return fmt.Errorf("Sender ain't that liquid right now")
+		return fmt.Errorf("sender ain't that liquid right now")
 	}
 
 	return nil
@@ -132,7 +132,7 @@ func (state *State) ValidateTransactionList(transactionList TransactionList) err
 	for i, t := range transactionList {
 		err := state.ValidateTransaction(t)
 		if err != nil {
-			return fmt.Errorf("Transaction nr. %d is not valid. Received Error: %s", i, err.Error())
+			return fmt.Errorf("transaction nr. %d is not valid. Received Error: %s", i, err.Error())
 		}
 	}
 	return nil
@@ -232,9 +232,7 @@ func (currState *State) copyState() State {
 		copy.AccountNounces[accountA] = nounce
 	}
 
-	for _, tx := range currState.TxMempool {
-		copy.TxMempool = append(copy.TxMempool, tx)
-	}
+	copy.TxMempool = append(copy.TxMempool, currState.TxMempool...)
 
 	return copy
 }
