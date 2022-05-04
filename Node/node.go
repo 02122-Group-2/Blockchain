@@ -65,7 +65,7 @@ func Run() error {
 			nodeState.State.TryAddTransactions(peerState.State.TxMempool)
 
 			for _, peer2 := range peerState.PeerList {
-				if !contains(nodeState.PeerList, peer2) && ping(peer2) {
+				if !contains(nodeState.PeerList, peer2) && Ping(peer2) {
 					nodeState.PeerList = append(nodeState.PeerList, peer2)
 				}
 			}
@@ -76,14 +76,14 @@ func Run() error {
 	return nil
 }
 
-func ping(peerAddr string) bool {
+func Ping(peerAddr string) bool {
 	timeout := 1 * time.Second
 	conn, err := net.DialTimeout("tcp", peerAddr, timeout)
-	conn.Close()
 	if err != nil {
 		fmt.Println("Site unreachable, error: ", err)
 		return false
 	}
+	conn.Close()
 	return true
 }
 
