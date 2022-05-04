@@ -59,7 +59,7 @@ func Run() error {
 			peerState := GetPeerState(peer)
 
 			if peerState.State.LastBlockSerialNo > nodeState.State.LastBlockSerialNo {
-				peerBlocks := getPeerBlocks(peer, nodeState.State.LastBlockSerialNo)
+				peerBlocks := GetPeerBlocks(peer, nodeState.State.LastBlockSerialNo)
 				nodeState.State.ApplyBlocks(peerBlocks)
 			}
 
@@ -97,7 +97,7 @@ func contains(s []string, e string) bool {
 	return false
 }
 
-func getPeerBlocks(peerAddr string, lastLocalBlockSerialNo int) []Database.Block {
+func GetPeerBlocks(peerAddr string, lastLocalBlockSerialNo int) []Database.Block {
 	URI := fmt.Sprintf("http://"+peerAddr+"/blockDelta?lastLocalBlockSerialNo=%d", lastLocalBlockSerialNo)
 	resp, err := http.Get(URI)
 
@@ -108,7 +108,9 @@ func getPeerBlocks(peerAddr string, lastLocalBlockSerialNo int) []Database.Block
 
 	var blockDelta []Database.Block
 
-	readResp(resp, blockDelta)
+	bytes, err := readResp(resp)
+
+	json.Unmarshal(bytes, &blockDelta)
 
 	return blockDelta
 }
@@ -132,7 +134,8 @@ func GetPeerState(peerAddr string) NodeState {
 
 	peerNodeState := NodeState{}
 
-	readResp(resp, &peerNodeState)
+	bytes, _ := readResp(resp)
+	json.Unmarshal(bytes, &peerNodeState)
 	//At this point the data recived should have been saved into peerNodeState
 
 	return peerNodeState
@@ -285,18 +288,12 @@ func readReq(r *http.Request, reqBody interface{}) error {
 	return nil
 }
 
-func readResp(r *http.Response, reqBody interface{}) error {
+func readResp(r *http.Response) ([]byte, error) {
 	reqJson, err := ioutil.ReadAll(r.Body)
 
 	if err != nil {
-		return fmt.Errorf("unable to read request body. %s", err.Error())
-
+		return nil, fmt.Errorf("unable to read request body. %s", err.Error())
 	}
-	defer r.Body.Close()
 
-	err = json.Unmarshal(reqJson, reqBody)
-	if err != nil {
-		return fmt.Errorf("unable to unmarshal request body. %s", err.Error())
-	}
-	return nil
+	return reqJson, nil
 }

@@ -8,11 +8,10 @@ import (
 func TestRun(t *testing.T) {
 	t.Log("begin init test")
 
-	Run()
+	// Run()
 
 	//Database.ResetTest()
 }
-
 func TestGetPeerState(t *testing.T) {
 	t.Log("begin get peer state test")
 
@@ -34,4 +33,10 @@ func TestGetPeerState(t *testing.T) {
 	}
 	fmt.Println(nodeState.State)
 
+}
+
+func TestGetPeerBlocks(t *testing.T) {
+	res := GetPeerBlocks("localhost:8080", 0)
+
+	fmt.Println(res)
 }
