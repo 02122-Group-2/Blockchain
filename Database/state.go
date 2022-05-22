@@ -11,6 +11,17 @@ import (
 	"time"
 )
 
+type StateFromPostRequest struct {
+	AccountBalances    map[AccountAddress]uint `json:"AccountBalances"`
+	AccountNounces     map[AccountAddress]uint `json:"AccountNounces"`
+	TxMempool          TransactionList         `json:"TxMempool"`
+	DbFile             *os.File                `json:"DbFile"`
+	LastBlockSerialNo  int                     `json:"LastBlockSerialNo"`
+	LastBlockTimestamp int64                   `json:"LastBlockTimestamp"`
+	LatestHash         []byte                  `json:"LatestHash"`
+	LatestTimestamp    int64                   `json:"LatestTimestamp"`
+}
+
 type State struct {
 	AccountBalances    map[AccountAddress]uint `json:"AccountBalances"`
 	AccountNounces     map[AccountAddress]uint `json:"AccountNounces"`

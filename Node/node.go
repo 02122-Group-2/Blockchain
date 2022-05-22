@@ -13,13 +13,18 @@ import (
 	"time"
 )
 
+type NodeStateFromPostRequest struct {
+	PeerList []string                      `json:"peer_list"`
+	State    Database.StateFromPostRequest `json:"state"`
+}
+
 type NodeState struct {
 	PeerList []string       `json:"peer_list"`
 	State    Database.State `json:"state"`
 }
 
 const httpPort = 8080
-const bootstrapNode = "bootstrapNode"
+const bootstrapNode = "localhost:8080"
 
 //Models the balances data recived
 type balancesResult struct {
@@ -42,28 +47,34 @@ type TxResult struct {
 
 func Run() error {
 	fmt.Printf("Listening on port %d\n", httpPort)
+	go synchronization()
 	startNode()
-	/*
-		nodeState := GetNodeState()
+	return nil
+}
 
-		for {
+func synchronization() {
+	nodeState := GetNodeState()
 
-			updateNodeState(&nodeState) // Updates nodeState to get local changes in case any has been made
+	for {
+		updateNodeState(&nodeState) // Updates nodeState to get local changes in case any has been made
 
-			// Creates a copy of the peers to check, to avoid weird looping as we append to the slice in the loop
-			peersToCheck := make([]string, len(nodeState.PeerList))
-			copy(peersToCheck, nodeState.PeerList)
+		// Creates a copy of the peers to check, to avoid weird looping as we append to the slice in the loop
+		peersToCheck := make([]string, len(nodeState.PeerList))
+		copy(peersToCheck, nodeState.PeerList)
 
-			for _, peer := range peersToCheck {
+		for _, peer := range peersToCheck {
 
-				peerState := GetPeerState(peer)
+			peerState := GetPeerState(peer)
+
+			fmt.Println("Got peer state")
+			fmt.Println(peerState)
 
 			if peerState.State.LastBlockSerialNo > nodeState.State.LastBlockSerialNo {
 				peerBlocks := GetPeerBlocks(peer, nodeState.State.LastBlockSerialNo)
 				nodeState.State.ApplyBlocks(peerBlocks)
 			}
 
-				nodeState.State.TryAddTransactions(peerState.State.TxMempool)
+			nodeState.State.TryAddTransactions(peerState.State.TxMempool)
 
 			for _, peer2 := range peerState.PeerList {
 				if !contains(nodeState.PeerList, peer2) && Ping(peer2) {
@@ -72,8 +83,7 @@ func Run() error {
 			}
 			time.Sleep(40 * time.Second)
 		}
-	*/
-	return nil
+	}
 }
 
 func Ping(peerAddr string) bool {
@@ -117,7 +127,7 @@ func GetPeerBlocks(peerAddr string, lastLocalBlockSerialNo int) []Database.Block
 //The following is done using POST,
 //The header contain the address of the peer that is currently being accessed
 //The body should contain the current state of the requesting node
-func GetPeerState(peerAddr string) NodeState {
+func GetPeerState(peerAddr string) NodeStateFromPostRequest {
 	httpposturl := "http://" + peerAddr + "/getState"
 
 	currNodeState := GetNodeState()
@@ -127,20 +137,17 @@ func GetPeerState(peerAddr string) NodeState {
 		panic(err)
 	}
 
-	request, error := http.NewRequest("POST", httpposturl, bytes.NewBuffer(jsonData))
-	request.Header.Set("Content-Type", "application/json; charset=UTF-8")
-
-	client := &http.Client{}
-	response, error := client.Do(request)
-	if error != nil {
-		fmt.Println("something went wrong when posting")
-		panic(error)
+	resp, err := http.Post(httpposturl, "application/json", bytes.NewBuffer(jsonData))
+	if err != nil {
+		fmt.Println("Unable to get state")
+		panic(err)
 	}
-	defer response.Body.Close()
-	fmt.Println("Successfully posted current state")
 
-	peerNodeState := NodeState{}
-	bytes, _ := readResp(response)
+	var peerNodeState NodeStateFromPostRequest
+	bytes, _ := readResp(resp)
+	fmt.Println("Get State response")
+	str := string(bytes)
+	fmt.Println(str)
 	json.Unmarshal(bytes, &peerNodeState)
 	//At this point the data recived should have been saved into peerNodeState
 
@@ -215,7 +222,7 @@ func getStateHandler(w http.ResponseWriter, r *http.Request, state *Database.Sta
 	nodeState := GetNodeState()
 
 	fmt.Println(nodeState.PeerList)
-	writeResult(w, NodeState{PeerList: nodeState.PeerList, State: nodeState.State})
+	writeResult(w, nodeState)
 }
 
 func balancesHandler(w http.ResponseWriter, r *http.Request, state *Database.State) {
