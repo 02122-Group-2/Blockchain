@@ -127,7 +127,7 @@ func GetPeerBlocks(peerAddr string, lastLocalBlockSerialNo int) []Database.Block
 //The following is done using POST,
 //The header contain the address of the peer that is currently being accessed
 //The body should contain the current state of the requesting node
-func GetPeerState(peerAddr string) NodeStateFromPostRequest {
+func GetPeerState(peerAddr string) NodeState {
 	httpposturl := "http://" + peerAddr + "/getState"
 
 	currNodeState := GetNodeState()
@@ -143,13 +143,21 @@ func GetPeerState(peerAddr string) NodeStateFromPostRequest {
 		panic(err)
 	}
 
-	var peerNodeState NodeStateFromPostRequest
+	var peerNodeStateFromRequest NodeStateFromPostRequest
+	var peerNodeState NodeState
 	bytes, _ := readResp(resp)
 	fmt.Println("Get State response")
 	str := string(bytes)
 	fmt.Println(str)
+	json.Unmarshal(bytes, &peerNodeStateFromRequest)
 	json.Unmarshal(bytes, &peerNodeState)
 	//At this point the data recived should have been saved into peerNodeState
+
+	var lh32 [32]byte
+	for i := 0; i < 32; i++ {
+		lh32[i] = peerNodeStateFromRequest.State.LatestHash[i]
+	}
+	peerNodeState.State.LatestHash = lh32
 
 	return peerNodeState
 }
