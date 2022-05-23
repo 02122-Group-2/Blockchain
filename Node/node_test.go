@@ -8,6 +8,7 @@ import (
 func TestRun(t *testing.T) {
 	t.Log("begin init test")
 
+	synchronization()
 	// Run()
 
 	//Database.ResetTest()
@@ -21,7 +22,7 @@ func TestGetPeerState(t *testing.T) {
 	// }
 	// t.Log("sucessfully loaded the current state")
 
-	nodeState := GetPeerState("localhost:8080")
+	nodeState := GetPeerState("192.168.0.106:8080")
 
 	if nodeState.PeerList == nil {
 		t.Errorf("Peer list is nil")
