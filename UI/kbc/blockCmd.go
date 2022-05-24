@@ -26,10 +26,13 @@ var blockCreateCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		var state_block = Database.LoadState()
 
-		pendingTxs := Database.LoadTransactions()
+		block := state_block.CreateBlock(state_block.TxMempool)
 
-		block := state_block.CreateBlock(pendingTxs)
-
-		fmt.Println(state_block.AddBlock(block).Error())
+		err := state_block.AddBlock(block)
+		if err != nil {
+			fmt.Println(err.Error())
+		} else {
+			fmt.Println("Succesfully added the block to the blockchain")
+		}
 	},
 }
