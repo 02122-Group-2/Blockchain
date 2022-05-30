@@ -1,41 +1,51 @@
 package database
 
 import (
-	"io/ioutil"
 	"os"
-	"path/filepath"
 	//"io/ioutil"
 )
 
-func getDatabaseDirPath(dataDir string) string {
-	return filepath.Join(dataDir, "database")
-}
+//Function that ensures that all files needed to run a node are present on the current system
+//If not they are created
+func CheckForNeededFiles() error {
 
-func getGenesisJsonFilePath(dataDir string) string {
-	return filepath.Join(getDatabaseDirPath(dataDir), "genesis.json")
-}
+	err := initDataDirIfNotExists("CurrentState.json")
+	if err != nil {
+		return err
+	}
 
-func getBlocksDbFilePath(dataDir string) string {
-	return filepath.Join(getDatabaseDirPath(dataDir), "block.db")
+	err = initDataDirIfNotExists("LatestSnapshot.json")
+	if err != nil {
+		return err
+	}
+
+	err = initDataDirIfNotExists("state.json")
+	if err != nil {
+		return err
+	}
+
+	err = initDataDirIfNotExists("Transactions.json")
+	if err != nil {
+		return err
+	}
+
+	err = initDataDirIfNotExists("Blockchain.db")
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func initDataDirIfNotExists(dataDir string) error {
-	if fileExist(getGenesisJsonFilePath(dataDir)) {
+	path := localDirToFileFolder + dataDir
+
+	if fileExist(path) {
 		return nil
 	}
 
-	dbDir := getDatabaseDirPath(dataDir)
-	if err := os.MkdirAll(dbDir, os.ModePerm); err != nil {
-		return err
-	}
-	/*
-		gen := getGenesisJsonFilePath(dataDir)
-		if err := writeGenesisToDisk(gen); err != nil {
-			return err
-		}
-	*/
-	blocks := getBlocksDbFilePath(dataDir)
-	if err := writeEmptyBlocksDbToDisk(blocks); err != nil {
+	_, err := os.Create(path)
+	if err != nil {
 		return err
 	}
 
@@ -49,8 +59,4 @@ func fileExist(filePath string) bool {
 	}
 
 	return true
-}
-
-func writeEmptyBlocksDbToDisk(path string) error {
-	return ioutil.WriteFile(path, []byte(""), os.ModePerm)
 }

@@ -1,7 +1,7 @@
 package node
 
 import (
-	Database "blockchain/database"
+	Database "blockchain/Database"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -46,12 +46,20 @@ type TxResult struct {
 }
 
 func Run() error {
+	//Assesing if all JSON files are present: CurrentState, LatestSnapshot, state,
+	//Transactions, Blockchain.db
+	err := Database.CheckForNeededFiles()
+	if err != nil {
+		return err
+	}
+
 	fmt.Printf("Listening on port %d\n", httpPort)
 	go synchronization()
 	startNode()
 	return nil
 }
 
+//Function that essentialy is the implemented version of our peer sync algorithm
 func synchronization() {
 	nodeState := GetNodeState()
 
@@ -176,6 +184,7 @@ func updateNodeState(currentNodeState *NodeState) {
 	currentNodeState.State = *Database.LoadState()
 }
 
+//Sets up all the http connections and their handlers
 func startNode() error {
 	state := Database.LoadState()
 
@@ -217,6 +226,7 @@ func blockDeltaHandler(w http.ResponseWriter, r *http.Request, state *Database.S
 	writeResult(w, delta)
 }
 
+//Function used to get the state of a peer node
 func getStateHandler(w http.ResponseWriter, r *http.Request, state *Database.State) {
 	// Read the body containing the state of the node requesting
 	getStateRequest := NodeState{}
@@ -293,7 +303,7 @@ func writeResult(w http.ResponseWriter, content interface{}) {
 	fmt.Println("Server response sent")
 }
 
-//Reading the request when using POST method
+//Reading the request from client
 func readReq(r *http.Request) ([]byte, error) {
 	reqJson, err := ioutil.ReadAll(r.Body)
 
@@ -304,6 +314,7 @@ func readReq(r *http.Request) ([]byte, error) {
 	return reqJson, nil
 }
 
+//Reading the server response
 func readResp(r *http.Response) ([]byte, error) {
 	reqJson, err := ioutil.ReadAll(r.Body)
 
