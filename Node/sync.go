@@ -17,9 +17,14 @@ func synchronization() {
 		peersToCheck := make([]string, len(nodeState.PeerList))
 		copy(peersToCheck, nodeState.PeerList)
 
+		// Create a new slice of Addresses - Add those who are new and works
+		var newAddresses []string
+
 		for _, peer := range peersToCheck {
 			if !Ping(peer) { // If the connection is lost, dont send to it
 				continue
+			} else {
+				newAddresses = append(newAddresses, peer)
 			}
 
 			peerState := GetPeerState(peer)
@@ -37,13 +42,14 @@ func synchronization() {
 			nodeState.State.TryAddTransactions(peerState.State.TxMempool)
 
 			for _, peer2 := range peerState.PeerList {
-				if !contains(nodeState.PeerList, peer2) {
-					nodeState.PeerList = append(nodeState.PeerList, peer2)
+				if !contains(nodeState.PeerList, peer2) { // If the incomming address wasn't in the original list, add it to the new list of addresses
+					newAddresses = append(newAddresses, peer2)
 				}
 			}
-			// Save any potential changes in the peer list
-			Database.SavePeerListAsJSON(nodeState.PeerList, peerListFile)
 		}
+		// Save any potential changes in the peer list
+		Database.SavePeerListAsJSON(newAddresses, peerListFile)
+		// Wait 20 seconds to continue
 		time.Sleep(20 * time.Second)
 	}
 }

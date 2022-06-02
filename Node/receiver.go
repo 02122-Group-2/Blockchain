@@ -41,8 +41,8 @@ func getStateHandler(w http.ResponseWriter, r *http.Request, state *Database.Sta
 	var currentPeerList = Database.LoadPeerListFromJSON(peerListFile)
 	copiedPeerList := make([]string, len(currentPeerList))
 	copy(copiedPeerList, currentPeerList)
-	for _, peer := range currentPeerList {
-		if !contains(getStateRequest.PeerList, peer) {
+	for _, peer := range getStateRequest.PeerList {
+		if !contains(copiedPeerList, peer) {
 			copiedPeerList = append(copiedPeerList, peer)
 		}
 	}
