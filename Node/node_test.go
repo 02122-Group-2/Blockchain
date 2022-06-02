@@ -8,20 +8,21 @@ import (
 func TestRun(t *testing.T) {
 	t.Log("begin init test")
 
+	synchronization()
 	// Run()
 
 	//Database.ResetTest()
 }
 func TestGetPeerState(t *testing.T) {
 	t.Log("begin get peer state test")
-	/*
-		err := startNode()
-		if err != nil {
-			t.Errorf("Node could not start")
-		}
-		t.Log("sucessfully loaded the current state")
-	*/
-	nodeState := GetPeerState("localhost:8080")
+
+	// err := startNode()
+	// if err != nil {
+	// 	t.Errorf("Node could not start")
+	// }
+	// t.Log("sucessfully loaded the current state")
+
+	nodeState := GetPeerState("192.168.0.106:8080")
 
 	if nodeState.PeerList == nil {
 		t.Errorf("Peer list is nil")
@@ -30,11 +31,10 @@ func TestGetPeerState(t *testing.T) {
 		t.Errorf("State balances is nil")
 	}
 	fmt.Println(nodeState.State)
-
 }
 
 func TestGetPeerBlocks(t *testing.T) {
-	res := GetPeerBlocks("localhost:8080", 0)
+	res := GetPeerBlocks("192.168.0.106:8090", 0)
 
 	fmt.Println(res)
 }

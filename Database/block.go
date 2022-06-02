@@ -137,6 +137,9 @@ func (state *State) AddBlock(block Block) error {
 	// Apply all the remaining transactions from the current memory pool
 	prevState.TryAddTransactions(state.TxMempool)
 
+	// Update the current state with the updates from the blockchain
+	prevState.SaveState()
+
 	// Updates the current state
 	*state = prevState.copyState()
 	return nil
@@ -175,7 +178,7 @@ func SaveBlockchain(blockchain []Block) bool {
 	toSave := Blockchain{blockchain}
 	txFile, _ := json.MarshalIndent(toSave, "", "  ")
 
-	err := ioutil.WriteFile("./Persistence/Blockchain.db", txFile, 0644)
+	err := ioutil.WriteFile(localDirToFileFolder+"Blockchain.db", txFile, 0644)
 	if err != nil {
 		panic(err)
 	}
