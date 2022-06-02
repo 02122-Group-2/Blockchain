@@ -218,6 +218,34 @@ func loadStateFromJSON(filename string) State {
 	return state
 }
 
+// Get Peer List from JSON file
+func LoadPeerListFromJSON(filename string) []string {
+	// Create the file if it doesnt exist
+	InitDataDirIfNotExists(filename)
+
+	data, err := os.ReadFile(localDirToFileFolder + filename)
+	if err != nil {
+		panic(err)
+	}
+
+	var peerList []string
+	json.Unmarshal(data, &peerList)
+
+	return peerList
+}
+
+// Save the peer list in a JSON file
+func SavePeerListAsJSON(state []string, filename string) error {
+	peerList, _ := json.MarshalIndent(state, "", "  ")
+
+	err := ioutil.WriteFile(localDirToFileFolder+filename, peerList, 0644)
+	if err != nil {
+		panic(err)
+	}
+
+	return nil
+}
+
 // Given a state, make a deep copy of the state and return the copy.
 func (currState *State) copyState() State {
 	copy := State{}

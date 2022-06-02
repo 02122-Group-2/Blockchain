@@ -9,27 +9,27 @@ import (
 //If not they are created
 func CheckForNeededFiles() error {
 
-	err := initDataDirIfNotExists("CurrentState.json")
+	err := InitDataDirIfNotExists("CurrentState.json")
 	if err != nil {
 		return err
 	}
 
-	err = initDataDirIfNotExists("LatestSnapshot.json")
+	err = InitDataDirIfNotExists("LatestSnapshot.json")
 	if err != nil {
 		return err
 	}
 
-	err = initDataDirIfNotExists("state.json")
+	err = InitDataDirIfNotExists("state.json")
 	if err != nil {
 		return err
 	}
 
-	err = initDataDirIfNotExists("Transactions.json")
+	err = InitDataDirIfNotExists("Transactions.json")
 	if err != nil {
 		return err
 	}
 
-	err = initDataDirIfNotExists("Blockchain.db")
+	err = InitDataDirIfNotExists("Blockchain.db")
 	if err != nil {
 		return err
 	}
@@ -37,7 +37,7 @@ func CheckForNeededFiles() error {
 	return nil
 }
 
-func initDataDirIfNotExists(dataDir string) error {
+func InitDataDirIfNotExists(dataDir string) error {
 	path := localDirToFileFolder + dataDir
 
 	if fileExist(path) {

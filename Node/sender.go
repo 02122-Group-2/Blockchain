@@ -88,13 +88,6 @@ func GetPeerState(peerAddr string) NodeState {
 	return peerNodeState
 }
 
-func GetNodeState() NodeState {
-	nodeState := NodeState{}
-	nodeState.State = *Database.LoadState()
-	nodeState.PeerList = []string{bootstrapNode}
-	return nodeState
-}
-
 //Reading the server response
 func readResp(r *http.Response) ([]byte, error) {
 	reqJson, err := ioutil.ReadAll(r.Body)

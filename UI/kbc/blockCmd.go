@@ -1,7 +1,7 @@
 package main
 
 import (
-	Database "blockchain/database"
+	Database "blockchain/Database"
 	"fmt"
 
 	"github.com/spf13/cobra"

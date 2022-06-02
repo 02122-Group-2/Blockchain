@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	Database "blockchain/database"
+	Database "blockchain/Database"
 
 	"github.com/spf13/cobra"
 )
