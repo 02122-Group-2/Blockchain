@@ -8,8 +8,8 @@ import (
 func TestRun(t *testing.T) {
 	t.Log("begin init test")
 
-	synchronization()
-	// Run()
+	// synchronization()
+	Run()
 
 	//Database.ResetTest()
 }

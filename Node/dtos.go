@@ -13,7 +13,7 @@ type NodeState struct {
 }
 
 const httpPort = 8080
-const bootstrapNode = "192.168.0.106:8080"
+const bootstrapNode = "localhost:8080"
 
 //Models the balances data recived
 type balancesResult struct {

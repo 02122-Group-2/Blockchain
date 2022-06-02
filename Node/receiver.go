@@ -26,6 +26,9 @@ func blockDeltaHandler(w http.ResponseWriter, r *http.Request, state *Database.S
 
 //Function used to get the state of a peer node
 func getStateHandler(w http.ResponseWriter, r *http.Request, state *Database.State) {
+	//Response: Get your own state to send to the one requesting it
+	nodeState := GetNodeState()
+
 	// Read the body containing the state of the node requesting
 	getStateRequest := NodeState{}
 	bytes, err := readReq(r)
@@ -34,10 +37,16 @@ func getStateHandler(w http.ResponseWriter, r *http.Request, state *Database.Sta
 	}
 	json.Unmarshal(bytes, &getStateRequest)
 
-	//TODO: Do something with the peer state
-
-	//Response: Send your current state
-	nodeState := GetNodeState()
+	//Get the peers from the peer state and append it to your own, if they arent already in the list
+	var currentPeerList = Database.LoadPeerListFromJSON(peerListFile)
+	copiedPeerList := make([]string, len(currentPeerList))
+	copy(copiedPeerList, currentPeerList)
+	for _, peer := range currentPeerList {
+		if !contains(getStateRequest.PeerList, peer) {
+			copiedPeerList = append(copiedPeerList, peer)
+		}
+	}
+	Database.SavePeerListAsJSON(copiedPeerList, peerListFile)
 
 	fmt.Println(nodeState.PeerList)
 	writeResult(w, nodeState)
