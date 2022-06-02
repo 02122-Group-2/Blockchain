@@ -42,7 +42,7 @@ func synchronization() {
 			nodeState.State.TryAddTransactions(peerState.State.TxMempool)
 
 			for _, peer2 := range peerState.PeerList {
-				if !contains(nodeState.PeerList, peer2) { // If the incomming address wasn't in the original list, add it to the new list of addresses
+				if !contains(nodeState.PeerList, peer2) && Ping(peer2) { // If the incomming address wasn't in the original list, add it to the new list of addresses
 					newAddresses = append(newAddresses, peer2)
 				}
 			}
