@@ -1,20 +1,18 @@
-{
-  "transactions": [
-    {
-      "From": "Magn",
-      "To": "Niels",
-      "Amount": 100,
-      "SenderNounce": 11,
-      "Timestamp": 1653418033414027000,
-      "Type": "transaction"
-    },
-    {
-      "From": "Magn",
-      "To": "Emilie",
-      "Amount": 420,
-      "SenderNounce": 12,
-      "Timestamp": 1653418054854211000,
-      "Type": "transaction"
-    }
-  ]
-}
+[
+  {
+    "From": "Magn",
+    "To": "Niels",
+    "Amount": 100,
+    "SenderNounce": 11,
+    "Timestamp": 1653418033414027000,
+    "Type": "transaction"
+  },
+  {
+    "From": "Magn",
+    "To": "Emilie",
+    "Amount": 420,
+    "SenderNounce": 12,
+    "Timestamp": 1653418054854211000,
+    "Type": "transaction"
+  }
+]

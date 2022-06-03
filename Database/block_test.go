@@ -11,6 +11,7 @@ var state_block = LoadState()
 var blockchain_original = LoadBlockchain()
 var state_original = LoadState()
 var snapshot_orignal = LoadSnapshot()
+var transactions_original = LoadTransactions()
 
 func TestCreateBlock(t *testing.T) {
 	tx1 := state_block.CreateTransaction("Niels", "Asger", 10)
@@ -157,6 +158,7 @@ func ResetTest() {
 	SaveBlockchain(blockchain_original)
 	state_original.SaveState()
 	snapshot_orignal.SaveSnapshot()
+	transactions_original.SaveTransactions()
 }
 
 // Only run this to remake the local blockchain

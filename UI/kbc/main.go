@@ -21,6 +21,7 @@ func main() {
 	kbcCmd.AddCommand(balancesCmd())
 	kbcCmd.AddCommand(runCmd())
 	kbcCmd.AddCommand(blockCmd())
+	kbcCmd.AddCommand(overviewCmd())
 
 	err := kbcCmd.Execute()
 	if err != nil {
