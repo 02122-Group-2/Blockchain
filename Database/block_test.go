@@ -1,6 +1,7 @@
 package database
 
 import (
+	shared "blockchain/Shared"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -14,6 +15,8 @@ var snapshot_orignal = LoadSnapshot()
 var transactions_original = LoadTransactions()
 
 func TestCreateBlock(t *testing.T) {
+	shared.ResetPersistenceFilesForTest()
+
 	tx1 := state_block.CreateTransaction("Niels", "Asger", 10)
 	tx2 := state_block.CreateTransaction("Asger", "Emilie", 4)
 	state_block.AddTransaction(tx1)

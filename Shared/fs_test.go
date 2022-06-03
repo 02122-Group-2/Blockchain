@@ -1,6 +1,7 @@
 package shared
 
 import (
+	"fmt"
 	"os"
 	"testing"
 )
@@ -29,20 +30,26 @@ func TestCheckForNeededFiles(t *testing.T) {
 	}
 
 	//Check if the files are present
-	if !fileExist(LocalDirToFileFolder + "CurrentState.json") {
+	if !fileExist(Locate("CurrentState.json")) {
 		t.Log("Error CurrentState.json was not created")
 		t.Fail()
-	} else if !fileExist(LocalDirToFileFolder + "Blockchain.db") {
+	} else if !fileExist(Locate("Blockchain.db")) {
 		t.Log("Error Blockchain.db was not created")
 		t.Fail()
-	} else if !fileExist(LocalDirToFileFolder + "state.json") {
+	} else if !fileExist(Locate("state.json")) {
 		t.Log("Error state.json was not created")
 		t.Fail()
-	} else if !fileExist(LocalDirToFileFolder + "LatestSnapshot.json") {
+	} else if !fileExist(Locate("LatestSnapshot.json")) {
 		t.Log("Error LatestSnapshot.json was not created")
 		t.Fail()
-	} else if !fileExist(LocalDirToFileFolder + "Transactions.json") {
+	} else if !fileExist(Locate("Transactions.json")) {
 		t.Log("Error Transactions.json was not created")
 		t.Fail()
 	}
+}
+
+// test result is cached and as a result the reset is not run more than once when running the test
+func TestResetPersistenceFiles(t *testing.T) {
+	fmt.Println("bruh")
+	ResetPersistenceFilesForTest()
 }

@@ -35,4 +35,21 @@ func TestPeerSet(t *testing.T) {
 	if ps.Exists(illegalIP) {
 		panic(fmt.Sprintf("%s should not be added, as it is an illegal IP", illegalIP))
 	}
+
+	ps2 := PeerSet{}
+	legalIP2 := "localhost:8080"
+	ps2.Add(legalIP)
+	ps2.Add(legalIP2)
+
+	ps_copy := ps.DeepCopy()
+
+	ps.UnionWith(ps2)
+	if !ps.Exists(legalIP2) {
+		panic(fmt.Sprintf("ps should contain %s after union operation with ps2", legalIP2))
+	}
+
+	ps_union := Union(ps_copy, ps2)
+	if !(ps_union.Exists(legalIP) && ps_union.Exists(legalIP2)) {
+		panic("union of ps's should contain all elements of both ps's")
+	}
 }
