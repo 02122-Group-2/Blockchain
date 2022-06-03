@@ -78,6 +78,9 @@ func TestLoadBlockchain(t *testing.T) {
 }
 
 func TestAddBlockToBlockchain(t *testing.T) {
+	// Start by ensuring the setup is correct
+	ResetTest()
+	state_block = LoadState()
 	// Creates a wallet to test the functionality
 	Crypto.CreateNewWallet(walletUsername1, pswd)
 	testWallet, _ := Crypto.AccessWallet(walletUsername1, pswd)
@@ -100,6 +103,8 @@ func TestAddBlockToBlockchain(t *testing.T) {
 
 	err = state_block.AddBlock(block2)
 	if err != nil || len(state_block.TxMempool) != 1 {
+		t.Log(state_block.TxMempool)
+		t.Log(len(state_block.TxMempool))
 		t.Errorf("failed - expected no errors and that the length of the TxMemPool is 1")
 	}
 
