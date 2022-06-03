@@ -1,18 +1,18 @@
 package database
 
 import (
-	Crypto "blockchain/Cryptography"
+	shared "blockchain/Shared"
+	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
-	"path/filepath"
 )
 
 type Block struct {
-	Header       BlockHeader            `json:"Header"`
-	SignedTx    SignedTransactionList   `json:"Transactions"`
+	Header   BlockHeader           `json:"Header"`
+	SignedTx SignedTransactionList `json:"Transactions"`
 }
 
 type BlockHeader struct {
@@ -29,6 +29,10 @@ type BhDTO struct {
 
 type Blockchain struct {
 	Blockchain []Block `json:"Blockchain"`
+}
+
+type Genesis struct {
+	Balances map[AccountAddress]int `json:"balances"`
 }
 
 // Create a block object that matches the current state, given a list of transactions
@@ -74,6 +78,11 @@ func (state *State) ValidateBlock(block Block) error {
 	return nil
 }
 
+// Takes a Block in JSON string format and calculates the 32-byte hash of this block and returns it.
+func HashBlock(blockString string) [32]byte {
+	return sha256.Sum256([]byte(blockString))
+}
+
 // Applies a single block to the current state.
 // It validates all the transactions within the block.
 // It applies all the transactions within the block to the state as well.
@@ -88,7 +97,7 @@ func (state *State) ApplyBlock(block Block) error {
 		return jsonErr
 	}
 
-	state.LatestHash = Crypto.HashBlock(jsonString)
+	state.LatestHash = HashBlock(jsonString)
 	state.LastBlockSerialNo = block.Header.SerialNo
 	state.LastBlockTimestamp = block.Header.CreatedAt
 	state.TxMempool = nil
@@ -129,6 +138,9 @@ func (state *State) AddBlock(block Block) error {
 	// Apply all the remaining transactions from the current memory pool
 	prevState.TryAddTransactions(state.TxMempool)
 
+	// Update the current state with the updates from the blockchain
+	prevState.SaveState()
+
 	// Updates the current state
 	*state = prevState.copyState()
 	return nil
@@ -148,12 +160,7 @@ func PersistBlockToDB(block Block) error {
 
 // Load the local blockchain and return it as a list of blocks
 func LoadBlockchain() []Block {
-	currWD, err := os.Getwd()
-	if err != nil {
-		panic(err)
-	}
-
-	data, err := os.ReadFile(filepath.Join(currWD, "./Persistence/Blockchain.db"))
+	data, err := os.ReadFile(shared.LocalDirToFileFolder + "Blockchain.db")
 	if err != nil {
 		panic(err)
 	}
@@ -172,12 +179,35 @@ func SaveBlockchain(blockchain []Block) bool {
 	toSave := Blockchain{blockchain}
 	txFile, _ := json.MarshalIndent(toSave, "", "  ")
 
-	err := ioutil.WriteFile("./Persistence/Blockchain.db", txFile, 0644)
+	err := ioutil.WriteFile(shared.LocalDirToFileFolder+"Blockchain.db", txFile, 0644)
 	if err != nil {
 		panic(err)
 	}
 
 	return true
+}
+
+// Load difference in contents of blockchain (for sending deltas to peer)
+// TODO: data structure of blockchain not the most scalable... 🤔
+func GetBlockChainDelta(blockchain []Block, fromBlockSerialNo int) []Block {
+	// if 0, special case -> send entire blockchain
+	if fromBlockSerialNo == 0 {
+		return blockchain
+	}
+
+	startIdx := -1
+	for i, b := range blockchain {
+		if b.Header.SerialNo == fromBlockSerialNo {
+			startIdx = i + 1
+			break
+		}
+	}
+
+	if startIdx == -1 || (len(blockchain)-1 < startIdx) {
+		return nil
+	}
+
+	return blockchain[(startIdx):]
 }
 
 // Given a block, convert it to a JSON string
@@ -239,4 +269,13 @@ func (block *Block) UnmarshalJSON(data []byte) error {
 	block.Header = aux.Header.decodeBH()
 
 	return nil
+}
+
+func (block *Block) BlockToString() string {
+
+	listOfTransactions := ""
+	for _, currTransaction := range block.SignedTx {
+		listOfTransactions += TxToString(currTransaction.Tx) + "\n"
+	}
+	return "Header: \n " + "-Parent Hash: " + fmt.Sprintf("%v \n", block.Header.ParentHash) + "-Created at: " + fmt.Sprintf("%v \n", block.Header.CreatedAt) + "-Serial No.: " + fmt.Sprintf("%v \n", block.Header.SerialNo) + "List of Transactions: \n" + listOfTransactions
 }

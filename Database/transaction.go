@@ -1,8 +1,8 @@
 package database
 
 import (
-	Consts "blockchain/Constants"
 	Crypto "blockchain/Cryptography"
+	shared "blockchain/Shared"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -45,7 +45,6 @@ func (transaction *Transaction_Old) hash() [32]byte {
 	return Crypto.HashTransaction(transaction.toJsonString())
 }
 
-
 func (state *State) newAccountAddr(value string) AccountAddress {
 	return AccountAddress(value)
 }
@@ -72,7 +71,7 @@ func (state *State) CreateTransaction(from AccountAddress, to AccountAddress, am
 	return state.CreateCustomTransaction(from, to, amount, "transaction")
 }
 
-// Takes a wallet, password, receiver, amount and returns a signed transaction 
+// Takes a wallet, password, receiver, amount and returns a signed transaction
 func (state *State) CreateSignedTransaction(wallet Crypto.Account, password string, receiver AccountAddress, amount float64) (SignedTransaction, error) {
 	tx := state.CreateTransaction(AccountAddress(wallet.Address), receiver, amount)
 	return state.SignTransaction(wallet, password, tx)
@@ -83,7 +82,7 @@ func (state *State) CreateSignedTransaction(wallet Crypto.Account, password stri
 func (state *State) CreateGenesisTransaction(accountAddress AccountAddress, amount float64) SignedTransaction {
 	return SignedTransaction{
 		Signature: []byte{},
-		Tx: state.CreateCustomTransaction("system", accountAddress, amount, "genesis"),
+		Tx:        state.CreateCustomTransaction("system", accountAddress, amount, "genesis"),
 	}
 }
 
@@ -93,10 +92,9 @@ func (state *State) CreateGenesisTransaction(accountAddress AccountAddress, amou
 func (state *State) CreateReward(accountAddress AccountAddress, amount float64) SignedTransaction {
 	return SignedTransaction{
 		Signature: []byte{},
-		Tx: state.CreateCustomTransaction("system", accountAddress, amount, "reward"),
+		Tx:        state.CreateCustomTransaction("system", accountAddress, amount, "reward"),
 	}
 }
-
 
 // Given the password for the wallet and a regular transaction, sign the transaction, if the sender is equal to the address of the wallet
 // Returns the signed transaction or an error
@@ -119,7 +117,7 @@ func SaveTransaction(transactionList SignedTransactionList) bool {
 	toSave := LoadedTransactions{transactionList}
 	txFile, _ := json.MarshalIndent(toSave, "", "  ")
 
-	err := ioutil.WriteFile(Consts.LocalDirToFileFolder+"Transactions.json", txFile, 0644)
+	err := ioutil.WriteFile(shared.LocalDirToFileFolder+"Transactions.json", txFile, 0644)
 	if err != nil {
 		panic(err)
 	}
@@ -130,7 +128,7 @@ func SaveTransaction(transactionList SignedTransactionList) bool {
 // Loads the local transactions, saved in the transactions.json file. This is deprecated and only used in early versions of the blockchain.
 // It returns a list of transactions.
 func LoadTransactions() SignedTransactionList {
-	data, err := os.ReadFile(Consts.LocalDirToFileFolder + "Transactions.json")
+	data, err := os.ReadFile(shared.LocalDirToFileFolder + "Transactions.json")
 	if err != nil {
 		panic(err)
 	}
@@ -139,6 +137,23 @@ func LoadTransactions() SignedTransactionList {
 	json.Unmarshal(data, &loadedTransactions)
 
 	return loadedTransactions.Transactions
+}
+
+// Given a list of transactions, save the list of transactions as the local transactions.
+func (transaction_list *TransactionList) SaveTransactions() error {
+	return saveTransactionsAsJSON(transaction_list, "Transactions.json")
+}
+
+// Function that saves list of transactions as a json file
+func saveTransactionsAsJSON(transaction_list *TransactionList, filename string) error {
+	txFile, _ := json.MarshalIndent(transaction_list, "", "  ")
+
+	err := ioutil.WriteFile(shared.LocalDirToFileFolder+filename, txFile, 0644)
+	if err != nil {
+		panic(err)
+	}
+
+	return nil
 }
 
 // Formats a given transaction to text format.

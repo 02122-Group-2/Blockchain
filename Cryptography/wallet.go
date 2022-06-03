@@ -1,7 +1,7 @@
 package cryptography
 
 import (
-	Consts "blockchain/Constants"
+	shared "blockchain/Shared"
 	"crypto/ecdsa"
 	"fmt"
 	"io/ioutil"
@@ -20,7 +20,7 @@ import (
 // Given a password, this function will create a new wallet in the ./wallet folder. It will not delete the old wallets.
 func CreateNewWallet(username string, password string) (string, error) {
 	hashedUsername := crypto.Keccak256Hash([]byte(username)).Hex()
-	ks := keystore.NewKeyStore(filepath.Join(Consts.LocalDirToWallets, hashedUsername), keystore.StandardScryptN, keystore.StandardScryptP)
+	ks := keystore.NewKeyStore(filepath.Join(shared.LocalDirToWallets, hashedUsername), keystore.StandardScryptN, keystore.StandardScryptP)
 	newAcc, err := ks.NewAccount(password)
 
 	if err != nil {
@@ -29,32 +29,30 @@ func CreateNewWallet(username string, password string) (string, error) {
 	return newAcc.Address.Hex(), nil
 }
 
-
 type Account struct {
 	Username string           // Stores the username of the wallet
-	Address string						// Stores the address of the wallet
+	Address  string           // Stores the address of the wallet
 	Wallet   accounts.Account // Stores the actual wallet.
 }
 
-
 func AccessWallet(username string, password string) (Account, error) {
 	hashedUsername := crypto.Keccak256Hash([]byte(username)).Hex()
-	ks := keystore.NewKeyStore(filepath.Join(Consts.LocalDirToWallets, hashedUsername), keystore.StandardScryptN, keystore.StandardScryptP)
+	ks := keystore.NewKeyStore(filepath.Join(shared.LocalDirToWallets, hashedUsername), keystore.StandardScryptN, keystore.StandardScryptP)
 	allAccs := ks.Accounts()
 	if len(allAccs) == 0 {
 		return Account{}, fmt.Errorf("not able to find the account")
 	}
-	
+
 	wallet := allAccs[len(allAccs)-1]
 
 	crypto.Keccak256Hash([]byte(username))
 
 	account := Account{
 		Username: hashedUsername,
-		Address: wallet.Address.Hex(),
-		Wallet: wallet,
+		Address:  wallet.Address.Hex(),
+		Wallet:   wallet,
 	}
-	
+
 	err := account.tryLogIn(password)
 
 	if err != nil {
@@ -101,12 +99,10 @@ func (account *Account) SignTransaction(password string, hashedTransaction [32]b
 	return signature, nil
 }
 
-
 // Deletes the wallet - should require some verification before doing this
 func (account *Account) Delete() error {
 	return os.Remove(account.Wallet.URL.Path)
 }
-
 
 // Given a signature and a signed transaction, it will return the public address of the signer
 // This can be used with the transaction, which was hashed, to ensure the sender of the transaction is the one who signed it,
@@ -123,5 +119,3 @@ func GetAddressFromSignedTransaction(signature []byte, hashedTransaction [32]byt
 
 	return addrString, nil
 }
-
-

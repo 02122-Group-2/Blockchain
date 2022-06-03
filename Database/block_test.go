@@ -8,12 +8,11 @@ import (
 	"testing"
 )
 
-
 var state_block = LoadState()
 var blockchain_original = LoadBlockchain()
 var state_original = LoadState()
 var snapshot_orignal = LoadSnapshot()
-
+var transactions_original = LoadTransactions()
 
 func TestCreateBlock(t *testing.T) {
 	// Create a wallet to test the functionality
@@ -78,7 +77,6 @@ func TestLoadBlockchain(t *testing.T) {
 	ResetTest()
 }
 
-
 func TestAddBlockToBlockchain(t *testing.T) {
 	// Creates a wallet to test the functionality
 	Crypto.CreateNewWallet(walletUsername1, pswd)
@@ -117,7 +115,6 @@ func TestSeperateStatesShareBlock(t *testing.T) {
 	stateOne := LoadSnapshot()
 	stateTwo := stateOne.copyState()
 
-
 	// Creates three wallets
 	// Creates the first wallet to test the functionality
 	Crypto.CreateNewWallet(walletUsername1, pswd)
@@ -141,7 +138,6 @@ func TestSeperateStatesShareBlock(t *testing.T) {
 	// Makes a copy of stateOne to get the original state.
 	original_state := stateOne.copyState()
 	stateOne.SaveSnapshot()
-	
 
 	signedTx1, _ := stateOne.CreateSignedTransaction(testWallet1, pswd, "Niels", 10)
 	stateOne.AddTransaction(signedTx1)
@@ -153,7 +149,6 @@ func TestSeperateStatesShareBlock(t *testing.T) {
 	stateOne.AddTransaction(signedTx3)
 
 	blockOne := stateOne.CreateBlock(stateOne.TxMempool)
-
 
 	signedTx1_2, _ := stateTwo.CreateSignedTransaction(testWallet1, pswd, "Niels", 10) // Should be invalid when merging the other block - Because of Nounces
 	stateTwo.AddTransaction(signedTx1_2)
@@ -188,6 +183,7 @@ func TestSeperateStatesShareBlock(t *testing.T) {
 	testWallet3.Delete()
 	ResetTest()
 }
+
 /*
 func TestMarshalUnmarshalBlock(t *testing.T) {
 	txList := []Transaction{
@@ -240,7 +236,6 @@ func ResetTest() {
 	state_original.SaveState()
 	snapshot_orignal.SaveSnapshot()
 }
-
 
 // Only run this to remake the local blockchain
 // func TestCreateTestDatabase(t *testing.T) {

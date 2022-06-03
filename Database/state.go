@@ -1,8 +1,8 @@
 package database
 
 import (
-	Consts "blockchain/Constants"
 	Crypto "blockchain/Cryptography"
+	shared "blockchain/Shared"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -12,6 +12,17 @@ import (
 	// "path/filepath"
 	"time"
 )
+
+type StateFromPostRequest struct {
+	AccountBalances    map[AccountAddress]uint `json:"AccountBalances"`
+	AccountNounces     map[AccountAddress]uint `json:"AccountNounces"`
+	TxMempool          TransactionList         `json:"TxMempool"`
+	DbFile             *os.File                `json:"DbFile"`
+	LastBlockSerialNo  int                     `json:"LastBlockSerialNo"`
+	LastBlockTimestamp int64                   `json:"LastBlockTimestamp"`
+	LatestHash         []byte                  `json:"LatestHash"`
+	LatestTimestamp    int64                   `json:"LatestTimestamp"`
+}
 
 type State struct {
 	AccountBalances    map[AccountAddress]uint `json: "AccountBalances"`
@@ -142,7 +153,7 @@ func (state *State) ValidateTransactionList(transactionList SignedTransactionLis
 	for i, t := range transactionList {
 		err := state.ValidateTransaction(t)
 		if err != nil {
-			return fmt.Errorf("Transaction nr. %d is not valid. Received Error: %s", i, err.Error())
+			return fmt.Errorf("transaction nr. %d is not valid. Received Error: %s", i, err.Error())
 		}
 	}
 	return nil
@@ -196,7 +207,7 @@ func (state *State) SaveSnapshot() error {
 func saveStateAsJSON(state *State, filename string) error {
 	txFile, _ := json.MarshalIndent(state, "", "  ")
 
-	err := ioutil.WriteFile(Consts.LocalDirToFileFolder+filename, txFile, 0644)
+	err := ioutil.WriteFile(shared.LocalDirToFileFolder+filename, txFile, 0644)
 	if err != nil {
 		panic(err)
 	}
@@ -206,15 +217,11 @@ func saveStateAsJSON(state *State, filename string) error {
 
 // Function that loads a state from a JSON file
 func loadStateFromJSON(filename string) State {
-	data, err := os.ReadFile(Consts.LocalDirToFileFolder + filename)
+	data, err := os.ReadFile(shared.LocalDirToFileFolder + filename)
 	if err != nil {
 		panic(err)
 	}
 
-	data, err = os.ReadFile(Consts.LocalDirToFileFolder + filename)
-	if err != nil {
-		panic(err)
-	}
 	var state State
 	json.Unmarshal(data, &state)
 
@@ -242,9 +249,7 @@ func (currState *State) copyState() State {
 		copy.AccountNounces[accountA] = nounce
 	}
 
-	for _, tx := range currState.TxMempool {
-		copy.TxMempool = append(copy.TxMempool, tx)
-	}
+	copy.TxMempool = append(copy.TxMempool, currState.TxMempool...)
 
 	return copy
 }

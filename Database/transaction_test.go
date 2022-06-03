@@ -71,7 +71,7 @@ func TestApplyLegalTransaction(t *testing.T) {
 	tr := state.CreateTransaction(AccountAddress(testWallet.Address), "Niels", 42.0)
 	signedTx, err := state.SignTransaction(testWallet, pswd, tr)
 
-	if (err != nil) {
+	if err != nil {
 		t.Error("failed to sign transaction. Get error: " + err.Error())
 	}
 
@@ -80,11 +80,11 @@ func TestApplyLegalTransaction(t *testing.T) {
 		t.Error("Failed to add transaction. Error: " + err.Error())
 	}
 
-	if senderBalanceBefore - 42 != state.AccountBalances[AccountAddress(testWallet.Address)] {
+	if senderBalanceBefore-42 != state.AccountBalances[AccountAddress(testWallet.Address)] {
 		t.Error("Sender should have lost 42 tokens")
 	}
 
-	if receiverBalanceBefore + 42 != state.AccountBalances["Niels"] {
+	if receiverBalanceBefore+42 != state.AccountBalances["Niels"] {
 		t.Error("Receiver should have received 42 tokens")
 	}
 
@@ -186,7 +186,7 @@ func TestAddRewardToAccount(t *testing.T) {
 
 	Crypto.CreateNewWallet(walletUsername1, pswd)
 	testWallet, _ := Crypto.AccessWallet(walletUsername1, pswd)
-	state.AccountBalances[AccountAddress(testWallet.Address)] = 1000	
+	state.AccountBalances[AccountAddress(testWallet.Address)] = 1000
 
 	rewardTx := state.CreateReward("Alberto", 5000)
 	err := state.AddTransaction(rewardTx)
@@ -204,7 +204,7 @@ func TestCreateLegalTransactionAndPersist(t *testing.T) {
 
 	Crypto.CreateNewWallet(walletUsername1, pswd)
 	testWallet, _ := Crypto.AccessWallet(walletUsername1, pswd)
-	state.AccountBalances[AccountAddress(testWallet.Address)] = 1000	
+	state.AccountBalances[AccountAddress(testWallet.Address)] = 1000
 
 	tr := state.CreateTransaction(AccountAddress(testWallet.Address), "Magn", 12.0)
 	signedTx, _ := state.SignTransaction(testWallet, pswd, tr)
