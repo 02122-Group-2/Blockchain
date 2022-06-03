@@ -1,4 +1,4 @@
-package database
+package shared
 
 import (
 	"os"
@@ -17,13 +17,11 @@ func TestCheckForNeededFiles(t *testing.T) {
 	}
 
 	//Remove the file
-	os.Remove(localDirToFileFolder + "CurrentState.json")
+	os.Remove(LocalDirToFileFolder + "CurrentState.json")
 
 	//2. The file should not be present and therefore a new empty one is created
 	err = CheckForNeededFiles()
 	if err != nil {
 		t.Errorf("failed to create missing file...")
 	}
-
-	ResetTest()
 }

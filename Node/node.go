@@ -2,6 +2,7 @@ package node
 
 import (
 	Database "blockchain/Database"
+	shared "blockchain/Shared"
 	"fmt"
 	"net/http"
 )
@@ -9,7 +10,7 @@ import (
 func Run() error {
 	//Assesing if all JSON files are present: CurrentState, LatestSnapshot, state,
 	//Transactions, Blockchain.db
-	err := Database.CheckForNeededFiles()
+	err := shared.CheckForNeededFiles()
 	if err != nil {
 		return err
 	}

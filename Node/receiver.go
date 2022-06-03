@@ -14,7 +14,7 @@ func blockDeltaHandler(w http.ResponseWriter, r *http.Request, state *Database.S
 	serialNoParam := r.URL.Query().Get("lastLocalBlockSerialNo")
 	var fromSerial int
 	if serialNoParam == "" {
-		fmt.Errorf("no serial number was provided in GET request\n")
+		fmt.Println(fmt.Errorf("no serial number was provided in GET request"))
 		return
 	}
 
@@ -27,29 +27,23 @@ func blockDeltaHandler(w http.ResponseWriter, r *http.Request, state *Database.S
 //Function used to get the state of a peer node
 func getStateHandler(w http.ResponseWriter, r *http.Request, state *Database.State) {
 	//Response: Get your own state to send to the one requesting it
-	nodeState := GetNodeState()
+	node := GetNode()
 
 	// Read the body containing the state of the node requesting
-	getStateRequest := NodeState{}
+	getStateRequest := Node{}
 	bytes, err := readReq(r)
 	if err != nil {
 		panic(err)
 	}
 	json.Unmarshal(bytes, &getStateRequest)
 
-	//Get the peers from the peer state and append it to your own, if they arent already in the list
-	var currentPeerList = Database.LoadPeerListFromJSON(peerListFile)
-	copiedPeerList := make([]string, len(currentPeerList))
-	copy(copiedPeerList, currentPeerList)
-	for _, peer := range getStateRequest.PeerList {
-		if !contains(copiedPeerList, peer) {
-			copiedPeerList = append(copiedPeerList, peer)
-		}
-	}
-	Database.SavePeerListAsJSON(copiedPeerList, peerListFile)
+	// load peer set from file and union it with the peer set from the incoming request
+	currentPeerSet := LoadPeerSetFromJSON(peerSetFile)
+	currentPeerSet.UnionWith(getStateRequest.PeerSet)
+	SavePeerSetAsJSON(currentPeerSet, peerSetFile)
 
-	fmt.Println(nodeState.PeerList)
-	writeResult(w, nodeState)
+	fmt.Println(node.PeerSet)
+	writeResult(w, node)
 }
 
 func balancesHandler(w http.ResponseWriter, r *http.Request, state *Database.State) {

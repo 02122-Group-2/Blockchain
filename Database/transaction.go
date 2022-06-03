@@ -1,6 +1,7 @@
 package database
 
 import (
+	shared "blockchain/Shared"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -69,7 +70,7 @@ func SaveTransaction(transactionList TransactionList) bool {
 	toSave := LoadedTransactions{transactionList}
 	txFile, _ := json.MarshalIndent(toSave, "", "  ")
 
-	err := ioutil.WriteFile(localDirToFileFolder+"Transactions.json", txFile, 0644)
+	err := ioutil.WriteFile(shared.LocalDirToFileFolder+"Transactions.json", txFile, 0644)
 	if err != nil {
 		panic(err)
 	}
@@ -80,7 +81,7 @@ func SaveTransaction(transactionList TransactionList) bool {
 // Loads the local transactions, saved in the transactions.json file. This is deprecated and only used in early versions of the blockchain.
 // It returns a list of transactions.
 func LoadTransactions() TransactionList {
-	data, err := os.ReadFile(localDirToFileFolder + "Transactions.json")
+	data, err := os.ReadFile(shared.LocalDirToFileFolder + "Transactions.json")
 	if err != nil {
 		panic(err)
 	}

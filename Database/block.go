@@ -1,6 +1,7 @@
 package database
 
 import (
+	shared "blockchain/Shared"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
@@ -159,7 +160,7 @@ func PersistBlockToDB(block Block) error {
 
 // Load the local blockchain and return it as a list of blocks
 func LoadBlockchain() []Block {
-	data, err := os.ReadFile(localDirToFileFolder + "Blockchain.db")
+	data, err := os.ReadFile(shared.LocalDirToFileFolder + "Blockchain.db")
 	if err != nil {
 		panic(err)
 	}
@@ -178,7 +179,7 @@ func SaveBlockchain(blockchain []Block) bool {
 	toSave := Blockchain{blockchain}
 	txFile, _ := json.MarshalIndent(toSave, "", "  ")
 
-	err := ioutil.WriteFile(localDirToFileFolder+"Blockchain.db", txFile, 0644)
+	err := ioutil.WriteFile(shared.LocalDirToFileFolder+"Blockchain.db", txFile, 0644)
 	if err != nil {
 		panic(err)
 	}

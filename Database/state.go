@@ -1,6 +1,7 @@
 package database
 
 import (
+	shared "blockchain/Shared"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -197,7 +198,7 @@ func (state *State) SaveSnapshot() error {
 func saveStateAsJSON(state *State, filename string) error {
 	txFile, _ := json.MarshalIndent(state, "", "  ")
 
-	err := ioutil.WriteFile(localDirToFileFolder+filename, txFile, 0644)
+	err := ioutil.WriteFile(shared.LocalDirToFileFolder+filename, txFile, 0644)
 	if err != nil {
 		panic(err)
 	}
@@ -207,7 +208,7 @@ func saveStateAsJSON(state *State, filename string) error {
 
 // Function that loads a state from a JSON file
 func loadStateFromJSON(filename string) State {
-	data, err := os.ReadFile(localDirToFileFolder + filename)
+	data, err := os.ReadFile(shared.LocalDirToFileFolder + filename)
 	if err != nil {
 		panic(err)
 	}
@@ -216,34 +217,6 @@ func loadStateFromJSON(filename string) State {
 	json.Unmarshal(data, &state)
 
 	return state
-}
-
-// Get Peer List from JSON file
-func LoadPeerListFromJSON(filename string) []string {
-	// Create the file if it doesnt exist
-	InitDataDirIfNotExists(filename)
-
-	data, err := os.ReadFile(localDirToFileFolder + filename)
-	if err != nil {
-		panic(err)
-	}
-
-	var peerList []string
-	json.Unmarshal(data, &peerList)
-
-	return peerList
-}
-
-// Save the peer list in a JSON file
-func SavePeerListAsJSON(state []string, filename string) error {
-	peerList, _ := json.MarshalIndent(state, "", "  ")
-
-	err := ioutil.WriteFile(localDirToFileFolder+filename, peerList, 0644)
-	if err != nil {
-		panic(err)
-	}
-
-	return nil
 }
 
 // Given a state, make a deep copy of the state and return the copy.

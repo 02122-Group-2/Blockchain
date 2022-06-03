@@ -7,30 +7,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"net"
 	"net/http"
-	"time"
 )
-
-func Ping(peerAddr string) bool {
-	timeout := 1 * time.Second
-	conn, err := net.DialTimeout("tcp", peerAddr, timeout)
-	if err != nil {
-		fmt.Println("Site unreachable, error: ", err)
-		return false
-	}
-	conn.Close()
-	return true
-}
-
-func contains(s []string, e string) bool {
-	for _, a := range s {
-		if a == e {
-			return true
-		}
-	}
-	return false
-}
 
 func GetPeerBlocks(peerAddr string, lastLocalBlockSerialNo int) []Database.Block {
 	URI := fmt.Sprintf("http://"+peerAddr+"/blockDelta?lastLocalBlockSerialNo=%d", lastLocalBlockSerialNo)
@@ -53,11 +31,11 @@ func GetPeerBlocks(peerAddr string, lastLocalBlockSerialNo int) []Database.Block
 //The following is done using POST,
 //The header contain the address of the peer that is currently being accessed
 //The body should contain the current state of the requesting node
-func GetPeerState(peerAddr string) NodeState {
+func GetPeerState(peerAddr string) Node {
 	httpposturl := "http://" + peerAddr + "/getState"
 
-	currNodeState := GetNodeState()
-	jsonData, err := json.Marshal(currNodeState)
+	currNode := GetNode()
+	jsonData, err := json.Marshal(currNode)
 	if err != nil {
 		fmt.Println("Could not marshal current node state")
 		panic(err)
@@ -69,23 +47,23 @@ func GetPeerState(peerAddr string) NodeState {
 		panic(err)
 	}
 
-	var peerNodeStateFromRequest NodeStateFromPostRequest
-	var peerNodeState NodeState
+	var peerNodeFromRequest NodeFromPostRequest
+	var peerNode Node
 	bytes, _ := readResp(resp)
 	fmt.Println("Get State response")
 	str := string(bytes)
 	fmt.Println(str)
-	json.Unmarshal(bytes, &peerNodeStateFromRequest)
-	json.Unmarshal(bytes, &peerNodeState)
-	//At this point the data recived should have been saved into peerNodeState
+	json.Unmarshal(bytes, &peerNodeFromRequest)
+	json.Unmarshal(bytes, &peerNode)
+	//At this point the data recived should have been saved into peerNode
 
 	var lh32 [32]byte
 	for i := 0; i < 32; i++ {
-		lh32[i] = peerNodeStateFromRequest.State.LatestHash[i]
+		lh32[i] = peerNodeFromRequest.State.LatestHash[i]
 	}
-	peerNodeState.State.LatestHash = lh32
+	peerNode.State.LatestHash = lh32
 
-	return peerNodeState
+	return peerNode
 }
 
 //Reading the server response

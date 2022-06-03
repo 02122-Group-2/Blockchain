@@ -1,4 +1,4 @@
-package database
+package shared
 
 import (
 	"os"
@@ -38,7 +38,7 @@ func CheckForNeededFiles() error {
 }
 
 func InitDataDirIfNotExists(dataDir string) error {
-	path := localDirToFileFolder + dataDir
+	path := LocalDirToFileFolder + dataDir
 
 	if fileExist(path) {
 		return nil

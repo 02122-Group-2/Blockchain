@@ -5,6 +5,14 @@ import (
 	"testing"
 )
 
+func TestCreatePeerSet(t *testing.T) {
+	ps := PeerSet{}
+	// legalIP := "192.168.0.1:8080"
+	localhost := "localhost:8080"
+	ps.Add(localhost)
+	SavePeerSetAsJSON(ps, peerSetFile)
+}
+
 func TestRun(t *testing.T) {
 	t.Log("begin init test")
 
@@ -24,7 +32,7 @@ func TestGetPeerState(t *testing.T) {
 
 	nodeState := GetPeerState("192.168.0.106:8080")
 
-	if nodeState.PeerList == nil {
+	if nodeState.PeerSet == nil {
 		t.Errorf("Peer list is nil")
 	}
 	if nodeState.State.AccountBalances == nil {
