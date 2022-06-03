@@ -92,6 +92,23 @@ func LoadTransactions() TransactionList {
 	return loadedTransactions.Transactions
 }
 
+// Given a list of transactions, save the list of transactions as the local transactions.
+func (transaction_list *TransactionList) SaveTransactions() error {
+	return saveTransactionsAsJSON(transaction_list, "Transactions.json")
+}
+
+// Function that saves list of transactions as a json file
+func saveTransactionsAsJSON(transaction_list *TransactionList, filename string) error {
+	txFile, _ := json.MarshalIndent(transaction_list, "", "  ")
+
+	err := ioutil.WriteFile(shared.LocalDirToFileFolder+filename, txFile, 0644)
+	if err != nil {
+		panic(err)
+	}
+
+	return nil
+}
+
 // Formats a given transaction to text format.
 func TxToString(transaction Transaction) string {
 	return "From: " + string(transaction.From) + "\n To: " + string(transaction.To) + "\n Amount: " + fmt.Sprintf("%v", transaction.Amount)

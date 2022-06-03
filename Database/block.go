@@ -270,3 +270,12 @@ func (block *Block) UnmarshalJSON(data []byte) error {
 
 	return nil
 }
+
+func (block *Block) BlockToString() string {
+
+	listOfTransactions := ""
+	for _, currTransaction := range block.Transactions {
+		listOfTransactions += TxToString(currTransaction) + "\n"
+	}
+	return "Header: \n " + "-Parent Hash: " + fmt.Sprintf("%v \n", block.Header.ParentHash) + "-Created at: " + fmt.Sprintf("%v \n", block.Header.CreatedAt) + "-Serial No.: " + fmt.Sprintf("%v \n", block.Header.SerialNo) + "List of Transactions: \n" + listOfTransactions
+}
