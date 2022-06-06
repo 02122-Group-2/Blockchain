@@ -35,6 +35,16 @@ func CheckForNeededFiles() error {
 		return err
 	}
 
+	err = InitDataDirIfNotExists("PeerList.json")
+	if err != nil {
+		return err
+	}
+
+	err = InitDataDirIfNotExists("PeerSet.json")
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
