@@ -88,7 +88,7 @@ func TestApplyLegalTransaction(t *testing.T) {
 		t.Error("Receiver should have received 42 tokens")
 	}
 
-	testWallet.Delete()
+	testWallet.HardDelete()
 	ResetTest()
 }
 
@@ -106,7 +106,7 @@ func TestApplyIllegalTransaction(t *testing.T) {
 		t.Error("Succesfully added transaction but expected to fail.")
 	}
 
-	testWallet.Delete()
+	testWallet.HardDelete()
 	ResetTest()
 }
 
@@ -124,7 +124,7 @@ func TestSendMoneyToSameUser(t *testing.T) {
 		t.Error("Normal transaction from account to itself is not allowed")
 	}
 
-	testWallet.Delete()
+	testWallet.HardDelete()
 	ResetTest()
 }
 
@@ -142,7 +142,7 @@ func TestApplyTransactionWithNegativeAmount(t *testing.T) {
 		t.Error("Succesfully added transaction but expected to fail.")
 	}
 
-	testWallet.Delete()
+	testWallet.HardDelete()
 	ResetTest()
 }
 
@@ -159,7 +159,7 @@ func TestAddTransactionFromAnUnknownAccount(t *testing.T) {
 		t.Error("Shouldnt be able to make a transaction from an unknown account")
 	}
 
-	testWallet.Delete()
+	testWallet.HardDelete()
 	ResetTest()
 }
 
@@ -177,7 +177,7 @@ func TestAddTransactionToAnUnknownAccount(t *testing.T) {
 		t.Error("Should be able to send to unknown account")
 	}
 
-	testWallet.Delete()
+	testWallet.HardDelete()
 	ResetTest()
 }
 
@@ -195,7 +195,7 @@ func TestAddRewardToAccount(t *testing.T) {
 		t.Error("Unable to add reward to user. Gor error: " + err.Error())
 	}
 
-	testWallet.Delete()
+	testWallet.HardDelete()
 	ResetTest()
 }
 
@@ -213,7 +213,7 @@ func TestCreateLegalTransactionAndPersist(t *testing.T) {
 		t.Error("Failed to add transaction. Error: " + err.Error())
 	}
 
-	testWallet.Delete()
+	testWallet.HardDelete()
 	SaveTransaction(state.TxMempool)
 	ResetTest()
 }
@@ -243,7 +243,7 @@ func TestAddTransactionAndCheckTheyAreSaved(t *testing.T) {
 		t.Error("the local changes should be saved but are not")
 	}
 
-	testWallet1.Delete()
-	testWallet2.Delete()
+	testWallet1.HardDelete()
+	testWallet2.HardDelete()
 	ResetTest()
 }

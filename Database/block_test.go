@@ -37,7 +37,7 @@ func TestCreateBlock(t *testing.T) {
 	fmt.Println(err2)
 
 	ResetTest()
-	testWallet.Delete()
+	testWallet.HardDelete()
 }
 
 func TestSaveBlock(t *testing.T) {
@@ -68,7 +68,7 @@ func TestSaveBlock(t *testing.T) {
 	SaveBlockchain(blockList)
 
 	ResetTest()
-	testWallet.Delete()
+	testWallet.HardDelete()
 }
 
 func TestLoadBlockchain(t *testing.T) {
@@ -109,7 +109,7 @@ func TestAddBlockToBlockchain(t *testing.T) {
 	}
 
 	ResetTest()
-	testWallet.Delete()
+	testWallet.HardDelete()
 }
 
 // This tests makes sure the functionality of sharing the blocks work correctly.
@@ -183,9 +183,9 @@ func TestSeperateStatesShareBlock(t *testing.T) {
 		t.Errorf("failed - all transactions should be removed from the first state and one should remain in the last")
 	}
 
-	testWallet1.Delete()
-	testWallet2.Delete()
-	testWallet3.Delete()
+	testWallet1.HardDelete()
+	testWallet2.HardDelete()
+	testWallet3.HardDelete()
 	ResetTest()
 }
 
@@ -242,9 +242,6 @@ func ResetTest() {
 	snapshot_orignal.SaveSnapshot()
 }
 
-
-
-
 // Only run this to remake the local blockchain
 // func TestCreateTestDatabase(t *testing.T) {
 // 	state_block.SaveSnapshot()
@@ -262,7 +259,6 @@ func ResetTest() {
 
 // 	block := state_block.CreateBlock(state_block.TxMempool)
 // 	err   := state_block.AddBlock(block)
-
 
 // 	if err != nil {
 // 		fmt.Println("d")

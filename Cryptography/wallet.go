@@ -5,6 +5,7 @@ import (
 	"crypto/ecdsa"
 	"fmt"
 	"io/ioutil"
+	"strings"
 
 	"crypto/elliptic"
 
@@ -100,7 +101,25 @@ func (account *Account) SignTransaction(password string, hashedTransaction [32]b
 }
 
 // Deletes the wallet - should require some verification before doing this
-func (account *Account) Delete() error {
+func (account *Account) Delete(username string, password string) error {
+
+	hashedUsername := crypto.Keccak256Hash([]byte(username)).Hex()
+
+	if strings.Compare(hashedUsername, account.Username) != 0 {
+		return fmt.Errorf("Cannot delete wallet. Username is incorrect")
+	}
+
+	err := account.tryLogIn(password)
+	if err != nil {
+		return fmt.Errorf("Cannot delete wallet. Password is incorrect")
+	}
+
+	return os.Remove(account.Wallet.URL.Path)
+}
+
+//Hard delete the wallet - no required verification. Used for testing
+func (account *Account) HardDelete() error {
+
 	return os.Remove(account.Wallet.URL.Path)
 }
 

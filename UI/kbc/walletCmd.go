@@ -32,7 +32,7 @@ func walletCreateCmd() *cobra.Command {
 		Short: "Create a new wallet",
 		Run: func(cmd *cobra.Command, args []string) {
 			//Initialize the flags
-			
+
 			username, _ := cmd.Flags().GetString(flagUsername)
 			password, _ := cmd.Flags().GetString(flagPassword)
 
@@ -57,14 +57,13 @@ func walletCreateCmd() *cobra.Command {
 
 }
 
-
 func walletDelete() *cobra.Command {
 	var cmd = &cobra.Command{
 		Use:   "delete",
 		Short: "Delete a wallet",
 		Run: func(cmd *cobra.Command, args []string) {
 			//Initialize the flags
-			
+
 			username, _ := cmd.Flags().GetString(flagUsername)
 			password, _ := cmd.Flags().GetString(flagPassword)
 
@@ -76,11 +75,11 @@ func walletDelete() *cobra.Command {
 			}
 
 			// Delete Wallet
-			err = wallet.Delete()
+			err = wallet.Delete(username, password)
 			if err != nil {
 				fmt.Fprintln(os.Stderr, err)
 				os.Exit(1)
-			} 
+			}
 			fmt.Println("Wallet has been deleted")
 		},
 	}
@@ -94,14 +93,13 @@ func walletDelete() *cobra.Command {
 
 }
 
-
 func walletAccess() *cobra.Command {
 	var cmd = &cobra.Command{
 		Use:   "access",
 		Short: "Aceess the wallet to see its information",
 		Run: func(cmd *cobra.Command, args []string) {
 			//Initialize the flags
-			
+
 			username, _ := cmd.Flags().GetString(flagUsername)
 			password, _ := cmd.Flags().GetString(flagPassword)
 
