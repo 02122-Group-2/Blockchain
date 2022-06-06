@@ -3,13 +3,17 @@ package node
 import Database "blockchain/Database"
 
 type NodeFromPostRequest struct {
-	PeerSet PeerSet                       `json:"peer_set"`
-	State   Database.StateFromPostRequest `json:"state"`
+	Address     string                        `json:"address"`
+	PeerSet     PeerSet                       `json:"peer_set"`
+	State       Database.StateFromPostRequest `json:"state"`
+	ChainHashes []string                      `json:"chain_hashes"`
 }
 
 type Node struct {
-	PeerSet PeerSet        `json:"peer_set"`
-	State   Database.State `json:"state"`
+	Address     string         `json:"address"`
+	PeerSet     PeerSet        `json:"peer_set"`
+	State       Database.State `json:"state"`
+	ChainHashes []string       `json:"chain_hashes"`
 }
 
 const httpPort = 8080
@@ -33,3 +37,15 @@ type TxRequest struct {
 type TxResult struct {
 	Status bool `json:"status"`
 }
+
+type PingResponse struct {
+	address string
+	ok      bool
+	latency int64
+}
+
+type PingResponseList []PingResponse
+
+func (p PingResponseList) Len() int           { return len(p) }
+func (p PingResponseList) Less(i, j int) bool { return p[i].latency < p[j].latency }
+func (p PingResponseList) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }

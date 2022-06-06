@@ -30,7 +30,7 @@ func (p PeerSet) Exists(k string) bool {
 
 func (p PeerSet) DeepCopy() PeerSet {
 	new := PeerSet{}
-	for k, _ := range p {
+	for k := range p {
 		new[k] = true
 	}
 	return new

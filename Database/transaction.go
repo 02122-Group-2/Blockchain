@@ -37,7 +37,7 @@ func (state *State) CreateCustomTransaction(from AccountAddress, to AccountAddre
 		to,
 		amount,
 		accountNounce,
-		makeTimestamp(),
+		shared.MakeTimestamp(),
 		_type,
 	}
 

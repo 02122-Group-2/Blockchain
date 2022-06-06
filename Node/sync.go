@@ -2,8 +2,10 @@ package node
 
 import (
 	Database "blockchain/Database"
+	shared "blockchain/Shared"
 	"fmt"
 	"net"
+	"os"
 	"regexp"
 	"time"
 )
@@ -22,9 +24,11 @@ func synchronization() {
 		// slice for storing all active connections from current sync iteration
 		newPeers := PeerSet{}
 
-		for peer, _ := range peersToCheck {
+		// sync with each peer, first blocks then states
+		for peer := range peersToCheck {
 			newPeers = node.syncPeer(peer, newPeers)
 		}
+
 		// Persist the updated peer Set
 		SavePeerSetAsJSON(newPeers, peerSetFile)
 
@@ -35,7 +39,7 @@ func synchronization() {
 
 func (node Node) syncPeer(peer string, newPeers PeerSet) PeerSet {
 	// if we cannot connect to a peer, skip it and don't append it
-	if !Ping(peer) {
+	if !Ping(peer).ok {
 		return nil
 	} else {
 		newPeers.Add(peer)
@@ -57,8 +61,8 @@ func (node Node) syncPeer(peer string, newPeers PeerSet) PeerSet {
 	node.State.TryAddTransactions(peerState.State.TxMempool)
 
 	reachableIPs := PeerSet{}
-	for peer2, _ := range peerState.PeerSet {
-		if Ping(peer2) { // If the incoming address wasn't in the original list, add it to the new list of addresses
+	for peer2 := range peerState.PeerSet {
+		if Ping(peer2).ok { // If the incoming address wasn't in the original list, add it to the new list of addresses
 			reachableIPs.Add(peer2)
 		}
 	}
@@ -69,8 +73,10 @@ func (node Node) syncPeer(peer string, newPeers PeerSet) PeerSet {
 // Get the initial node state
 func GetNode() Node {
 	node := Node{}
+	node.Address = getLocalIP()
 	node.State = *Database.LoadState()
 	node.PeerSet = GetPeerSet()
+	node.ChainHashes = Database.GetLocalChainHashes(node.State, 0)
 	return node
 }
 
@@ -84,19 +90,22 @@ func GetPeerSet() PeerSet {
 	return ps
 }
 
-func Ping(peerAddr string) bool {
+func Ping(peerAddr string) PingResponse {
 	if !legalIpAddress(peerAddr) {
-		return false
+		return PingResponse{"nil", false, -1}
 	}
 
+	startTime := shared.MakeTimestamp()
 	timeout := 1 * time.Second
 	conn, err := net.DialTimeout("tcp", peerAddr, timeout)
 	if err != nil {
 		fmt.Println("Site unreachable, error: ", err)
-		return false
+		return PingResponse{"nil", false, -1}
 	}
+	endTime := shared.MakeTimestamp()
+	latency := endTime - startTime
 	conn.Close()
-	return true
+	return PingResponse{peerAddr, true, latency}
 }
 
 func contains(s []string, e string) bool {
@@ -112,4 +121,15 @@ func legalIpAddress(addr string) bool {
 	regexIPwithPort := "^(localhost|([0-9]{1,3}.){1,3}([0-9]{1,3})):([0-9]{4,5})$"
 	match, _ := regexp.MatchString(regexIPwithPort, addr)
 	return match
+}
+
+func getLocalIP() string {
+	host, _ := os.Hostname()
+	addrs, _ := net.LookupIP(host)
+	for _, addr := range addrs {
+		if ipv4 := addr.To4(); ipv4 != nil {
+			return fmt.Sprint(ipv4) + ":8080"
+		}
+	}
+	return "localhost:8080"
 }

@@ -21,7 +21,7 @@ func GetPeerBlocks(peerAddr string, lastLocalBlockSerialNo int) []Database.Block
 
 	var blockDelta []Database.Block
 
-	bytes, err := readResp(resp)
+	bytes, _ := readResp(resp)
 
 	json.Unmarshal(bytes, &blockDelta)
 
@@ -62,6 +62,8 @@ func GetPeerState(peerAddr string) Node {
 		lh32[i] = peerNodeFromRequest.State.LatestHash[i]
 	}
 	peerNode.State.LatestHash = lh32
+
+	peerNode.ChainHashes = peerNodeFromRequest.ChainHashes
 
 	return peerNode
 }
