@@ -70,11 +70,6 @@ func (state *State) ValidateBlock(block Block) error {
 		return fmt.Errorf("the new block must have a newer creation date than the Latest block")
 	}
 
-	err := state.ValidateTransactionList(block.SignedTx)
-	if err != nil {
-		return err
-	}
-
 	return nil
 }
 
@@ -122,7 +117,13 @@ func (state *State) ApplyBlocks(blocks []Block) error {
 // It then applies the block to the state and saves a snapshot of the last "block"-state.
 func (state *State) AddBlock(block Block) error {
 	prevState := LoadSnapshot()
-	err := prevState.ApplyBlock(block)
+
+	err := prevState.ValidateBlock(block)
+	if err != nil {
+		return err
+	}
+
+	err = prevState.ApplyBlock(block)
 	if err != nil {
 		return err
 	}
