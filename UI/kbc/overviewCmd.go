@@ -24,7 +24,7 @@ func overviewCmd() *cobra.Command {
 			numberOfBlocks := currentState.LastBlockSerialNo
 			fmt.Printf("Current number of blocks in blockchain: %v \n", numberOfBlocks)
 
-			fmt.Printf("Latest hash: %v \n", currentState.LatestHash)
+			fmt.Printf("Latest hash: %x \n", currentState.LatestHash)
 
 			//converting time to readable format
 			tUnix := currentState.LastBlockTimestamp / int64(time.Second)
