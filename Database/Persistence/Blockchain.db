@@ -3,378 +3,41 @@
     {
       "Header": {
         "ParentHash": "0000000000000000000000000000000000000000000000000000000000000000",
-        "CreatedAt": 1648641894921071900,
+        "CreatedAt": 1654517978514047800,
         "SerialNo": 1
       },
       "Transactions": [
         {
-          "Signature": null,
+          "Signature": "",
           "Tx": {
-            "From": "",
-            "To": "",
-            "Amount": 0,
-            "SenderNounce": 0,
-            "Timestamp": 0,
-            "Type": ""
+            "From": "system",
+            "To": "0xC98f5180FF9836CC2EF67158EfEd9AA5ddeC54F6",
+            "Amount": 100000000,
+            "SenderNounce": 1,
+            "Timestamp": 1654517978511938300,
+            "Type": "genesis"
           }
         },
         {
-          "Signature": null,
+          "Signature": "",
           "Tx": {
-            "From": "",
-            "To": "",
-            "Amount": 0,
-            "SenderNounce": 0,
-            "Timestamp": 0,
-            "Type": ""
+            "From": "system",
+            "To": "0x5b355Cd0C7fB6aD65b2e9342Fb6FBf0146585D7b",
+            "Amount": 100000000,
+            "SenderNounce": 2,
+            "Timestamp": 1654517978513008600,
+            "Type": "genesis"
           }
         },
         {
-          "Signature": null,
+          "Signature": "",
           "Tx": {
-            "From": "",
-            "To": "",
-            "Amount": 0,
-            "SenderNounce": 0,
-            "Timestamp": 0,
-            "Type": ""
-          }
-        },
-        {
-          "Signature": null,
-          "Tx": {
-            "From": "",
-            "To": "",
-            "Amount": 0,
-            "SenderNounce": 0,
-            "Timestamp": 0,
-            "Type": ""
-          }
-        },
-        {
-          "Signature": null,
-          "Tx": {
-            "From": "",
-            "To": "",
-            "Amount": 0,
-            "SenderNounce": 0,
-            "Timestamp": 0,
-            "Type": ""
-          }
-        },
-        {
-          "Signature": null,
-          "Tx": {
-            "From": "",
-            "To": "",
-            "Amount": 0,
-            "SenderNounce": 0,
-            "Timestamp": 0,
-            "Type": ""
-          }
-        },
-        {
-          "Signature": null,
-          "Tx": {
-            "From": "",
-            "To": "",
-            "Amount": 0,
-            "SenderNounce": 0,
-            "Timestamp": 0,
-            "Type": ""
-          }
-        },
-        {
-          "Signature": null,
-          "Tx": {
-            "From": "",
-            "To": "",
-            "Amount": 0,
-            "SenderNounce": 0,
-            "Timestamp": 0,
-            "Type": ""
-          }
-        },
-        {
-          "Signature": null,
-          "Tx": {
-            "From": "",
-            "To": "",
-            "Amount": 0,
-            "SenderNounce": 0,
-            "Timestamp": 0,
-            "Type": ""
-          }
-        },
-        {
-          "Signature": null,
-          "Tx": {
-            "From": "",
-            "To": "",
-            "Amount": 0,
-            "SenderNounce": 0,
-            "Timestamp": 0,
-            "Type": ""
-          }
-        },
-        {
-          "Signature": null,
-          "Tx": {
-            "From": "",
-            "To": "",
-            "Amount": 0,
-            "SenderNounce": 0,
-            "Timestamp": 0,
-            "Type": ""
-          }
-        },
-        {
-          "Signature": null,
-          "Tx": {
-            "From": "",
-            "To": "",
-            "Amount": 0,
-            "SenderNounce": 0,
-            "Timestamp": 0,
-            "Type": ""
-          }
-        },
-        {
-          "Signature": null,
-          "Tx": {
-            "From": "",
-            "To": "",
-            "Amount": 0,
-            "SenderNounce": 0,
-            "Timestamp": 0,
-            "Type": ""
-          }
-        },
-        {
-          "Signature": null,
-          "Tx": {
-            "From": "",
-            "To": "",
-            "Amount": 0,
-            "SenderNounce": 0,
-            "Timestamp": 0,
-            "Type": ""
-          }
-        },
-        {
-          "Signature": null,
-          "Tx": {
-            "From": "",
-            "To": "",
-            "Amount": 0,
-            "SenderNounce": 0,
-            "Timestamp": 0,
-            "Type": ""
-          }
-        },
-        {
-          "Signature": null,
-          "Tx": {
-            "From": "",
-            "To": "",
-            "Amount": 0,
-            "SenderNounce": 0,
-            "Timestamp": 0,
-            "Type": ""
-          }
-        },
-        {
-          "Signature": null,
-          "Tx": {
-            "From": "",
-            "To": "",
-            "Amount": 0,
-            "SenderNounce": 0,
-            "Timestamp": 0,
-            "Type": ""
-          }
-        },
-        {
-          "Signature": null,
-          "Tx": {
-            "From": "",
-            "To": "",
-            "Amount": 0,
-            "SenderNounce": 0,
-            "Timestamp": 0,
-            "Type": ""
-          }
-        },
-        {
-          "Signature": null,
-          "Tx": {
-            "From": "",
-            "To": "",
-            "Amount": 0,
-            "SenderNounce": 0,
-            "Timestamp": 0,
-            "Type": ""
-          }
-        },
-        {
-          "Signature": null,
-          "Tx": {
-            "From": "",
-            "To": "",
-            "Amount": 0,
-            "SenderNounce": 0,
-            "Timestamp": 0,
-            "Type": ""
-          }
-        },
-        {
-          "Signature": null,
-          "Tx": {
-            "From": "",
-            "To": "",
-            "Amount": 0,
-            "SenderNounce": 0,
-            "Timestamp": 0,
-            "Type": ""
-          }
-        },
-        {
-          "Signature": null,
-          "Tx": {
-            "From": "",
-            "To": "",
-            "Amount": 0,
-            "SenderNounce": 0,
-            "Timestamp": 0,
-            "Type": ""
-          }
-        },
-        {
-          "Signature": null,
-          "Tx": {
-            "From": "",
-            "To": "",
-            "Amount": 0,
-            "SenderNounce": 0,
-            "Timestamp": 0,
-            "Type": ""
-          }
-        },
-        {
-          "Signature": null,
-          "Tx": {
-            "From": "",
-            "To": "",
-            "Amount": 0,
-            "SenderNounce": 0,
-            "Timestamp": 0,
-            "Type": ""
-          }
-        },
-        {
-          "Signature": null,
-          "Tx": {
-            "From": "",
-            "To": "",
-            "Amount": 0,
-            "SenderNounce": 0,
-            "Timestamp": 0,
-            "Type": ""
-          }
-        },
-        {
-          "Signature": null,
-          "Tx": {
-            "From": "",
-            "To": "",
-            "Amount": 0,
-            "SenderNounce": 0,
-            "Timestamp": 0,
-            "Type": ""
-          }
-        },
-        {
-          "Signature": null,
-          "Tx": {
-            "From": "",
-            "To": "",
-            "Amount": 0,
-            "SenderNounce": 0,
-            "Timestamp": 0,
-            "Type": ""
-          }
-        },
-        {
-          "Signature": null,
-          "Tx": {
-            "From": "",
-            "To": "",
-            "Amount": 0,
-            "SenderNounce": 0,
-            "Timestamp": 0,
-            "Type": ""
-          }
-        }
-      ]
-    },
-    {
-      "Header": {
-        "ParentHash": "c352edf51ac6fdf40de39d11a85c1f1a90620028905a6ead5fa78da04eee75cc",
-        "CreatedAt": 1648641894929076300,
-        "SerialNo": 2
-      },
-      "Transactions": [
-        {
-          "Signature": null,
-          "Tx": {
-            "From": "",
-            "To": "",
-            "Amount": 0,
-            "SenderNounce": 0,
-            "Timestamp": 0,
-            "Type": ""
-          }
-        },
-        {
-          "Signature": null,
-          "Tx": {
-            "From": "",
-            "To": "",
-            "Amount": 0,
-            "SenderNounce": 0,
-            "Timestamp": 0,
-            "Type": ""
-          }
-        }
-      ]
-    },
-    {
-      "Header": {
-        "ParentHash": "0116adebf51528def8fdb441daa7620c017d1fe288fdb8071e24717aea74f81c",
-        "CreatedAt": 1648641894935865700,
-        "SerialNo": 3
-      },
-      "Transactions": [
-        {
-          "Signature": null,
-          "Tx": {
-            "From": "",
-            "To": "",
-            "Amount": 0,
-            "SenderNounce": 0,
-            "Timestamp": 0,
-            "Type": ""
-          }
-        },
-        {
-          "Signature": null,
-          "Tx": {
-            "From": "",
-            "To": "",
-            "Amount": 0,
-            "SenderNounce": 0,
-            "Timestamp": 0,
-            "Type": ""
+            "From": "system",
+            "To": "0x5D34001173D5d05fA3AC865fb2b30131478a13d7",
+            "Amount": 100000000,
+            "SenderNounce": 3,
+            "Timestamp": 1654517978513529900,
+            "Type": "genesis"
           }
         }
       ]
