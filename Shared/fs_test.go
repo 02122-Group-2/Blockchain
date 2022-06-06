@@ -22,6 +22,8 @@ func TestCheckForNeededFiles(t *testing.T) {
 	os.Remove(LocalDirToFileFolder + "state.json")
 	os.Remove(LocalDirToFileFolder + "LatestSnapshot.json")
 	os.Remove(LocalDirToFileFolder + "Transactions.json")
+	os.Remove(LocalDirToFileFolder + "PeerSet.json")
+	os.Remove(LocalDirToFileFolder + "PeerList.json")
 
 	//2. The file should not be present and therefore a new empty one is created
 	err = CheckForNeededFiles()

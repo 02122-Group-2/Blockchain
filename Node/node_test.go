@@ -14,12 +14,15 @@ func TestCreatePeerSet(t *testing.T) {
 }
 
 func TestRun(t *testing.T) {
-	t.Log("begin init test")
+	t.Log("begin run test")
 
-	// synchronization()
-	Run()
+	err := Run()
+	if err != nil {
+		t.Log("Could not run node")
+		t.Fail()
+	}
+	//Check for files
 
-	//Database.ResetTest()
 }
 func TestGetPeerState(t *testing.T) {
 	t.Log("begin get peer state test")
