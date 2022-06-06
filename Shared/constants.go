@@ -1,4 +1,4 @@
 package shared
 
-const LocalDirToWallets string = "/Users/nielsraunkjaer/desktop/Sem4/SWP_02122/Blockchain/Wallets"
-const LocalDirToFileFolder string = "/Users/nielsraunkjaer/desktop/Sem4/SWP_02122/Blockchain/database/Persistence/"
+const LocalDirToWallets string = "C:\\Users\\Asger\\OneDrive - Danmarks Tekniske Universitet\\4. semester\\Fagprojekt\\New blockchain\\Blockchain\\Wallets\\"
+const LocalDirToFileFolder string = "C:\\Users\\Asger\\OneDrive - Danmarks Tekniske Universitet\\4. semester\\Fagprojekt\\New blockchain\\Blockchain\\database\\Persistence\\"
