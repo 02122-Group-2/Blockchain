@@ -35,6 +35,7 @@ $RECYCLE.BIN/
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
+Cryptography/Wallets/*
 database/constants.go
 Constants/constants.go
 */constants.go
