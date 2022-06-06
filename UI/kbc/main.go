@@ -22,6 +22,7 @@ func main() {
 	kbcCmd.AddCommand(runCmd())
 	kbcCmd.AddCommand(blockCmd())
 	kbcCmd.AddCommand(overviewCmd())
+	kbcCmd.AddCommand(walletCmd())
 
 	err := kbcCmd.Execute()
 	if err != nil {
