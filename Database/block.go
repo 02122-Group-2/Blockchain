@@ -70,11 +70,6 @@ func (state *State) ValidateBlock(block Block) error {
 		return fmt.Errorf("the new block must have a newer creation date than the Latest block")
 	}
 
-	err := state.ValidateTransactionList(block.Transactions)
-	if err != nil {
-		return err
-	}
-
 	return nil
 }
 
