@@ -246,28 +246,28 @@ func ResetTest() {
 
 
 // Only run this to remake the local blockchain
-func TestCreateTestDatabase(t *testing.T) {
-	state_block.SaveSnapshot()
-	// Genesis transaction to Emilie
-	tx1 := state_block.CreateGenesisTransaction("0xC98f5180FF9836CC2EF67158EfEd9AA5ddeC54F6", 100000000)
-	_    = state_block.AddTransaction(tx1)
+// func TestCreateTestDatabase(t *testing.T) {
+// 	state_block.SaveSnapshot()
+// 	// Genesis transaction to Emilie
+// 	tx1 := state_block.CreateGenesisTransaction("0xC98f5180FF9836CC2EF67158EfEd9AA5ddeC54F6", 100000000)
+// 	_    = state_block.AddTransaction(tx1)
 
-	// Genesis transaction to Asger
-	tx2 := state_block.CreateGenesisTransaction("0x5b355Cd0C7fB6aD65b2e9342Fb6FBf0146585D7b", 100000000)
-	_    = state_block.AddTransaction(tx2)
+// 	// Genesis transaction to Asger
+// 	tx2 := state_block.CreateGenesisTransaction("0x5b355Cd0C7fB6aD65b2e9342Fb6FBf0146585D7b", 100000000)
+// 	_    = state_block.AddTransaction(tx2)
 
-	// Genesis transaction to Magn
-	tx3 := state_block.CreateGenesisTransaction("0x5D34001173D5d05fA3AC865fb2b30131478a13d7", 100000000)
-	_    = state_block.AddTransaction(tx3)
+// 	// Genesis transaction to Magn
+// 	tx3 := state_block.CreateGenesisTransaction("0x5D34001173D5d05fA3AC865fb2b30131478a13d7", 100000000)
+// 	_    = state_block.AddTransaction(tx3)
 
-	block := state_block.CreateBlock(state_block.TxMempool)
-	err   := state_block.AddBlock(block)
+// 	block := state_block.CreateBlock(state_block.TxMempool)
+// 	err   := state_block.AddBlock(block)
 
 
-	if err != nil {
-		fmt.Println("d")
-	}
-	fmt.Print("Uo")
-}
+// 	if err != nil {
+// 		fmt.Println("d")
+// 	}
+// 	fmt.Print("Uo")
+// }
 
 // // func TestByteSliceToHexString (t *testing.T)
