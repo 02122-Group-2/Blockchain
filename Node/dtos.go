@@ -1,6 +1,9 @@
 package node
 
-import Database "blockchain/Database"
+import (
+	Database "blockchain/Database"
+	shared "blockchain/Shared"
+)
 
 type NodeFromPostRequest struct {
 	Address     string                        `json:"address"`
@@ -16,8 +19,8 @@ type Node struct {
 	ChainHashes []string       `json:"chain_hashes"`
 }
 
-const httpPort = 8081
-const bootstrapNode = "localhost:8081"
+const httpPort = shared.HttpPort
+const bootstrapNode = shared.BootstrapNode
 
 //Models the balances data recived
 type balancesResult struct {

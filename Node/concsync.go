@@ -63,7 +63,12 @@ func concSynchronization() {
 		consensusNode := computeConsensusNode(nodes) // gets node object that has consensus chain
 
 		// match blockchain with consensus chain, newest blocks
-		deltaIdx := chainDiffIdx(node.ChainHashes, consensusNode.ChainHashes)
+		var deltaIdx int
+		if len(node.ChainHashes) < len(consensusNode.ChainHashes) {
+			deltaIdx = chainDiffIdx(node.ChainHashes, consensusNode.ChainHashes)
+		} else {
+			deltaIdx = chainDiffIdx(consensusNode.ChainHashes, node.ChainHashes)
+		}
 
 		// fetch peer blocks delta
 		var peerBlocks []Database.Block
