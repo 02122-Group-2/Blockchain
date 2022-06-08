@@ -2,13 +2,11 @@ package node
 
 import (
 	Database "blockchain/Database"
+	shared "blockchain/Shared"
 	"fmt"
 	"net"
-	"regexp"
 	"time"
 )
-
-var peerSetFile = "PeerSet.json"
 
 //Function that essentialy is the implemented version of our peer sync algorithm
 func synchronization() {
@@ -26,7 +24,7 @@ func synchronization() {
 			newPeers = node.syncPeer(peer, newPeers)
 		}
 		// Persist the updated peer Set
-		SavePeerSetAsJSON(newPeers, peerSetFile)
+		SavePeerSetAsJSON(newPeers, shared.PeerSetFile)
 
 		// Wait 20 seconds before running next sync iteration
 		time.Sleep(20 * time.Second)
@@ -77,7 +75,7 @@ func GetNode() Node {
 // Get the stored set of nodes
 // If this hasn't been created before, create it using the bootstrap node
 func GetPeerSet() PeerSet {
-	ps := LoadPeerSetFromJSON(peerSetFile)
+	ps := LoadPeerSetFromJSON(shared.PeerSetFile)
 	if len(ps) == 0 {
 		ps.Add(bootstrapNode)
 	}
@@ -85,7 +83,7 @@ func GetPeerSet() PeerSet {
 }
 
 func Ping(peerAddr string) bool {
-	if !legalIpAddress(peerAddr) {
+	if !shared.LegalIpAddress(peerAddr) {
 		return false
 	}
 
@@ -108,8 +106,4 @@ func contains(s []string, e string) bool {
 	return false
 }
 
-func legalIpAddress(addr string) bool {
-	regexIPwithPort := "^(localhost|([0-9]{1,3}.){1,3}([0-9]{1,3})):([0-9]{4,5})$"
-	match, _ := regexp.MatchString(regexIPwithPort, addr)
-	return match
-}
+

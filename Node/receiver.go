@@ -2,6 +2,7 @@ package node
 
 import (
 	Database "blockchain/Database"
+	shared "blockchain/Shared"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -38,9 +39,9 @@ func getStateHandler(w http.ResponseWriter, r *http.Request, state *Database.Sta
 	json.Unmarshal(bytes, &getStateRequest)
 
 	// load peer set from file and union it with the peer set from the incoming request
-	currentPeerSet := LoadPeerSetFromJSON(peerSetFile)
+	currentPeerSet := LoadPeerSetFromJSON(shared.PeerSetFile)
 	currentPeerSet.UnionWith(getStateRequest.PeerSet)
-	SavePeerSetAsJSON(currentPeerSet, peerSetFile)
+	SavePeerSetAsJSON(currentPeerSet, shared.PeerSetFile)
 
 	fmt.Println(node.PeerSet)
 	writeResult(w, node)
