@@ -48,7 +48,7 @@ func (node Node) syncPeer(peer string, newPeers PeerSet) PeerSet {
 	peerState := GetPeerState(peer)
 
 	fmt.Println("Got peer state")
-	fmt.Println(peerState)
+	// fmt.Println(peerState)
 
 	peerHasNewerBlock := peerState.State.LastBlockSerialNo > node.State.LastBlockSerialNo
 	if peerHasNewerBlock {

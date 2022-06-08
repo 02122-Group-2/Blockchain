@@ -2,6 +2,7 @@ package node
 
 import (
 	Database "blockchain/Database"
+	shared "blockchain/Shared"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -50,9 +51,9 @@ func GetPeerState(peerAddr string) Node {
 	var peerNodeFromRequest NodeFromPostRequest
 	var peerNode Node
 	bytes, _ := readResp(resp)
-	fmt.Println("Get State response")
-	str := string(bytes)
-	fmt.Println(str)
+	fmt.Printf("Get State response at %v\n", shared.PrettyTimestamp())
+	// str := string(bytes)
+	// fmt.Println(str)
 	json.Unmarshal(bytes, &peerNodeFromRequest)
 	json.Unmarshal(bytes, &peerNode)
 	//At this point the data recived should have been saved into peerNode

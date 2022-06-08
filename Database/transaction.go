@@ -41,7 +41,7 @@ func (state *State) CreateCustomTransaction(from AccountAddress, to AccountAddre
 		_type,
 	}
 
-	fmt.Println(t)
+	// fmt.Println(t)
 	return t
 }
 

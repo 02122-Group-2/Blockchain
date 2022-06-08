@@ -16,8 +16,8 @@ type Node struct {
 	ChainHashes []string       `json:"chain_hashes"`
 }
 
-const httpPort = 8080
-const bootstrapNode = "localhost:8080"
+const httpPort = 8081
+const bootstrapNode = "localhost:8081"
 
 //Models the balances data recived
 type balancesResult struct {

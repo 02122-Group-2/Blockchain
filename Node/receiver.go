@@ -42,7 +42,7 @@ func getStateHandler(w http.ResponseWriter, r *http.Request, state *Database.Sta
 	currentPeerSet.UnionWith(getStateRequest.PeerSet)
 	SavePeerSetAsJSON(currentPeerSet, peerSetFile)
 
-	fmt.Println(node.PeerSet)
+	// fmt.Println(node.PeerSet)
 	writeResult(w, node)
 }
 
@@ -79,7 +79,7 @@ func transactionHandler(w http.ResponseWriter, r *http.Request, state *Database.
 		}
 	}
 
-	fmt.Println(transaction)
+	// fmt.Println(transaction)
 
 	err = state.AddTransaction(transaction)
 	if err != nil {
