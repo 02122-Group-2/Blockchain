@@ -52,7 +52,7 @@ func GetPeerState(peerAddr string) Node {
 	var peerNodeFromRequest NodeFromPostRequest
 	var peerNode Node
 	bytes, _ := readResp(resp)
-	fmt.Printf("Get State response at %v\n", shared.PrettyTimestamp())
+	fmt.Printf("%s: Get State response from %s \n", shared.PrettyTimestamp(), peerAddr)
 	// str := string(bytes)
 	// fmt.Println(str)
 	json.Unmarshal(bytes, &peerNodeFromRequest)
