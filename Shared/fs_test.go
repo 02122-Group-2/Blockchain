@@ -47,8 +47,8 @@ func TestCheckForNeededFiles(t *testing.T) {
 	} else if !fileExist(Locate("Transactions.json")) {
 		t.Log("Error Transactions.json was not created")
 		t.Fail()
-	} else if !fileExist(Locate("PeerLis.json")) {
-		t.Log("Error PeerList.json was not created")
+	} else if !fileExist(Locate(PeerSetFile)) {
+		t.Log("Error " + PeerSetFile + " was not created")
 		t.Fail()
 	} else if !fileExist(Locate("PeerSet.json")) {
 		t.Log("Error PeerSet.json was not created")
@@ -58,6 +58,6 @@ func TestCheckForNeededFiles(t *testing.T) {
 
 // test result is cached and as a result the reset is not run more than once when running the test
 func TestResetPersistenceFiles(t *testing.T) {
-	fmt.Println("bruh2")
+	fmt.Println("bruh4")
 	ResetPersistenceFilesForTest()
 }

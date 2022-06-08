@@ -286,24 +286,24 @@
     {
       "Header": {
         "ParentHash": "811a21a6ad322ab9e5f68cbcb47bf20a094ba55612a404f00a83ccb93e57c063",
-        "CreatedAt": 1654683281493658000,
+        "CreatedAt": 1654688603051834900,
         "SerialNo": 4
       },
       "Transactions": [
         {
           "From": "Magn",
           "To": "Niels",
-          "Amount": 2000,
+          "Amount": 10,
           "SenderNounce": 11,
-          "Timestamp": 1654683279365129000,
+          "Timestamp": 1654688518572703100,
           "Type": "transaction"
         }
       ]
     },
     {
       "Header": {
-        "ParentHash": "c4ec2207d0d6e5251f8fae03d94b9fa1f5cce9c1262b36529e84ffd7569c1ae4",
-        "CreatedAt": 1654683840735790000,
+        "ParentHash": "efd4f8a7151e4c3282487224d0813903aaf48349b299796ad364a9bd11601787",
+        "CreatedAt": 1654689079153893000,
         "SerialNo": 5
       },
       "Transactions": [
@@ -312,7 +312,7 @@
           "To": "Niels",
           "Amount": 2000,
           "SenderNounce": 12,
-          "Timestamp": 1654683825973072000,
+          "Timestamp": 1654689077228695000,
           "Type": "transaction"
         }
       ]

@@ -10,8 +10,6 @@ import (
 	"time"
 )
 
-var peerSetFile = "PeerSet.json"
-
 //Function that essentialy is the implemented version of our peer sync algorithm
 func synchronization() {
 	for {
@@ -30,7 +28,7 @@ func synchronization() {
 		}
 
 		// Persist the updated peer Set
-		SavePeerSetAsJSON(newPeers, peerSetFile)
+		SavePeerSetAsJSON(newPeers, shared.PeerSetFile)
 
 		// Wait 20 seconds before running next sync iteration
 		time.Sleep(20 * time.Second)
@@ -83,7 +81,7 @@ func GetNode() Node {
 // Get the stored set of nodes
 // If this hasn't been created before, create it using the bootstrap node
 func GetPeerSet() PeerSet {
-	ps := LoadPeerSetFromJSON(peerSetFile)
+	ps := LoadPeerSetFromJSON(shared.PeerSetFile)
 	if ps == nil {
 		ps = PeerSet{bootstrapNode: true}
 	}
@@ -134,5 +132,5 @@ func getLocalIP() string {
 			return fmt.Sprintf("%v:%d", ipv4, httpPort)
 		}
 	}
-	return "localhost:8080"
+	return fmt.Sprintf("localhost:%d", httpPort)
 }
