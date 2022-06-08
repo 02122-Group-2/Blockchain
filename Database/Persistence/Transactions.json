@@ -4,8 +4,8 @@
       "From": "Magn",
       "To": "Niels",
       "Amount": 2000,
-      "SenderNounce": 12,
-      "Timestamp": 1654689077228695000,
+      "SenderNounce": 11,
+      "Timestamp": 1654695380935784000,
       "Type": "transaction"
     }
   ]

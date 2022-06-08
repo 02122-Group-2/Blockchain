@@ -261,37 +261,6 @@ func getNodesInPeerSet(ps PeerSet, nch chan Node, pch chan PingResponse) {
 	}
 }
 
-func (node Node) concSyncPeer(peer string, newPeers PeerSet) PeerSet {
-	// if we cannot connect to a peer, skip it and don't append it
-	pingRes := Ping(peer)
-	if !pingRes.Ok {
-		return nil
-	} else {
-		newPeers.Add(peer)
-	}
-
-	peerState := GetPeerState(peer)
-
-	peerHasNewerBlock := peerState.State.LastBlockSerialNo > node.State.LastBlockSerialNo
-	if peerHasNewerBlock {
-		peerBlocks := GetPeerBlocks(peer, node.State.LastBlockSerialNo)
-		for _, block := range peerBlocks {
-			node.State.AddBlock(block)
-		}
-	}
-
-	node.State.TryAddTransactions(peerState.State.TxMempool)
-
-	reachableIPs := PeerSet{}
-	for peer2 := range peerState.PeerSet {
-		if Ping(peer2).Ok { // If the incoming address wasn't in the original list, add it to the new list of addresses
-			reachableIPs.Add(peer2)
-		}
-	}
-
-	return Union(newPeers, reachableIPs)
-}
-
 func constructSubsets(peersToCheck PeerSet) []PeerSet {
 	psLen := len(peersToCheck)
 	noSubsets := min(psLen, MAX_SUBSETS)
