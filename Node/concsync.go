@@ -3,6 +3,7 @@ package node
 import (
 	Database "blockchain/Database"
 	shared "blockchain/Shared"
+	"fmt"
 	"sort"
 	"time"
 )
@@ -18,7 +19,7 @@ type cPair struct {
 // concurrent implementation of our synchronization algorithm, with a simple proof-of-work consensus algorithm
 func concSynchronization() {
 	for {
-		// time.Sleep(2000 * time.Second)
+		fmt.Printf("Running sync %s\n", shared.PrettyTimestamp())
 		// get latest node data
 		node := GetNode()
 
@@ -97,8 +98,10 @@ func concSynchronization() {
 		pings = add2ndLevelPeers(pings, peersToCheck, nodes)
 		newPeers := getNFastestPeers(pings, MAX_PEERS)
 
-		// persist new peerset to file
-		SavePeerSetAsJSON(newPeers, shared.PeerSetFile)
+		// persist new peerset to file if there are any - otherwise, it might be because of bad connection
+		if len(newPeers) > 0 {
+			SavePeerSetAsJSON(newPeers, shared.PeerSetFile)
+		}
 
 		time.Sleep(20 * time.Second)
 	}
