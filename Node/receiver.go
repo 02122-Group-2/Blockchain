@@ -22,7 +22,7 @@ func blockDeltaHandler(w http.ResponseWriter, r *http.Request, state *Database.S
 	fromSerial, _ = strconv.Atoi(serialNoParam)
 	delta := Database.GetBlockChainDelta(localBlockChain, fromSerial)
 
-	writeResult(w, delta)
+	writeResult(w, r, delta)
 }
 
 //Function used to get the state of a peer node
@@ -44,11 +44,11 @@ func getStateHandler(w http.ResponseWriter, r *http.Request, state *Database.Sta
 	SavePeerSetAsJSON(currentPeerSet, shared.PeerSetFile)
 
 	// fmt.Println(node.PeerSet)
-	writeResult(w, node)
+	writeResult(w, r, node)
 }
 
 func balancesHandler(w http.ResponseWriter, r *http.Request, state *Database.State) {
-	writeResult(w, balancesResult{state.LatestHash, state.AccountBalances})
+	writeResult(w, r, balancesResult{state.LatestHash, state.AccountBalances})
 }
 
 func transactionHandler(w http.ResponseWriter, r *http.Request, state *Database.State) {
@@ -89,11 +89,11 @@ func transactionHandler(w http.ResponseWriter, r *http.Request, state *Database.
 
 	status := Database.SaveTransaction(state.TxMempool)
 
-	writeResult(w, TxResult{status})
+	writeResult(w, r, TxResult{status})
 }
 
 //Writing the result from the server
-func writeResult(w http.ResponseWriter, content interface{}) {
+func writeResult(w http.ResponseWriter, r *http.Request, content interface{}) {
 	contentJson, err := json.Marshal(content)
 	if err != nil {
 		fmt.Println(err)
@@ -102,7 +102,7 @@ func writeResult(w http.ResponseWriter, content interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 	w.Write(contentJson)
-	fmt.Println("Server response sent")
+	shared.Log(fmt.Sprintf("Server response sent to %s", r.RemoteAddr))
 }
 
 //Reading the request from client

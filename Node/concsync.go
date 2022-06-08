@@ -3,7 +3,6 @@ package node
 import (
 	Database "blockchain/Database"
 	shared "blockchain/Shared"
-	"fmt"
 	"sort"
 	"time"
 )
@@ -19,7 +18,7 @@ type cPair struct {
 // concurrent implementation of our synchronization algorithm, with a simple proof-of-work consensus algorithm
 func concSynchronization() {
 	for {
-		fmt.Printf("Running sync %s\n", shared.PrettyTimestamp())
+		shared.Log("Running sync")
 		// get latest node data
 		node := GetNode()
 
