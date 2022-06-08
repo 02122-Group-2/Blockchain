@@ -2,6 +2,7 @@ package node
 
 import (
 	Database "blockchain/Database"
+	shared "blockchain/Shared"
 	"sort"
 	"time"
 )
@@ -84,6 +85,7 @@ func concSynchronization() {
 		if len(peerBlocks) > 0 {
 			for _, block := range peerBlocks {
 				node.State.AddBlock(block)
+				clearConflictingSubchain(deltaIdx)
 			}
 		}
 		// TODO: or maybe clear them at this point since we do not know yet if the chain is accepted back then?
@@ -96,7 +98,7 @@ func concSynchronization() {
 		newPeers := getNFastestPeers(pings, MAX_PEERS)
 
 		// persist new peerset to file
-		SavePeerSetAsJSON(newPeers, peerSetFile)
+		SavePeerSetAsJSON(newPeers, shared.PeerSetFile)
 
 		time.Sleep(20 * time.Second)
 	}
@@ -109,6 +111,9 @@ func clearConflictingSubchain(deltaIdx int) {
 
 func tryApplyPeerStates(node Node, nodes []Node) {
 	for _, peer := range nodes {
+		if !Ping(peer.Address).Ok {
+			continue
+		}
 		if len(peer.ChainHashes) < len(node.ChainHashes) {
 			if chainsAgree(peer.ChainHashes, node.ChainHashes) {
 				node.State.TryAddTransactions(peer.State.TxMempool)
@@ -124,7 +129,7 @@ func tryApplyPeerStates(node Node, nodes []Node) {
 func add2ndLevelPeers(pings PingResponseList, peersToCheck PeerSet, nodes []Node) PingResponseList {
 	for _, n := range nodes {
 		for peer2 := range n.PeerSet {
-			if !peersToCheck.Exists(peer2) {
+			if !peersToCheck.Exists(peer2) && peer2 != getLocalIP() {
 				pingRes := Ping(peer2)
 				pings = append(pings, pingRes)
 			}

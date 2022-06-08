@@ -10,19 +10,24 @@ import (
 
 func TestIpRegex(t *testing.T) {
 	shouldBeTrue := "192.168.0.1:8080"
+	shouldBeTrue2 := "localhost:8080"
 	shouldBeFalse := "192.168.0.1:808022"
 	shouldBeFalse2 := "asdf"
 	shouldBeFalse3 := "256.168.0.1:8080"
 
-	if !legalIpAddress(shouldBeTrue) {
+	if !shared.LegalIpAddress(shouldBeTrue) {
 		panic(fmt.Sprintf("%s should be true", shouldBeTrue))
 	}
 
-	if legalIpAddress(shouldBeFalse) {
+	if !shared.LegalIpAddress(shouldBeTrue2) {
+		panic(fmt.Sprintf("%s should be true", shouldBeTrue2))
+	}
+
+	if shared.LegalIpAddress(shouldBeFalse) {
 		panic(fmt.Sprintf("%s should be false", shouldBeFalse2))
 	}
 
-	if legalIpAddress(shouldBeFalse2) {
+	if shared.LegalIpAddress(shouldBeFalse2) {
 		panic(fmt.Sprintf("%s should be false", shouldBeFalse2))
 	}
 	if legalIpAddress(shouldBeFalse3) {

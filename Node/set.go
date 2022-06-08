@@ -12,7 +12,7 @@ import (
 type PeerSet map[string]bool
 
 func (p PeerSet) Add(k string) {
-	if legalIpAddress(k) {
+	if shared.LegalIpAddress(k) {
 		p[k] = true
 	}
 }
@@ -65,6 +65,10 @@ func LoadPeerSetFromJSON(filename string) PeerSet {
 
 	var ps PeerSet
 	json.Unmarshal(data, &ps)
+
+	if ps == nil {
+		ps = PeerSet{}
+	} 
 
 	return ps
 }
