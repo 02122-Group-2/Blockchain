@@ -282,23 +282,6 @@
           "Type": "transaction"
         }
       ]
-    },
-    {
-      "Header": {
-        "ParentHash": "811a21a6ad322ab9e5f68cbcb47bf20a094ba55612a404f00a83ccb93e57c063",
-        "CreatedAt": 1654695382961702000,
-        "SerialNo": 4
-      },
-      "Transactions": [
-        {
-          "From": "Magn",
-          "To": "Niels",
-          "Amount": 2000,
-          "SenderNounce": 11,
-          "Timestamp": 1654695380935784000,
-          "Type": "transaction"
-        }
-      ]
     }
   ]
 }

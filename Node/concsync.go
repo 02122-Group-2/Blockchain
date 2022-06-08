@@ -1,7 +1,7 @@
 package node
 
 import (
-	Database "blockchain/Database"
+	db "blockchain/Database"
 	shared "blockchain/Shared"
 	"sort"
 	"time"
@@ -74,7 +74,7 @@ func concSynchronization() {
 		}
 
 		// fetch peer blocks delta
-		var peerBlocks []Database.Block
+		var peerBlocks []db.Block
 		if deltaIdx != -1 {
 			peerBlocks = GetPeerBlocks(consensusNode.Address, deltaIdx)
 			clearConflictingSubchain(deltaIdx)
@@ -85,7 +85,6 @@ func concSynchronization() {
 		if len(peerBlocks) > 0 {
 			for _, block := range peerBlocks {
 				node.State.AddBlock(block)
-				clearConflictingSubchain(deltaIdx)
 			}
 		}
 		// TODO: or maybe clear them at this point since we do not know yet if the chain is accepted back then?
@@ -107,8 +106,9 @@ func concSynchronization() {
 }
 
 func clearConflictingSubchain(deltaIdx int) {
-	blockchain := Database.LoadBlockchain()[:deltaIdx]
-	Database.SaveBlockchain(blockchain)
+	blockchain := db.LoadBlockchain()[:deltaIdx-1]
+	// slicedBlockchain := blockchain
+	db.SaveBlockchain(blockchain)
 }
 
 func tryApplyPeerStates(node Node, nodes []Node) {
