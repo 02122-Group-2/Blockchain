@@ -54,8 +54,8 @@ func concSynchronization() {
 		}
 
 		// close channels, since they will no longer be used
-		close(nodeChannel)
-		close(pingChannel)
+		// close(nodeChannel)
+		// close(pingChannel)
 
 		// compute consensus
 		// add own node to nodes argument

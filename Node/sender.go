@@ -11,8 +11,9 @@ import (
 	"net/http"
 )
 
-func GetPeerBlocks(peerAddr string, lastLocalBlockSerialNo int) []Database.Block {
-	URI := fmt.Sprintf("http://"+peerAddr+"/blockDelta?lastLocalBlockSerialNo=%d", lastLocalBlockSerialNo)
+func GetPeerBlocks(peerAddr string, deltaIdx int) []Database.Block {
+	lastBlockSerialNo := deltaIdx - 1
+	URI := fmt.Sprintf("http://"+peerAddr+"/blockDelta?lastLocalBlockSerialNo=%d", lastBlockSerialNo)
 	resp, err := http.Get(URI)
 
 	if err != nil {
