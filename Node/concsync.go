@@ -78,12 +78,12 @@ func concSynchronization() {
 		var peerBlocks []db.Block
 		if deltaIdx != -1 {
 			peerBlocks = GetPeerBlocks(consensusNode.Address, deltaIdx)
-			clearConflictingSubchain(deltaIdx)
 		}
 
 		// apply the fetched blocks
 		//    - TODO: should it make sure blocks are clear up until this point in own state?
 		if len(peerBlocks) > 0 {
+			clearConflictingSubchain(deltaIdx)
 			for _, block := range peerBlocks {
 				node.State.AddBlock(block)
 			}
