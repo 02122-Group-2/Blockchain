@@ -52,7 +52,10 @@ func TestGetPeerBlocks(t *testing.T) {
 
 func TestPingActiveConnection(t *testing.T) {
 	addr := "localhost:8080"
-	if !Ping(addr) {
+	// addr := "10.209.222.2:8080"
+	pingRes := Ping(addr)
+	t.Logf("Latency: %d", pingRes.Latency)
+	if !pingRes.Ok {
 		t.Error("Connection not active")
 	}
 }

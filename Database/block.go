@@ -40,7 +40,7 @@ func (state *State) CreateBlock(txs []Transaction) Block {
 	return Block{
 		BlockHeader{
 			state.getLatestHash(),
-			makeTimestamp(),
+			shared.MakeTimestamp(),
 			state.getNextBlockSerialNo(),
 		},
 		txs,
@@ -279,4 +279,31 @@ func (block *Block) BlockToString() string {
 		listOfTransactions += TxToString(currTransaction) + "\n"
 	}
 	return "Header: \n " + "-Parent Hash: " + fmt.Sprintf("%v \n", block.Header.ParentHash) + "-Created at: " + fmt.Sprintf("%v \n", block.Header.CreatedAt) + "-Serial No.: " + fmt.Sprintf("%v \n", block.Header.SerialNo) + "List of Transactions: \n" + listOfTransactions
+}
+
+func GetLocalChainHashes(state State, fromSerialNo int) []string {
+	blocks := LoadBlockchain()
+	persistedChainHashes := getChainHashes(blocks, fromSerialNo)
+	latestHash := fmt.Sprintf("%x", state.getLatestHash())
+	return append(persistedChainHashes, latestHash)
+}
+
+func getChainHashes(blockchain []Block, fromSerialNo int) []string {
+	var chainHashes []string
+	for _, b := range blockchain {
+		if b.Header.SerialNo > fromSerialNo {
+			chainHashes = append(chainHashes, fmt.Sprintf("%x", b.Header.ParentHash))
+		}
+	}
+	return chainHashes
+}
+
+// returns index of (first) mismatch, -1 if succesful
+func CompareChainHashes(cHashes1 []string, cHashes2 []string) int {
+	for i, hash := range cHashes1 {
+		if i >= len(cHashes2) || hash != cHashes2[i] {
+			return i
+		}
+	}
+	return -1
 }

@@ -7,9 +7,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-
 	// "path/filepath"
-	"time"
 )
 
 type StateFromPostRequest struct {
@@ -32,10 +30,6 @@ type State struct {
 	LastBlockTimestamp int64                   `json:"LastBlockTimestamp"`
 	LatestHash         [32]byte                `json:"LatestHash"`
 	LatestTimestamp    int64                   `json:"LatestTimestamp"`
-}
-
-func makeTimestamp() int64 {
-	return time.Now().UnixNano()
 }
 
 func (s *State) getNextBlockSerialNo() int {

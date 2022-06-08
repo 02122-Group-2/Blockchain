@@ -58,6 +58,6 @@ func TestCheckForNeededFiles(t *testing.T) {
 
 // test result is cached and as a result the reset is not run more than once when running the test
 func TestResetPersistenceFiles(t *testing.T) {
-	fmt.Println("bruh")
+	fmt.Println("bruh2")
 	ResetPersistenceFilesForTest()
 }

@@ -16,8 +16,10 @@ func Run() error {
 	}
 
 	fmt.Printf("Listening on port %d\n", httpPort)
-	go synchronization()
+
+	go concSynchronization()
 	startNode()
+
 	return nil
 }
 
