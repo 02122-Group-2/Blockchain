@@ -60,9 +60,10 @@ func concSynchronization() {
 		// close(nodeChannel)
 		// close(pingChannel)
 
-		// compute consensus
 		// add own node to nodes argument
-		nodes = append(nodes, node)
+		// nodes = append(nodes, node)
+
+		// compute consensus
 		consensusNode := computeConsensusNode(nodes) // gets node object that has consensus chain
 
 		// match blockchain with consensus chain, newest blocks
@@ -200,7 +201,9 @@ func computeConsensusNode(nodes []Node) Node {
 	agreeCount := make(map[string]int)
 	for h1, cPair1 := range latestHashes {
 		// remove to avoid duplicates
-		agreeCount[h1] = latestHashes[h1].count
+		if _, ok := agreeCount[h1]; !ok {
+			agreeCount[h1] = latestHashes[h1].count
+		}
 		delete(latestHashes, h1)
 		for h2, cPair2 := range latestHashes {
 			if _, ok := agreeCount[h2]; !ok {

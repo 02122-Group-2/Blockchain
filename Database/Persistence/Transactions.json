@@ -1,0 +1,12 @@
+{
+  "transactions": [
+    {
+      "From": "Magn",
+      "To": "Niels",
+      "Amount": 2000,
+      "SenderNounce": 14,
+      "Timestamp": 1654698881372294000,
+      "Type": "transaction"
+    }
+  ]
+}
