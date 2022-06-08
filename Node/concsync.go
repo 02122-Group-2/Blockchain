@@ -54,6 +54,7 @@ func concSynchronization() {
 			pings[i] = pingResp
 		}
 
+		// TODO: following can only be done in last iteration. Listen for SIGTERM on main process?
 		// close channels, since they will no longer be used
 		// close(nodeChannel)
 		// close(pingChannel)
@@ -75,6 +76,7 @@ func concSynchronization() {
 		var peerBlocks []Database.Block
 		if deltaIdx != -1 {
 			peerBlocks = GetPeerBlocks(consensusNode.Address, deltaIdx)
+			clearConflictingSubchain(deltaIdx)
 		}
 
 		// apply the fetched blocks
@@ -98,6 +100,11 @@ func concSynchronization() {
 
 		time.Sleep(20 * time.Second)
 	}
+}
+
+func clearConflictingSubchain(deltaIdx int) {
+	blockchain := Database.LoadBlockchain()[:deltaIdx]
+	Database.SaveBlockchain(blockchain)
 }
 
 func tryApplyPeerStates(node Node, nodes []Node) {

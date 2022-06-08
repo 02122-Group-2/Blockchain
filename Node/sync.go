@@ -121,7 +121,7 @@ func contains(s []string, e string) bool {
 }
 
 func legalIpAddress(addr string) bool {
-	regexIPwithPort := "^(localhost|([0-9]{1,3}.){1,3}([0-9]{1,3})):([0-9]{4,5})$"
+	regexIPwithPort := "^(localhost|((([0-1]{0,1}[0-9]{1,2})|2([0-4][0-9]|5[0-5])).){3}(([0-1]{0,1}[0-9]{1,2})|2([0-4][0-9]|5[0-5])):[0-9]{4,5})$"
 	match, _ := regexp.MatchString(regexIPwithPort, addr)
 	return match
 }
