@@ -3,6 +3,7 @@ package node
 import (
 	"fmt"
 	"testing"
+	shared "blockchain/Shared"
 )
 
 func TestCreatePeerSet(t *testing.T) {
@@ -10,7 +11,7 @@ func TestCreatePeerSet(t *testing.T) {
 	// legalIP := "192.168.0.1:8080"
 	localhost := "localhost:8080"
 	ps.Add(localhost)
-	SavePeerSetAsJSON(ps, peerSetFile)
+	SavePeerSetAsJSON(ps, shared.PeerSetFile)
 }
 
 func TestRun(t *testing.T) {

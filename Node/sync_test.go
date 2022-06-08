@@ -1,6 +1,7 @@
 package node
 
 import (
+	shared "blockchain/Shared"
 	"fmt"
 	"testing"
 )
@@ -10,15 +11,15 @@ func TestIpRegex(t *testing.T) {
 	shouldBeFalse := "192.168.0.1:808022"
 	shouldBeFalse2 := "asdf"
 
-	if !legalIpAddress(shouldBeTrue) {
+	if !shared.LegalIpAddress(shouldBeTrue) {
 		panic(fmt.Sprintf("%s should be true", shouldBeTrue))
 	}
 
-	if legalIpAddress(shouldBeFalse) {
+	if shared.LegalIpAddress(shouldBeFalse) {
 		panic(fmt.Sprintf("%s should be false", shouldBeFalse2))
 	}
 
-	if legalIpAddress(shouldBeFalse2) {
+	if shared.LegalIpAddress(shouldBeFalse2) {
 		panic(fmt.Sprintf("%s should be false", shouldBeFalse2))
 	}
 }
@@ -53,3 +54,4 @@ func TestPeerSet(t *testing.T) {
 		panic("union of ps's should contain all elements of both ps's")
 	}
 }
+
