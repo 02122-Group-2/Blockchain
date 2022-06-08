@@ -9,6 +9,7 @@ import (
 //Function that ensures that all files needed to run a node are present on the current system
 //If not they are created
 func CheckForNeededFiles() error {
+	ResetPersistenceFilesForTest()
 
 	err := InitDataDirIfNotExists("CurrentState.json")
 	if err != nil {

@@ -47,7 +47,7 @@ func TestCheckForNeededFiles(t *testing.T) {
 	} else if !fileExist(Locate("Transactions.json")) {
 		t.Log("Error Transactions.json was not created")
 		t.Fail()
-	} else if !fileExist(Locate("PeerLis.json")) {
+	} else if !fileExist(Locate("PeerList.json")) {
 		t.Log("Error PeerList.json was not created")
 		t.Fail()
 	} else if !fileExist(Locate("PeerSet.json")) {

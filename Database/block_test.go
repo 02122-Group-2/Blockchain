@@ -52,6 +52,181 @@ func TestLoadBlockchain(t *testing.T) {
 	ResetTest()
 }
 
+func TestAddLegalBlockToBlockchain(t *testing.T) {
+	shared.ResetPersistenceFilesForTest()
+
+	//Create the transactions
+	tx1 := state_block.CreateTransaction("Niels", "Magn", 10)
+	tx2 := state_block.CreateTransaction("Magn", "Emilie", 4)
+
+	//Add transactions to the state
+	state_block.AddTransaction(tx1)
+	state_block.AddTransaction(tx2)
+
+	//Create the block
+	block1 := state_block.CreateBlock(state_block.TxMempool)
+
+	//Add the block
+	err := state_block.AddBlock(block1)
+	if err != nil {
+		t.Errorf("Expected block to be legal, but wasn't")
+	}
+
+	ResetTest()
+}
+
+func TestAddIllegalBlockWrongParentHash(t *testing.T) {
+	shared.ResetPersistenceFilesForTest()
+
+	//Create the transactions
+	tx1 := state_block.CreateTransaction("Niels", "Magn", 10)
+	tx2 := state_block.CreateTransaction("Magn", "Emilie", 4)
+
+	//Add transactions to the state
+	state_block.AddTransaction(tx1)
+	state_block.AddTransaction(tx2)
+
+	//Create the block
+	block1 := state_block.CreateBlock(state_block.TxMempool)
+
+	//Mess up parent hash
+	block1.Header.ParentHash = [32]byte{}
+
+	//Add the block
+	err := state_block.AddBlock(block1)
+	if err == nil {
+		t.Errorf("Expected block to be illegal due to wrong parent hash, but wasn't")
+	}
+
+	ResetTest()
+
+}
+
+func TestAddIllegalBlockIllegalTransaction(t *testing.T) {
+	shared.ResetPersistenceFilesForTest()
+
+	//Create the transactions
+	tx1 := state_block.CreateTransaction("Niels", "Magn", 10)
+
+	//Illegal transaction
+	tx2 := state_block.CreateTransaction("Magn", "Emilie", 10000000)
+
+	//Create the block from a manually created transaction list
+	block1 := state_block.CreateBlock(TransactionList{tx1, tx2})
+
+	//Add the block
+	err := state_block.AddBlock(block1)
+	if err == nil {
+		t.Log("Expected block to be illegal due to illegal transaction, but wasn't", err)
+		t.Fail()
+	}
+
+	ResetTest()
+
+}
+
+func TestAddIllegalBlockWrongTimestamp(t *testing.T) {
+	shared.ResetPersistenceFilesForTest()
+
+	//Create the transactions
+	tx1 := state_block.CreateTransaction("Niels", "Magn", 10)
+	tx2 := state_block.CreateTransaction("Magn", "Emilie", 4)
+
+	//Add transactions to the state
+	state_block.AddTransaction(tx1)
+	state_block.AddTransaction(tx2)
+
+	//Create the block
+	block1 := state_block.CreateBlock(state_block.TxMempool)
+
+	//Mess up the timestamp
+	block1.Header.CreatedAt = state_block.LastBlockTimestamp - 1
+
+	//Add the block
+	err := state_block.AddBlock(block1)
+	if err == nil {
+		t.Errorf("Expected block to be illegal due to wrong timestamp, but wasn't")
+	}
+
+	ResetTest()
+
+}
+
+func TestAddIllegalBlockWrongBlockHeigh(t *testing.T) {
+	shared.ResetPersistenceFilesForTest()
+
+	//Create the transactions
+	tx1 := state_block.CreateTransaction("Niels", "Magn", 10)
+	tx2 := state_block.CreateTransaction("Magn", "Emilie", 4)
+
+	//Add transactions to the state
+	state_block.AddTransaction(tx1)
+	state_block.AddTransaction(tx2)
+
+	//Create the block
+	block1 := state_block.CreateBlock(state_block.TxMempool)
+
+	//Mess up the height
+	block1.Header.SerialNo -= 1
+
+	//Add the block
+	err := state_block.AddBlock(block1)
+	if err == nil {
+		t.Errorf("Expected block to be illegal due to wrong blockheight, but wasn't")
+	}
+
+	ResetTest()
+
+}
+
+func TestAddIllegalBlockNoTransactions(t *testing.T) {
+	shared.ResetPersistenceFilesForTest()
+
+	//Create the block with no transactions
+	block1 := state_block.CreateBlock(TransactionList{})
+
+	//Add the block
+	err := state_block.AddBlock(block1)
+	if err == nil {
+		t.Errorf("Expected block to be illegal due to no transactions, but wasn't")
+	}
+
+	ResetTest()
+
+}
+
+func TestAddBlockWhereSomeTransactionsFromStateAreInvalidatedAfterBlock(t *testing.T) {
+	shared.ResetPersistenceFilesForTest()
+
+	//Create the transaction
+	tx1 := state_block.CreateTransaction("Magn", "Emilie", 4)
+
+	//Add transactions to the state
+	state_block.AddTransaction(tx1)
+
+	// transaction not in the local mempool
+	tx2 := Transaction{"Niels", "Magn", 10, 10, makeTimestamp(), "transaction"}
+
+	//Create the block with the transactions (one local and one unknown)
+	block1 := state_block.CreateBlock(TransactionList{tx1, tx2})
+
+	//Create local tranaction which would be legal before block, but is illegal now
+	tx3 := state_block.CreateTransaction("Niels", "Asger", 579030) //Current balance for Niels is 579029
+	state_block.AddTransaction(tx3)
+
+	//Add the block
+	//At this point tx3 will be invalidated and not added to the state and will be lost
+	state_block.AddBlock(block1)
+
+	if len(state_block.TxMempool) != 0 {
+		t.Errorf("Expected TxMempool to be empty, but isn't")
+	}
+
+	ResetTest()
+
+}
+
+/*
 func TestAddBlockToBlockchain(t *testing.T) {
 	tx1 := state_block.CreateTransaction("Niels", "Magn", 10)
 	tx2 := state_block.CreateTransaction("Magn", "Emilie", 4)
@@ -69,6 +244,7 @@ func TestAddBlockToBlockchain(t *testing.T) {
 
 	ResetTest()
 }
+*/
 
 // This tests makes sure the functionality of sharing the blocks work correctly.
 // Two states will be created, who are orignally identical.
