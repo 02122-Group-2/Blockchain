@@ -7,6 +7,7 @@ import (
 
 var testingPassword = "testingPassword123"
 var testingHashedTransaction = [32]byte{'h', 'e', 'j', 's', 'a', 'b', 'm', 'm', 'h', 'e', 'j', 's', 'a', 'b', 'm', 'm', 'h', 'e', 'j', 's', 'a', 'b', 'm', 'm', 'h', 'e', 'j', 's', 'a', 'b', 'm', 'm'}
+var testingHashedTransaction2 = [32]byte{'k', 'e', 'j', 's', 'a', 'b', 'm', 'm', 'h', 'e', 'j', 's', 'a', 'b', 'm', 'm', 'h', 'e', 'j', 's', 'a', 'b', 'm', 'm', 'h', 'e', 'j', 's', 'a', 'b', 'm', 'm'}
 
 func TestCreateWallet(t *testing.T) {
 	testAcc := "testAccount1"
@@ -26,7 +27,7 @@ func TestDeleteWallet(t *testing.T) {
 
 	err := testWallet.Delete(testAcc, testingPassword)
 	if err != nil {
-		t.Log("Expected to delete account but didn't", err)
+		t.Log("Expected to delete account but didn't \n", err)
 		t.Fail()
 	}
 }
@@ -38,9 +39,9 @@ func TestDeleteWalletWithWrongPassword(t *testing.T) {
 
 	err := testWallet.Delete(testAcc, testingPassword+"_wrong")
 
+	testWallet.HardDelete()
 	if err == nil {
-		testWallet.HardDelete()
-		t.Log("Expected to not delete account when given wrong password, but did", err)
+		t.Log("Expected to not delete account when given wrong password, but did \n", err)
 		t.Fail()
 	}
 }
@@ -109,6 +110,46 @@ func TestSignTransaction(t *testing.T) {
 	}
 }
 
+func TestSignTransactionWithWrongPassword(t *testing.T) {
+	testAcc := "testAccount1"
+	CreateNewWallet(testAcc, testingPassword)
+	testWallet, _ := AccessWallet(testAcc, testingPassword)
+
+	_, err := testWallet.SignTransaction(testingPassword+"_wrong", testingHashedTransaction)
+	testWallet.HardDelete()
+	if err == nil {
+		t.Log("Expected to fail signing transaction with wrong password but didn't\n")
+		t.Fail()
+	}
+}
+
+func TestSignTransactionWhereSenderIsntTheSigner(t *testing.T) {
+	//Sending account1
+	testAcc := "testAccount1"
+	sendAddr, _ := CreateNewWallet(testAcc, testingPassword)
+	testWallet, _ := AccessWallet(testAcc, testingPassword)
+
+	//Signing account2
+	testAcc2 := "testAccount2"
+	CreateNewWallet(testAcc2, testingPassword)
+	testWallet2, _ := AccessWallet(testAcc2, testingPassword)
+
+	//Sign with account 2
+	signature, _ := testWallet2.SignTransaction(testingPassword, testingHashedTransaction)
+
+	//Retrive address
+	retrievedAddr, _ := GetAddressFromSignedTransaction(signature, testingHashedTransaction)
+
+	testWallet.HardDelete()
+	testWallet2.HardDelete()
+
+	if sendAddr == retrievedAddr {
+		t.Log("Signing address and sending address match, but they shouldn't.\n")
+		t.Fail()
+	}
+
+}
+
 func TestRetrieveAddressFromSignature(t *testing.T) {
 	testAcc := "testAccount1"
 	addr, _ := CreateNewWallet(testAcc, testingPassword)
@@ -164,5 +205,23 @@ func TestSignTwoTransactionWithTwoAccounts(t *testing.T) {
 
 	if bytes.Compare(signature1_account1, signature1_account2) == 0 || bytes.Compare(signature2_account1, signature2_account2) == 0 {
 		t.Errorf("Signature for the two accounts are the same...")
+	}
+}
+
+func TestSignaturesFromSameWalletDifferForTransactions(t *testing.T) {
+	testAcc := "testAccount1"
+	CreateNewWallet(testAcc, testingPassword)
+	testWallet, _ := AccessWallet(testAcc, testingPassword)
+
+	//Sign transaction 1
+	signature1, _ := testWallet.SignTransaction(testingPassword, testingHashedTransaction)
+
+	//Sign transaction 2
+	signature2, _ := testWallet.SignTransaction(testingPassword, testingHashedTransaction2)
+
+	testWallet.HardDelete()
+	if bytes.Compare(signature1, signature2) == 0 {
+		t.Log("Signatures are equal for two different transactions but shouldn't be")
+		t.Fail()
 	}
 }

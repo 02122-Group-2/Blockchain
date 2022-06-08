@@ -119,7 +119,6 @@ func (account *Account) Delete(username string, password string) error {
 
 //Hard delete the wallet - no required verification. Used for testing
 func (account *Account) HardDelete() error {
-
 	return os.Remove(account.Wallet.URL.Path)
 }
 
