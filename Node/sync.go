@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"net"
 	"os"
-	"regexp"
 	"time"
 )
 
@@ -92,7 +91,7 @@ func GetPeerSet() PeerSet {
 }
 
 func Ping(peerAddr string) PingResponse {
-	if !legalIpAddress(peerAddr) {
+	if !shared.LegalIpAddress(peerAddr) {
 		return PingResponse{"nil", false, -1}
 	}
 
@@ -116,12 +115,6 @@ func contains(s []string, e string) bool {
 		}
 	}
 	return false
-}
-
-func legalIpAddress(addr string) bool {
-	regexIPwithPort := "^(localhost|((([0-1]{0,1}[0-9]{1,2})|2([0-4][0-9]|5[0-5])).){3}(([0-1]{0,1}[0-9]{1,2})|2([0-4][0-9]|5[0-5])):[0-9]{4,5})$"
-	match, _ := regexp.MatchString(regexIPwithPort, addr)
-	return match
 }
 
 func getLocalIP() string {

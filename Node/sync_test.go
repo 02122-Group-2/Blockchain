@@ -30,7 +30,7 @@ func TestIpRegex(t *testing.T) {
 	if shared.LegalIpAddress(shouldBeFalse2) {
 		panic(fmt.Sprintf("%s should be false", shouldBeFalse2))
 	}
-	if legalIpAddress(shouldBeFalse3) {
+	if shared.LegalIpAddress(shouldBeFalse3) {
 		panic(fmt.Sprintf("%s should be false", shouldBeFalse3))
 	}
 }
@@ -95,7 +95,7 @@ func TestGetLocalChainHashes(t *testing.T) {
 func TestLocalIP(t *testing.T) {
 	localIP := getLocalIP()
 	t.Log(localIP)
-	if !legalIpAddress(localIP) {
+	if !shared.LegalIpAddress(localIP) {
 		panic(fmt.Sprintf("%s should be legal!", localIP))
 	}
 }
