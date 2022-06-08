@@ -17,6 +17,7 @@ type cPair struct {
 // concurrent implementation of our synchronization algorithm, with a simple proof-of-work consensus algorithm
 func concSynchronization() {
 	for {
+		// time.Sleep(2000 * time.Second)
 		// get latest node data
 		node := GetNode()
 
