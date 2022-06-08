@@ -155,6 +155,7 @@ func TestComputeConsensusNode(t *testing.T) {
 	if chainDiffIdx(c1, cons.ChainHashes) != -1 {
 		panic("Consensus algo aint work")
 	}
+	fmt.Println("succeeded")
 }
 
 // test with total separate (longer) chain than consensus chain

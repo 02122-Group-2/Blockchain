@@ -1,22 +1,22 @@
 {
-  "LatestHash": "773f165d938bcd7419ad44d1f46efef1216fa67198fd2464c084ece5b127209c",
+  "LatestHash": "811a21a6ad322ab9e5f68cbcb47bf20a094ba55612a404f00a83ccb93e57c063",
   "AccountBalances": {
     "Alberto": 15100,
     "Asger": 423,
     "Emilie": 22,
-    "Magn": 417011,
-    "Niels": 583039,
+    "Magn": 421011,
+    "Niels": 579039,
     "gggg": 3
   },
   "AccountNounces": {
     "Emilie": 3,
-    "Magn": 12,
+    "Magn": 10,
     "Niels": 9,
     "system": 10
   },
   "TxMempool": null,
   "DbFile": null,
-  "LastBlockSerialNo": 5,
-  "LastBlockTimestamp": 1654677665010390000,
-  "LatestTimestamp": 1654677632701845000
+  "LastBlockSerialNo": 3,
+  "LastBlockTimestamp": 1648641894935865700,
+  "LatestTimestamp": 1648641894935865700
 }
