@@ -8,17 +8,20 @@ import (
 )
 
 func TestCreatePeerSet(t *testing.T) {
+	addr := getFirstPeerInPeerset()
 	ps := PeerSet{}
-	localhost := "localhost:8080"
+	localhost := addr
 	ps.Add(localhost)
 	peerSetTestFile := fmt.Sprintf("%s_test.json", shared.PeerSetFile[:(len(shared.PeerSetFile)-len(".json"))])
 	SavePeerSetAsJSON(ps, peerSetTestFile)
 
-	correctChecksum := "a279eb83cba534c181c993c1a89989982b9c9862ea36a1548e0a78e0be851f69"
+	correctChecksum := "31f74234299b520c9a680a8022b7b0b24f707668c30f34be152a334d015dec0e"
 
 	realChecksum := shared.GetChecksum(shared.Locate(peerSetTestFile))
 
-	t.Logf("Checksums:\n%x\n%x\n\n", correctChecksum, realChecksum)
+	t.Log(realChecksum)
+
+	// t.Logf("Checksums:\n%x\n%x\n\n", correctChecksum, realChecksum)
 	if realChecksum != correctChecksum {
 		panic(fmt.Sprintf("%s was not created correctly", peerSetTestFile))
 	}
@@ -28,19 +31,21 @@ func TestCreatePeerSet(t *testing.T) {
 
 // this test is not an actual unit test.
 // it is merely for exploratory tests, e.g. starting a node and debugging
-func TestRun(t *testing.T) {
-	t.Log("begin run test")
+// func TestRun(t *testing.T) {
+// 	t.Log("begin run test")
 
-	err := Run()
-	if err != nil {
-		t.Log("Could not run node")
-		t.Fail()
-	}
-}
+// 	err := Run()
+// 	if err != nil {
+// 		t.Log("Could not run node")
+// 		t.Fail()
+// 	}
+// }
+
 func TestGetPeerState(t *testing.T) {
 	t.Log("begin get peer state test")
 
-	nodeState := GetPeerState("192.168.0.106:8080")
+	addr := getFirstPeerInPeerset()
+	nodeState := GetPeerState(addr)
 
 	if nodeState.PeerSet == nil {
 		t.Errorf("Peer list is nil")
@@ -48,20 +53,31 @@ func TestGetPeerState(t *testing.T) {
 	if nodeState.State.AccountBalances == nil {
 		t.Errorf("State balances is nil")
 	}
-	fmt.Println(nodeState.State)
+	// fmt.Println(nodeState.State)
 }
 
 func TestGetPeerBlocks(t *testing.T) {
-	res := GetPeerBlocks("192.168.0.106:8090", 0)
+	addr := getFirstPeerInPeerset()
+	res := GetPeerBlocks(addr, 0)
 
 	fmt.Println(res)
 }
 
 func TestPingActiveConnection(t *testing.T) {
-	addr := "localhost:8080"
+	addr := getFirstPeerInPeerset()
 	pingRes := Ping(addr)
 	t.Logf("Latency: %d", pingRes.Latency)
 	if !pingRes.Ok {
 		t.Error("Connection not active")
 	}
+}
+
+func getFirstPeerInPeerset() string {
+	peers := LoadPeerSetFromJSON(shared.PeerSetFile)
+	var addr string
+	for p := range peers {
+		addr = p
+		break
+	}
+	return addr
 }

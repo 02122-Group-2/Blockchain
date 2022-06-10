@@ -282,14 +282,6 @@
           "Type": "transaction"
         }
       ]
-    },
-    {
-      "Header": {
-        "ParentHash": "811a21a6ad322ab9e5f68cbcb47bf20a094ba55612a404f00a83ccb93e57c063",
-        "CreatedAt": 1654862448540931000,
-        "SerialNo": 4
-      },
-      "Transactions": null
     }
   ]
 }
