@@ -1,5 +1,5 @@
 {
-  "LatestHash": "59280b3d00eff4432957199c730d7d2cf13619db525bed17e6bdd9336decb303",
+  "LatestHash": "8fb9500d6ff6289d9d4585908bbf0082ba1146aee6ea45fcf5f49408ad2140da",
   "AccountBalances": {
     "Alberto": 15100,
     "Asger": 423,
@@ -16,7 +16,7 @@
   },
   "TxMempool": null,
   "DbFile": null,
-  "LastBlockSerialNo": 4,
-  "LastBlockTimestamp": 1654862448540931000,
+  "LastBlockSerialNo": 5,
+  "LastBlockTimestamp": 1654862763074926000,
   "LatestTimestamp": 1648641894935865700
 }
