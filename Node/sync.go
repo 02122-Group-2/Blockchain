@@ -9,64 +9,6 @@ import (
 	"time"
 )
 
-//Function that essentialy is the implemented version of our peer sync algorithm
-func synchronization() {
-	for {
-		// updates Node to get local changes in case any has been made
-		node := GetNode()
-
-		// make copy of initial peers to avoid weird behavior when modifying the slice
-		peersToCheck := node.PeerSet.DeepCopy()
-
-		// slice for storing all active connections from current sync iteration
-		newPeers := PeerSet{}
-
-		// sync with each peer, first blocks then states
-		for peer := range peersToCheck {
-			newPeers = node.syncPeer(peer, newPeers)
-		}
-
-		// Persist the updated peer Set
-		SavePeerSetAsJSON(newPeers, shared.PeerSetFile)
-
-		// Wait 20 seconds before running next sync iteration
-		time.Sleep(20 * time.Second)
-	}
-}
-
-func (node Node) syncPeer(peer string, newPeers PeerSet) PeerSet {
-	// if we cannot connect to a peer, skip it and don't append it
-	if !Ping(peer).Ok {
-		return nil
-	} else {
-		newPeers.Add(peer)
-	}
-
-	peerState := GetPeerState(peer)
-
-	fmt.Println("Got peer state")
-	// fmt.Println(peerState)
-
-	peerHasNewerBlock := peerState.State.LastBlockSerialNo > node.State.LastBlockSerialNo
-	if peerHasNewerBlock {
-		peerBlocks := GetPeerBlocks(peer, node.State.LastBlockSerialNo)
-		for _, block := range peerBlocks {
-			node.State.AddBlock(block)
-		}
-	}
-
-	node.State.TryAddTransactions(peerState.State.TxMempool)
-
-	reachableIPs := PeerSet{}
-	for peer2 := range peerState.PeerSet {
-		if Ping(peer2).Ok { // If the incoming address wasn't in the original list, add it to the new list of addresses
-			reachableIPs.Add(peer2)
-		}
-	}
-
-	return Union(newPeers, reachableIPs)
-}
-
 // Get the initial node state
 func GetNode() Node {
 	node := Node{}
@@ -106,15 +48,6 @@ func Ping(peerAddr string) PingResponse {
 	latency := endTime - startTime
 	conn.Close()
 	return PingResponse{peerAddr, true, latency}
-}
-
-func contains(s []string, e string) bool {
-	for _, a := range s {
-		if a == e {
-			return true
-		}
-	}
-	return false
 }
 
 func getLocalIP() string {
