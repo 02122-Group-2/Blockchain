@@ -19,6 +19,7 @@ var state = LoadState()
 
 func TestCreate(t *testing.T) {
 	t.Log("begin create transaction test")
+	shared.ResetPersistenceFilesForTest()
 
 	tr := state.CreateTransaction("magn", "niels", 6969.0)
 
@@ -39,6 +40,8 @@ func TestCreate(t *testing.T) {
 }
 
 func TestReward(t *testing.T) {
+	t.Log("begin create reward test")
+	shared.ResetPersistenceFilesForTest()
 	r := state.CreateReward("niels", 1337.420)
 
 	if r.Amount != 1337.420 {
@@ -90,7 +93,7 @@ func TestAddLegalGenesisTransaction(t *testing.T) {
 
 	err := state.AddTransaction(g)
 	if err != nil {
-		t.Error("Failed to add transaction. Error: " + err.Error())
+		t.Errorf("Failed to add transaction. Error: " + err.Error())
 	}
 
 	ResetTest()
@@ -98,22 +101,24 @@ func TestAddLegalGenesisTransaction(t *testing.T) {
 
 func TestAddIllegalGenesisTransaction(t *testing.T) {
 	t.Log("begin create illegal genesis transaction test")
+	shared.ResetPersistenceFilesForTest()
 
 	g := state.CreateGenesisTransaction("asger", 666.66)
 	err := state.AddTransaction(g)
 	if err == nil {
-		t.Error("Adding genesis transactions later in blockchain is not allowed")
+		t.Errorf("Adding genesis transactions later in blockchain is not allowed")
 	}
 	ResetTest()
 }
 
 func TestAddLegalTransaction(t *testing.T) {
 	t.Log("begin create transaction test")
+	shared.ResetPersistenceFilesForTest()
 
 	tr := state.CreateTransaction("Magn", "Niels", 42.0)
 	err := state.AddTransaction(tr)
 	if err != nil {
-		t.Error("Failed to add transaction. Error: " + err.Error())
+		t.Errorf("Failed to add transaction. Error: " + err.Error())
 	}
 
 	ResetTest()
@@ -121,11 +126,12 @@ func TestAddLegalTransaction(t *testing.T) {
 
 func TestAddIllegalTransaction(t *testing.T) {
 	t.Log("begin create too large transaction test")
+	shared.ResetPersistenceFilesForTest()
 
 	tr := state.CreateTransaction("Magn", "Niels", 898989.0)
 	err := state.AddTransaction(tr)
 	if err == nil {
-		t.Error("Succesfully added transaction but expected to fail.")
+		t.Errorf("Succesfully added transaction but expected to fail.")
 	}
 
 	ResetTest()
@@ -133,11 +139,12 @@ func TestAddIllegalTransaction(t *testing.T) {
 
 func TestSendMoneyToSameUser(t *testing.T) {
 	t.Log("begin create transaction test")
+	shared.ResetPersistenceFilesForTest()
 
 	tr := state.CreateTransaction("Magn", "Magn", 100.0)
 	err := state.AddTransaction(tr)
 	if err == nil {
-		t.Error("Normal transaction from account to itself is not allowed")
+		t.Errorf("Normal transaction from account to itself is not allowed")
 	}
 
 	ResetTest()
@@ -145,11 +152,12 @@ func TestSendMoneyToSameUser(t *testing.T) {
 
 func TestAddTransactionWithNegativeAmount(t *testing.T) {
 	t.Log("begin create transaction test")
+	shared.ResetPersistenceFilesForTest()
 
 	tr := state.CreateTransaction("Magn", "Niels", -10.0)
 	err := state.AddTransaction(tr)
 	if err == nil {
-		t.Error("Succesfully added transaction but expected to fail.")
+		t.Errorf("Succesfully added transaction but expected to fail.")
 	}
 
 	ResetTest()
@@ -157,11 +165,12 @@ func TestAddTransactionWithNegativeAmount(t *testing.T) {
 
 func TestAddTransactionFromAnUnknownAccount(t *testing.T) {
 	t.Log("begin create transaction test")
+	shared.ResetPersistenceFilesForTest()
 
 	tr := state.CreateTransaction("llll", "Niels", 1.0)
 	err := state.AddTransaction(tr)
 	if err == nil {
-		t.Error("Shouldnt be able to make a transaction from an unknown account")
+		t.Errorf("Shouldnt be able to make a transaction from an unknown account")
 	}
 
 	ResetTest()
@@ -169,11 +178,12 @@ func TestAddTransactionFromAnUnknownAccount(t *testing.T) {
 
 func TestAddTransactionToAnUnknownAccount(t *testing.T) {
 	t.Log("begin create transaction test")
+	shared.ResetPersistenceFilesForTest()
 
 	tr := state.CreateTransaction("Niels", "gggg", 1.0)
 	err := state.AddTransaction(tr)
 	if err != nil {
-		t.Error("Should be able to send to unknown account")
+		t.Errorf("Should be able to send to unknown account")
 	}
 
 	ResetTest()
@@ -187,18 +197,19 @@ func TestAddTransactionWithWrongNounce(t *testing.T) {
 	tr.SenderNounce = 2
 	err := state.AddTransaction(tr)
 	if err == nil {
-		t.Error("Should not be able to add transactions with older nounces")
+		t.Errorf("Should not be able to add transactions with older nounces")
 	}
 	ResetTest()
 }
 
 func TestAddRewardToAccount(t *testing.T) {
 	t.Log("Begin test reward system")
+	shared.ResetPersistenceFilesForTest()
 	tr := state.CreateReward("Alberto", 5000)
 	err := state.AddTransaction(tr)
 
 	if err != nil {
-		t.Error("Unable to add reward to user")
+		t.Errorf("Unable to add reward to user")
 	}
 
 	ResetTest()
@@ -206,10 +217,11 @@ func TestAddRewardToAccount(t *testing.T) {
 
 func TestCreateLegalTransactionAndPersist(t *testing.T) {
 	t.Log("Begin test persisting to transaction.JSON")
+	shared.ResetPersistenceFilesForTest()
 	tr := state.CreateTransaction("Niels", "Magn", 200000.0)
 	err := state.AddTransaction(tr)
 	if err != nil {
-		t.Error("Failed to add transaction. Error: " + err.Error())
+		t.Errorf("Failed to add transaction. Error: " + err.Error())
 	}
 
 	SaveTransaction(state.TxMempool)
@@ -217,6 +229,7 @@ func TestCreateLegalTransactionAndPersist(t *testing.T) {
 }
 
 func TestAddTransactionAndCheckTheyAreSaved(t *testing.T) {
+	shared.ResetPersistenceFilesForTest()
 	state1 := LoadState()
 	state1.AddTransaction(state.CreateTransaction("Magn", "Niels", 10))
 	state1.AddTransaction(state.CreateTransaction("Niels", "Magn", 10))
@@ -226,7 +239,7 @@ func TestAddTransactionAndCheckTheyAreSaved(t *testing.T) {
 	state1Json, _ := state1.MarshalJSON()
 	state2Json, _ := state2.MarshalJSON()
 	if string(state1Json) != string(state2Json) {
-		panic("the local changes should be saved but are not")
+		t.Errorf("the local changes should be saved but are not")
 	}
 
 	ResetTest()

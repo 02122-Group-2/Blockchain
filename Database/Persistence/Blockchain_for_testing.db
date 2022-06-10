@@ -257,31 +257,6 @@
           "Type": "transaction"
         }
       ]
-    },
-    {
-      "Header": {
-        "ParentHash": "0116adebf51528def8fdb441daa7620c017d1fe288fdb8071e24717aea74f81c",
-        "CreatedAt": 1648641894935865700,
-        "SerialNo": 3
-      },
-      "Transactions": [
-        {
-          "From": "Niels",
-          "To": "Magn",
-          "Amount": 10,
-          "SenderNounce": 9,
-          "Timestamp": 1648641894935865700,
-          "Type": "transaction"
-        },
-        {
-          "From": "Magn",
-          "To": "Emilie",
-          "Amount": 4,
-          "SenderNounce": 10,
-          "Timestamp": 1648641894935865700,
-          "Type": "transaction"
-        }
-      ]
     }
   ]
 }

@@ -135,6 +135,10 @@ func (state *State) ValidateTransaction(transaction Transaction) error {
 		return nil
 	}
 
+	if state.LastBlockSerialNo != 0 && transaction.Type == "genesis" {
+		return fmt.Errorf("a genesis transaction is not allowed with a block height greater than 0")
+	}
+
 	if transaction.From == transaction.To {
 		return fmt.Errorf("a normal transaction is not allowed to same account")
 	}
