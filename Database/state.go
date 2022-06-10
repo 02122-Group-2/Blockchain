@@ -125,8 +125,16 @@ func (state *State) ValidateTransaction(transaction Transaction) error {
 		return fmt.Errorf("Transaction Nounce doesn't match account nounce")
 	}
 
+	if transaction.Amount <= 0 {
+		return fmt.Errorf("illegal to make a transaction with 0 or less coins")
+	}
+
 	if (state.LastBlockSerialNo == 0 && transaction.Type == "genesis") || transaction.Type == "reward" {
 		return nil
+	}
+
+	if state.LastBlockSerialNo != 0 && transaction.Type == "genesis" {
+		return fmt.Errorf("a genesis transaction can only be applied to the genesis block (serial 0)")
 	}
 
 	if transaction.From == transaction.To {
@@ -135,9 +143,6 @@ func (state *State) ValidateTransaction(transaction Transaction) error {
 
 	if _, ok := state.AccountBalances[transaction.From]; !ok {
 		return fmt.Errorf("sending from Undefined Account \"%s\"", transaction.From)
-	}
-	if transaction.Amount <= 0 {
-		return fmt.Errorf("illegal to make a transaction with 0 or less coins")
 	}
 
 	if state.AccountBalances[transaction.From] < uint(transaction.Amount) {

@@ -5,16 +5,6 @@ import (
 	"testing"
 )
 
-// type State struct {
-// 	Balances  map[AccountAddress]uint
-// 	txMempool []Transaction
-// 	dbFile    *os.File
-
-// 	lastTxSerialNo    int
-// 	lastBlockSerialNo int
-// 	latestHash        string
-// }
-
 var state = LoadState()
 
 func TestCreate(t *testing.T) {
@@ -97,6 +87,9 @@ func TestAddLegalGenesisTransaction(t *testing.T) {
 }
 
 func TestAddIllegalGenesisTransaction(t *testing.T) {
+	// for this specific test case, the following reset is needed
+	shared.ResetPersistenceFilesForTest()
+	state = LoadState()
 	t.Log("begin create illegal genesis transaction test")
 
 	g := state.CreateGenesisTransaction("asger", 666.66)

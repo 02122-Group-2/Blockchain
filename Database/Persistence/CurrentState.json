@@ -1,32 +1,22 @@
 {
-  "LatestHash": "a98c25140bb0c5f0b40263fd0253171d3701823b110c848cca65d3a5c10e7721",
+  "LatestHash": "811a21a6ad322ab9e5f68cbcb47bf20a094ba55612a404f00a83ccb93e57c063",
   "AccountBalances": {
     "Alberto": 15100,
-    "Asger": 435,
-    "Emilie": 56,
-    "Magn": 420995,
-    "Niels": 579009,
+    "Asger": 423,
+    "Emilie": 22,
+    "Magn": 421011,
+    "Niels": 579039,
     "gggg": 3
   },
   "AccountNounces": {
-    "Asger": 2,
     "Emilie": 3,
-    "Magn": 12,
-    "Niels": 12,
+    "Magn": 10,
+    "Niels": 9,
     "system": 10
   },
-  "TxMempool": [
-    {
-      "From": "Magn",
-      "To": "Emilie",
-      "Amount": 22,
-      "SenderNounce": 12,
-      "Timestamp": 1654692298987766400,
-      "Type": "transaction"
-    }
-  ],
+  "TxMempool": null,
   "DbFile": null,
-  "LastBlockSerialNo": 4,
-  "LastBlockTimestamp": 1654692298987766400,
-  "LatestTimestamp": 1654692298987766400
+  "LastBlockSerialNo": 3,
+  "LastBlockTimestamp": 1648641894935865700,
+  "LatestTimestamp": 1648641894935865700
 }
