@@ -17,7 +17,7 @@ func Run() error {
 
 	shared.Log(fmt.Sprintf("Listening on port %d", httpPort))
 
-	go concSynchronization()
+	// go concSynchronization()
 	startNode()
 
 	return nil
