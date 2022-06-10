@@ -1,6 +1,7 @@
 package database
 
 import (
+	shared "blockchain/Shared"
 	"testing"
 )
 
@@ -46,6 +47,9 @@ func TestReward(t *testing.T) {
 	if r.From != "system" {
 		t.Errorf("From is set wrong")
 	}
+	if r.To != "niels" {
+		t.Errorf("To is set wrong")
+	}
 	if r.Type != "reward" {
 		t.Errorf("Type is wrong")
 	}
@@ -53,7 +57,57 @@ func TestReward(t *testing.T) {
 	ResetTest()
 }
 
-func TestApplyLegalTransaction(t *testing.T) {
+func EmptyBlockchain() {
+	ClearBlockchain()
+	ClearTransactions()
+	state.ClearState()
+}
+
+func TestGenesis(t *testing.T) {
+	EmptyBlockchain()
+	g := state.CreateGenesisTransaction("asger", 42.42)
+
+	if g.Amount != 42.42 {
+		t.Errorf("Amount is set wrong")
+	}
+	if g.From != "system" {
+		t.Errorf("From is set wrong")
+	}
+	if g.To != "asger" {
+		t.Errorf("To is set wrong")
+	}
+	if g.Type != "genesis" {
+		t.Errorf("Type is wrong")
+	}
+	ResetTest()
+}
+
+func TestAddLegalGenesisTransaction(t *testing.T) {
+	t.Log("begin add legal genesis transaction test")
+
+	EmptyBlockchain()
+	g := state.CreateGenesisTransaction("asger", 42.42)
+
+	err := state.AddTransaction(g)
+	if err != nil {
+		t.Error("Failed to add transaction. Error: " + err.Error())
+	}
+
+	ResetTest()
+}
+
+func TestAddIllegalGenesisTransaction(t *testing.T) {
+	t.Log("begin create illegal genesis transaction test")
+
+	g := state.CreateGenesisTransaction("asger", 666.66)
+	err := state.AddTransaction(g)
+	if err == nil {
+		t.Error("Adding genesis transactions later in blockchain is not allowed")
+	}
+	ResetTest()
+}
+
+func TestAddLegalTransaction(t *testing.T) {
 	t.Log("begin create transaction test")
 
 	tr := state.CreateTransaction("Magn", "Niels", 42.0)
@@ -65,8 +119,8 @@ func TestApplyLegalTransaction(t *testing.T) {
 	ResetTest()
 }
 
-func TestApplyIllegalTransaction(t *testing.T) {
-	t.Log("begin create transaction test")
+func TestAddIllegalTransaction(t *testing.T) {
+	t.Log("begin create too large transaction test")
 
 	tr := state.CreateTransaction("Magn", "Niels", 898989.0)
 	err := state.AddTransaction(tr)
@@ -89,7 +143,7 @@ func TestSendMoneyToSameUser(t *testing.T) {
 	ResetTest()
 }
 
-func TestApplyTransactionWithNegativeAmount(t *testing.T) {
+func TestAddTransactionWithNegativeAmount(t *testing.T) {
 	t.Log("begin create transaction test")
 
 	tr := state.CreateTransaction("Magn", "Niels", -10.0)
@@ -122,6 +176,19 @@ func TestAddTransactionToAnUnknownAccount(t *testing.T) {
 		t.Error("Should be able to send to unknown account")
 	}
 
+	ResetTest()
+}
+
+func TestAddTransactionWithWrongNounce(t *testing.T) {
+	t.Log("begin create transaction with wrong account nounce")
+
+	shared.ResetPersistenceFilesForTest()
+	tr := state.CreateTransaction("Emilie", "Niels", 2.0)
+	tr.SenderNounce = 2
+	err := state.AddTransaction(tr)
+	if err == nil {
+		t.Error("Should not be able to add transactions with older nounces")
+	}
 	ResetTest()
 }
 

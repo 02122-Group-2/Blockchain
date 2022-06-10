@@ -63,6 +63,13 @@ func (state *State) CreateReward(accountAddress AccountAddress, amount float64) 
 	return state.CreateCustomTransaction("system", accountAddress, amount, "reward")
 }
 
+func ClearTransactions() {
+	err := os.Truncate(shared.LocalDirToFileFolder+"Transactions.json", 0)
+	if err != nil {
+		panic(err)
+	}
+}
+
 // Given a list of transactions, it saves these transactions as a JSON string in a local text file.
 // Returns a boolean value indicating whether or not it was saved succesfully.
 // This is not used in older version of the blockchain.

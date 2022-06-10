@@ -85,6 +85,20 @@ func LoadState() *State {
 	return &state
 }
 
+func (state *State) ClearState() {
+	state.LastBlockSerialNo = 0
+	err := os.Truncate(shared.LocalDirToFileFolder+"CurrentState.json", 0)
+	if err != nil {
+		panic(err)
+	}
+
+	err = os.Truncate(shared.LocalDirToFileFolder+"LatestSnapshot.json", 0)
+	if err != nil {
+		panic(err)
+	}
+
+}
+
 // Adds a transaction to the state. It will validate the transaction, then apply the transaction to the state,
 // then add the transaction to its MemPool and update its latest timestamp field.
 func (state *State) AddTransaction(transaction Transaction) error {
@@ -214,7 +228,9 @@ func loadStateFromJSON(filename string) State {
 	}
 
 	var state State
-	json.Unmarshal(data, &state)
+	if len(data) != 0 {
+		json.Unmarshal(data, &state)
+	}
 
 	return state
 }

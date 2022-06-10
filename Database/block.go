@@ -179,6 +179,13 @@ func LoadBlockchain() []Block {
 	return loadedBlockchain.Blockchain
 }
 
+func ClearBlockchain() {
+	err := os.Truncate(shared.LocalDirToFileFolder+"Blockchain.db", 0)
+	if err != nil {
+		panic(err)
+	}
+}
+
 // Given a list of blocks, save the list as the local blockchain.
 func SaveBlockchain(blockchain []Block) bool {
 	toSave := Blockchain{blockchain}
