@@ -1,7 +1,10 @@
 package shared
 
 import (
+	"crypto/sha256"
 	"fmt"
+	"io"
+	"log"
 	"os"
 	"testing"
 )
@@ -53,8 +56,32 @@ func TestCheckForNeededFiles(t *testing.T) {
 	}
 }
 
+func getChecksum(filepath string) string {
+	f, err := os.Open(filepath)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer f.Close()
+
+	h := sha256.New()
+	if _, err := io.Copy(h, f); err != nil {
+		log.Fatal(err)
+	}
+
+	return fmt.Sprintf("%x", h.Sum(nil))
+}
+
 // test result is cached and as a result the reset is not run more than once when running the test
 func TestResetPersistenceFiles(t *testing.T) {
-	fmt.Println("bruh4202")
+	// fmt.Println("bruh4202")
 	ResetPersistenceFilesForTest()
+
+	for _, fileMapping := range persistenceFileMappings {
+		replacedFile, checkFile := Locate(fileMapping.from), Locate(fileMapping.to)
+		replacedFileSum, checkFileSum := getChecksum(replacedFile), getChecksum(checkFile)
+		if replacedFileSum != checkFileSum {
+			panic(fmt.Sprintf("Checksums do not match for files %s and %s\n%x\n%x\n", replacedFile, checkFile, replacedFileSum, checkFileSum))
+		}
+		fmt.Printf("Checksums for files %s and %s:\n%x\n%x\n\n", fileMapping.from, fileMapping.to, replacedFileSum, checkFileSum)
+	}
 }

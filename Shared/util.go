@@ -15,8 +15,8 @@ func PrettyTimestamp() string {
 }
 
 func LegalIpAddress(addr string) bool {
-	regexIPwithPort := "^(localhost|((([0-1]{0,1}[0-9]{1,2})|2([0-4][0-9]|5[0-5])).){3}(([0-1]{0,1}[0-9]{1,2})|2([0-4][0-9]|5[0-5]))):[0-9]{4,5}$"
-	match, _ := regexp.MatchString(regexIPwithPort, addr)
+	regexIPv4withPort := "^(localhost|((([0-1]{0,1}[0-9]{1,2})|2([0-4][0-9]|5[0-5])).){3}(([0-1]{0,1}[0-9]{1,2})|2([0-4][0-9]|5[0-5]))):[0-9]{4,5}$"
+	match, _ := regexp.MatchString(regexIPv4withPort, addr)
 	return match
 }
 

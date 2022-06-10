@@ -81,14 +81,13 @@ func concSynchronization() {
 		}
 
 		// apply the fetched blocks
-		//    - TODO: should it make sure blocks are clear up until this point in own state?
 		if len(peerBlocks) > 0 {
+			// TODO: validate all received blocks before clearing and applying
 			clearConflictingSubchain(deltaIdx)
 			for _, block := range peerBlocks {
 				node.State.AddBlock(block)
 			}
 		}
-		// TODO: or maybe clear them at this point since we do not know yet if the chain is accepted back then?
 
 		// apply states from peers with newest chain
 		tryApplyPeerStates(node, nodes)
