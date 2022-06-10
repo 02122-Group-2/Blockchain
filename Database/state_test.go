@@ -15,7 +15,7 @@ func TestLoadState(t *testing.T) {
 		hash32[i] = hash[i]
 	}
 	state_comp := State{LatestHash: hash32, AccountBalances: map[AccountAddress]uint{"Alberto": 15100, "Asger": 423, "Emilie": 22, "Magn": 421011, "Niels": 579039, "gggg": 3}, AccountNounces: map[AccountAddress]uint{"Emilie": 3, "Magn": 10, "Niels": 9, "system": 10}, TxMempool: nil, DbFile: nil, LastBlockSerialNo: 3, LastBlockTimestamp: 1648641894935865700, LatestTimestamp: 1648641894935865700}
-	state := loadStateFromJSON("state_test.json")
+	state := loadStateFromJSON("test_data/state_test.json")
 
 	state_comp_json, _ := json.Marshal(state_comp)
 	state_comp_json_string := fmt.Sprintf("%v", state_comp_json)

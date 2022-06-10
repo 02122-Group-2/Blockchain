@@ -202,3 +202,20 @@ func TestMarshalUnmarshalNode(t *testing.T) {
 
 	// t.Log(node_new)
 }
+
+// if two forks are exactly equal in number of nodes that agree
+func Test5050case(t *testing.T) {
+
+}
+
+func TestHandleLegalConsensusChain(t *testing.T) {
+
+}
+
+func TestHandleIllegalConsensusChain(t *testing.T) {
+
+}
+
+func TestTamperedChain(t *testing.T) {
+
+}

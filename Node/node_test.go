@@ -17,7 +17,7 @@ func TestCreatePeerSet(t *testing.T) {
 
 	correctChecksum := "31f74234299b520c9a680a8022b7b0b24f707668c30f34be152a334d015dec0e"
 
-	realChecksum := shared.GetChecksum(shared.Locate(peerSetTestFile))
+	realChecksum := shared.GetChecksum(shared.LocatePersistenceFile(peerSetTestFile, "test_data"))
 
 	t.Log(realChecksum)
 
@@ -26,7 +26,7 @@ func TestCreatePeerSet(t *testing.T) {
 		panic(fmt.Sprintf("%s was not created correctly", peerSetTestFile))
 	}
 
-	os.Remove(shared.Locate(peerSetTestFile))
+	os.Remove(shared.LocatePersistenceFile(peerSetTestFile, ""))
 }
 
 // this test is not an actual unit test.

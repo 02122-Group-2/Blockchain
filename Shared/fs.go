@@ -20,7 +20,7 @@ func CheckForNeededFiles() error {
 }
 
 func InitDataDirIfNotExists(dataDir string) error {
-	path := LocalDirToFileFolder + dataDir
+	path := LocatePersistenceFile(dataDir, "")
 
 	if fileExist(path) {
 		return nil
@@ -46,14 +46,17 @@ func fileExist(filePath string) bool {
 // function for creating a system state that we know is a legal blockchain, for testing further functionality
 func ResetPersistenceFilesForTest() {
 	for _, m := range persistenceFileMappings {
-		fromFile := Locate(m.from)
-		toFile := Locate(m.to)
+		fromFile := LocatePersistenceFile(m.from, "test_data")
+		toFile := LocatePersistenceFile(m.to, "")
 		replaceFileContents(fromFile, toFile)
 	}
 }
 
-func Locate(filename string) string {
-	return LocalDirToFileFolder + filename
+func LocatePersistenceFile(filename string, subfolder string) string {
+	if subfolder != "" {
+		subfolder += "/"
+	}
+	return fmt.Sprintf("%s/%s%s", LocalDirToFileFolder, subfolder, filename)
 }
 
 func replaceFileContents(replaceWith string, fileName string) error {
