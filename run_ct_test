@@ -1,1 +1,1 @@
-`go env GOPATH`/bin/kbc transaction create --from Magn --to Niels --amount 2000 --type transaction
+go install ./UI/kbc && `go env GOPATH`/bin/kbc transaction create --from Magn --to Niels --amount 2000 --type transaction

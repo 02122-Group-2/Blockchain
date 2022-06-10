@@ -1,1 +1,1 @@
-`go env GOPATH`/bin/kbc block create
+go install ./UI/kbc && `go env GOPATH`/bin/kbc block create

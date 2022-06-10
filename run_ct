@@ -1,1 +1,1 @@
-`go env GOPATH`/bin/kbc transaction create --from $1 --to $2 --amount $3 --type transaction
+go install ./UI/kbc && `go env GOPATH`/bin/kbc transaction create --from $1 --to $2 --amount $3 --type transaction
