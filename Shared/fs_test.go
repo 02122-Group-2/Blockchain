@@ -7,11 +7,11 @@ import (
 )
 
 //Tests if CheckingForNeededFiles work for all the needed files
-func TestCheckForNeededFiles(t *testing.T) {
-	t.Log("begin CheckForNeededFiles test")
+func TestEnsureNeededFilesExist(t *testing.T) {
+	t.Log("begin EnsureNeededFilesExist test")
 
 	//1. The file is already present and so nothing happens
-	err := CheckForNeededFiles()
+	err := EnsureNeededFilesExist()
 	if err != nil {
 		t.Errorf("failed to do nothing...")
 	}
@@ -22,7 +22,7 @@ func TestCheckForNeededFiles(t *testing.T) {
 	}
 
 	//2. The file should not be present and therefore a new empty one is created
-	err = CheckForNeededFiles()
+	err = EnsureNeededFilesExist()
 	if err != nil {
 		t.Errorf("failed to create missing files...")
 	}

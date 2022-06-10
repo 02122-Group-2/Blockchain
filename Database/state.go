@@ -186,7 +186,35 @@ func (state *State) TryAddTransactions(transactionList TransactionList) error {
 	return nil
 }
 
-// Loads the latest snapchat of the state. Each snapshat is meant as the state right after a block has been added.
+// recomputes state snapshot corresponding to a given index (serial no.) on the blockchain
+// mutates state of {state} and the persisted snapshot
+func (state *State) RecomputeState(deltaIdx int) {
+	newState := blankState()
+	bc := LoadBlockchain()[:deltaIdx-1]
+
+	for _, b := range bc {
+		newState.ApplyBlock(b)
+	}
+
+	*state = newState
+	state.SaveSnapshot()
+}
+
+func blankState() State {
+	newState := State{}
+	newState.AccountBalances = map[AccountAddress]uint{}
+	newState.AccountBalances = map[AccountAddress]uint{}
+	newState.AccountNounces = map[AccountAddress]uint{}
+	newState.TxMempool = TransactionList{}
+	newState.DbFile = &os.File{}
+	newState.LastBlockSerialNo = 0
+	newState.LastBlockTimestamp = 0
+	newState.LatestHash = [32]byte{}
+	newState.LatestTimestamp = 0
+	return newState
+}
+
+// Loads the latest snapshot of the state. Each snapshot is meant as the state right after a block has been added.
 func LoadSnapshot() State {
 	return loadStateFromJSON("LatestSnapshot.json")
 }
