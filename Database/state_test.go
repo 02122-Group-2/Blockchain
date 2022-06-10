@@ -1,6 +1,7 @@
 package database
 
 import (
+	shared "blockchain/Shared"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -8,6 +9,7 @@ import (
 )
 
 func TestLoadState(t *testing.T) {
+	shared.ResetPersistenceFilesForTest()
 	t.Log("Start load state test")
 	hash, _ := hex.DecodeString("811a21a6ad322ab9e5f68cbcb47bf20a094ba55612a404f00a83ccb93e57c063")
 	hash32 := [32]byte{}

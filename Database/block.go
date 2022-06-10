@@ -58,6 +58,10 @@ func (state *State) ValidateBlock(block Block) error {
 		}
 	}
 
+	if len(block.Transactions) == 0 {
+		return fmt.Errorf("The number of transactions must be greater than 0")
+	}
+
 	if block.Header.ParentHash != state.LatestHash {
 		return fmt.Errorf("the parent hash doesn't match the hash of the Latest block \nBlock.Parent: %x\nState.Latest: %x", block.Header.ParentHash, state.LatestHash)
 	}

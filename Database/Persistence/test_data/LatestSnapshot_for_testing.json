@@ -9,6 +9,7 @@
     "gggg": 3
   },
   "AccountNounces": {
+    "Asger": 2,
     "Emilie": 3,
     "Magn": 10,
     "Niels": 9,
@@ -19,4 +20,4 @@
   "LastBlockSerialNo": 3,
   "LastBlockTimestamp": 1648641894935865700,
   "LatestTimestamp": 1648641894935865700
-}
+  } 
