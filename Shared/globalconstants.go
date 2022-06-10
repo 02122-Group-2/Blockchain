@@ -14,3 +14,5 @@ var persistenceFileMappings []struct {
 	{from: "Blockchain_for_testing.db", to: "Blockchain.db"},
 	{from: "CurrentState_for_testing.json", to: "CurrentState.json"},
 	{from: "LatestSnapshot_for_testing.json", to: "LatestSnapshot.json"}}
+
+var runtimeFiles = []string{"CurrentState.json", "LatestSnapshot.json", "state.json", "Transactions.json", "Blockchain.db", "PeerList.json", "PeerSet.json"}

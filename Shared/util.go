@@ -1,7 +1,11 @@
 package shared
 
 import (
+	"crypto/sha256"
 	"fmt"
+	"io"
+	"log"
+	"os"
 	"regexp"
 	"time"
 )
@@ -22,4 +26,19 @@ func LegalIpAddress(addr string) bool {
 
 func Log(msg string) {
 	fmt.Printf("%s: %s\n", PrettyTimestamp(), msg)
+}
+
+func GetChecksum(filepath string) string {
+	f, err := os.Open(filepath)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer f.Close()
+
+	h := sha256.New()
+	if _, err := io.Copy(h, f); err != nil {
+		log.Fatal(err)
+	}
+
+	return fmt.Sprintf("%x", h.Sum(nil))
 }

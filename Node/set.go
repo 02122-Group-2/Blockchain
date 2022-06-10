@@ -68,7 +68,7 @@ func LoadPeerSetFromJSON(filename string) PeerSet {
 
 	if ps == nil {
 		ps = PeerSet{}
-	} 
+	}
 
 	return ps
 }
@@ -77,7 +77,7 @@ func LoadPeerSetFromJSON(filename string) PeerSet {
 func SavePeerSetAsJSON(ps PeerSet, filename string) error {
 	psJSON, _ := json.MarshalIndent(ps, "", "  ")
 
-	err := ioutil.WriteFile(shared.LocalDirToFileFolder+filename, psJSON, 0644)
+	err := ioutil.WriteFile(shared.Locate(filename), psJSON, 0644)
 	if err != nil {
 		panic(err)
 	}

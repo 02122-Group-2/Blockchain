@@ -9,9 +9,7 @@ import (
 //Function that ensures that all files needed to run a node are present on the current system
 //If not they are created
 func CheckForNeededFiles() error {
-	files := []string{"CurrentState.json", "LatestSnapshot.json", "state.json", "Transactions.json", "Blockchain.db", "PeerList.json", "PeerSet.json"}
-
-	for _, file := range files {
+	for _, file := range runtimeFiles {
 		err := InitDataDirIfNotExists(file)
 		if err != nil {
 			return err
