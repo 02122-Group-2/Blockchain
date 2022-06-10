@@ -73,6 +73,10 @@ func LoadPeerSetFromJSON(filename string) PeerSet {
 	return ps
 }
 
+func PersistPeerSet(ps PeerSet) {
+	SavePeerSetAsJSON(ps, shared.PeerSetFile)
+}
+
 // Save the peer list in a JSON file
 func SavePeerSetAsJSON(ps PeerSet, filename string) error {
 	psJSON, _ := json.MarshalIndent(ps, "", "  ")

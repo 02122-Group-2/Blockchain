@@ -59,7 +59,7 @@ func (state *State) ValidateBlock(block Block) error {
 	}
 
 	if len(block.Transactions) == 0 {
-		return fmt.Errorf("The number of transactions must be greater than 0")
+		return fmt.Errorf("the number of transactions must be greater than 0")
 	}
 
 	if block.Header.ParentHash != state.LatestHash {

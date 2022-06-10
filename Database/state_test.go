@@ -28,3 +28,9 @@ func TestLoadState(t *testing.T) {
 		panic(fmt.Sprintf("%s\n%s\n", state_comp_json, state_comp_json_string))
 	}
 }
+
+func TestRecomputeState(t *testing.T) {
+	s := LoadState()
+	s.RecomputeState(4)
+	t.Logf("%x\n", s.LatestHash)
+}

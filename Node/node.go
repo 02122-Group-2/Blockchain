@@ -8,9 +8,7 @@ import (
 )
 
 func Run() error {
-	//Assesing if all JSON files are present: CurrentState, LatestSnapshot, state,
-	//Transactions, Blockchain.db
-	err := shared.CheckForNeededFiles()
+	err := shared.EnsureNeededFilesExist()
 	if err != nil {
 		return err
 	}
