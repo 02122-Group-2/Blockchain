@@ -85,7 +85,7 @@ func TestGetLocalChainHashes(t *testing.T) {
 	shared.ResetPersistenceFilesForTest()
 	state := db.LoadState()
 	cHashes := db.GetLocalChainHashes(*state, 0)
-	t.Log(cHashes)
+	// t.Log(cHashes)
 	chainComp := []string{"0000000000000000000000000000000000000000000000000000000000000000", "c352edf51ac6fdf40de39d11a85c1f1a90620028905a6ead5fa78da04eee75cc", "0116adebf51528def8fdb441daa7620c017d1fe288fdb8071e24717aea74f81c", "811a21a6ad322ab9e5f68cbcb47bf20a094ba55612a404f00a83ccb93e57c063"}
 	if db.CompareChainHashes(cHashes, chainComp) != -1 {
 		panic("should be equal")
@@ -107,7 +107,7 @@ func TestSortByLatency(t *testing.T) {
 	pings[2] = PingResponse{"localhost:8083", true, 3}
 	pings[3] = PingResponse{"localhost:8084", true, 4}
 	fastest := getNFastestPeers(pings, 3)
-	t.Log(fastest)
+	// t.Log(fastest)
 	if !(fastest.Exists(pings[1].Address) || fastest.Exists(pings[2].Address) || fastest.Exists(pings[0].Address)) {
 		panic(fmt.Sprintf("PeerSet should include fastest 3 pings. [0]: %s [1]: %s", pings[0].Address, pings[1].Address))
 	}
@@ -200,5 +200,22 @@ func TestMarshalUnmarshalNode(t *testing.T) {
 		panic(fmt.Sprintf("Error unmarshaling Node, %v", err2.Error()))
 	}
 
-	t.Log(node_new)
+	// t.Log(node_new)
+}
+
+// if two forks are exactly equal in number of nodes that agree
+func Test5050case(t *testing.T) {
+
+}
+
+func TestHandleLegalConsensusChain(t *testing.T) {
+
+}
+
+func TestHandleIllegalConsensusChain(t *testing.T) {
+
+}
+
+func TestTamperedChain(t *testing.T) {
+
 }

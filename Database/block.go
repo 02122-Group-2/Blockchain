@@ -58,6 +58,10 @@ func (state *State) ValidateBlock(block Block) error {
 		}
 	}
 
+	if len(block.Transactions) == 0 {
+		return fmt.Errorf("The number of transactions must be greater than 0")
+	}
+
 	if block.Header.ParentHash != state.LatestHash {
 		return fmt.Errorf("the parent hash doesn't match the hash of the Latest block \nBlock.Parent: %x\nState.Latest: %x", block.Header.ParentHash, state.LatestHash)
 	}
@@ -161,7 +165,7 @@ func PersistBlockToDB(block Block) error {
 
 // Load the local blockchain and return it as a list of blocks
 func LoadBlockchain() []Block {
-	data, err := os.ReadFile(shared.LocalDirToFileFolder + "Blockchain.db")
+	data, err := os.ReadFile(shared.LocatePersistenceFile("Blockchain.db", ""))
 	if err != nil {
 		panic(err)
 	}
@@ -176,7 +180,7 @@ func LoadBlockchain() []Block {
 }
 
 func ClearBlockchain() {
-	err := os.Truncate(shared.LocalDirToFileFolder+"Blockchain.db", 0)
+	err := os.Truncate(shared.LocatePersistenceFile("Blockchain.db", ""), 0)
 	if err != nil {
 		panic(err)
 	}
@@ -187,7 +191,7 @@ func SaveBlockchain(blockchain []Block) bool {
 	toSave := Blockchain{blockchain}
 	txFile, _ := json.MarshalIndent(toSave, "", "  ")
 
-	err := ioutil.WriteFile(shared.LocalDirToFileFolder+"Blockchain.db", txFile, 0644)
+	err := ioutil.WriteFile(shared.LocatePersistenceFile("Blockchain.db", ""), txFile, 0644)
 	if err != nil {
 		panic(err)
 	}

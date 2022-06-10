@@ -18,7 +18,7 @@ func TestCheckForNeededFiles(t *testing.T) {
 
 	//Remove the files
 	for _, fileName := range runtimeFiles {
-		os.Remove(Locate(fileName))
+		os.Remove(LocatePersistenceFile(fileName, ""))
 	}
 
 	//2. The file should not be present and therefore a new empty one is created
@@ -28,7 +28,7 @@ func TestCheckForNeededFiles(t *testing.T) {
 	}
 
 	for _, fileName := range runtimeFiles {
-		if !fileExist(Locate(fileName)) {
+		if !fileExist(LocatePersistenceFile(fileName, "")) {
 			panic(fmt.Sprintf("Error %s was not created\n", fileName))
 		}
 	}
@@ -39,7 +39,7 @@ func TestResetPersistenceFiles(t *testing.T) {
 	ResetPersistenceFilesForTest()
 
 	for _, fileMapping := range persistenceFileMappings {
-		replacedFile, checkFile := Locate(fileMapping.from), Locate(fileMapping.to)
+		replacedFile, checkFile := LocatePersistenceFile(fileMapping.from, "test_data"), LocatePersistenceFile(fileMapping.to, "")
 		replacedFileSum, checkFileSum := GetChecksum(replacedFile), GetChecksum(checkFile)
 		if replacedFileSum != checkFileSum {
 			panic(fmt.Sprintf("Checksums do not match for files %s and %s\n%x\n%x\n", replacedFile, checkFile, replacedFileSum, checkFileSum))

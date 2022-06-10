@@ -81,12 +81,12 @@ func LoadState() *State {
 
 func (state *State) ClearState() {
 	state.LastBlockSerialNo = 0
-	err := os.Truncate(shared.LocalDirToFileFolder+"CurrentState.json", 0)
+	err := os.Truncate(shared.LocatePersistenceFile("CurrentState.json", ""), 0)
 	if err != nil {
 		panic(err)
 	}
 
-	err = os.Truncate(shared.LocalDirToFileFolder+"LatestSnapshot.json", 0)
+	err = os.Truncate(shared.LocatePersistenceFile("CurrentState.json", ""), 0)
 	if err != nil {
 		panic(err)
 	}
@@ -211,7 +211,7 @@ func (state *State) SaveSnapshot() error {
 func saveStateAsJSON(state *State, filename string) error {
 	txFile, _ := json.MarshalIndent(state, "", "  ")
 
-	err := ioutil.WriteFile(shared.LocalDirToFileFolder+filename, txFile, 0644)
+	err := ioutil.WriteFile(shared.LocatePersistenceFile(filename, ""), txFile, 0644)
 	if err != nil {
 		panic(err)
 	}
@@ -221,7 +221,7 @@ func saveStateAsJSON(state *State, filename string) error {
 
 // Function that loads a state from a JSON file
 func loadStateFromJSON(filename string) State {
-	data, err := os.ReadFile(shared.LocalDirToFileFolder + filename)
+	data, err := os.ReadFile(shared.LocatePersistenceFile(filename, ""))
 	if err != nil {
 		panic(err)
 	}

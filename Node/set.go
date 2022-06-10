@@ -58,7 +58,7 @@ func LoadPeerSetFromJSON(filename string) PeerSet {
 	// Create the file if it doesnt exist
 	shared.InitDataDirIfNotExists(filename)
 
-	data, err := os.ReadFile(shared.LocalDirToFileFolder + filename)
+	data, err := os.ReadFile(shared.LocatePersistenceFile(filename, ""))
 	if err != nil {
 		panic(err)
 	}
@@ -77,7 +77,7 @@ func LoadPeerSetFromJSON(filename string) PeerSet {
 func SavePeerSetAsJSON(ps PeerSet, filename string) error {
 	psJSON, _ := json.MarshalIndent(ps, "", "  ")
 
-	err := ioutil.WriteFile(shared.Locate(filename), psJSON, 0644)
+	err := ioutil.WriteFile(shared.LocatePersistenceFile(filename, ""), psJSON, 0644)
 	if err != nil {
 		panic(err)
 	}

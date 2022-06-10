@@ -16,4 +16,4 @@ var persistenceFileMappings []struct {
 	{from: "LatestSnapshot_for_testing.json", to: "LatestSnapshot.json"},
 	{from: "PeerSet_for_testing.json", to: "PeerSet.json"}}
 
-var runtimeFiles = []string{"CurrentState.json", "LatestSnapshot.json", "state.json", "Transactions.json", "Blockchain.db", "PeerList.json", "PeerSet.json"}
+var runtimeFiles = []string{"CurrentState.json", "LatestSnapshot.json", "state.json", "Transactions.json", "Blockchain.db", "PeerSet.json"}

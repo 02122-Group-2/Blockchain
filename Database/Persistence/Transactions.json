@@ -1,12 +1,1 @@
-{
-  "transactions": [
-    {
-      "From": "Magn",
-      "To": "Niels",
-      "Amount": 1234,
-      "SenderNounce": 11,
-      "Timestamp": 1654862230687967000,
-      "Type": "transaction"
-    }
-  ]
-}
+null

@@ -5,17 +5,21 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"reflect"
 	"testing"
 )
 
-var state_block = LoadState()
 var blockchain_original = LoadBlockchain()
 var state_original = LoadState()
 var snapshot_orignal = LoadSnapshot()
 var transactions_original = LoadTransactions()
 
 func TestCreateBlock(t *testing.T) {
+
+	t.Log("begin create block test")
 	shared.ResetPersistenceFilesForTest()
+
+	var state_block = LoadState()
 
 	tx1 := state_block.CreateTransaction("Niels", "Asger", 10)
 	tx2 := state_block.CreateTransaction("Asger", "Emilie", 4)
@@ -24,10 +28,33 @@ func TestCreateBlock(t *testing.T) {
 	block := state_block.CreateBlock(state_block.TxMempool)
 	fmt.Println(block)
 
+	if len(block.Transactions) != 2 {
+		t.Logf("Expected number of transactions in block to be 2, but was %v", len(block.Transactions))
+		t.Fail()
+	}
+
+	trans1 := block.Transactions[0]
+	trans2 := block.Transactions[1]
+
+	if trans1.From != tx1.From && trans1.To != tx1.To && trans1.Amount != tx1.Amount {
+		t.Log("Expected the first transaction in the block to be equal to the first transaction but wasn't")
+		t.Fail()
+	}
+
+	if trans2.From != tx2.From && trans2.To != tx2.To && trans2.Amount != tx2.Amount {
+		t.Log("Expected the second transaction in the block to be equal to the second transaction but wasn't")
+		t.Fail()
+	}
+
 	ResetTest()
 }
 
 func TestSaveBlock(t *testing.T) {
+	t.Log("begin save block")
+	shared.ResetPersistenceFilesForTest()
+
+	var state_block = LoadState()
+
 	blockchain_original = LoadBlockchain()
 
 	// Create a block
@@ -38,20 +65,277 @@ func TestSaveBlock(t *testing.T) {
 	block := state_block.CreateBlock(state_block.TxMempool)
 
 	// var blockList []Block
-
 	blockList := append(blockchain_original, block)
 
 	SaveBlockchain(blockList)
+
+	//Now this blocklist should be equal to the one in the file
+	loadedBlockchain := LoadBlockchain()
+
+	if !reflect.DeepEqual(blockList, loadedBlockchain) {
+		t.Log("Expected blockchains to be equal but weren't")
+		t.Fail()
+	}
 
 	ResetTest()
 }
 
 func TestLoadBlockchain(t *testing.T) {
+
+	t.Log("begin load blockchain test")
+	shared.ResetPersistenceFilesForTest()
+
 	res := LoadBlockchain()
 	fmt.Println(res)
 	ResetTest()
 }
 
+func TestAddLegalBlockToBlockchain(t *testing.T) {
+
+	t.Log("begin add legal block to blockchain")
+	shared.ResetPersistenceFilesForTest()
+
+	var state_block = LoadState()
+
+	//Create the transactions
+	tx1 := state_block.CreateTransaction("Niels", "Magn", 10)
+	tx2 := state_block.CreateTransaction("Magn", "Emilie", 4)
+
+	//Add transactions to the state
+	state_block.AddTransaction(tx1)
+	state_block.AddTransaction(tx2)
+
+	//Create the block
+	block1 := state_block.CreateBlock(state_block.TxMempool)
+
+	//Add the block
+	err := state_block.AddBlock(block1)
+	if err != nil {
+		t.Errorf("Expected block to be legal, but wasn't")
+	}
+
+	ResetTest()
+}
+
+func TestAddIllegalBlockWrongParentHash(t *testing.T) {
+
+	t.Log("begin add illegal block to blockchain: Wrong parent hash")
+	shared.ResetPersistenceFilesForTest()
+
+	var state_block = LoadState()
+
+	//Create the transactions
+	tx1 := state_block.CreateTransaction("Niels", "Magn", 10)
+	tx2 := state_block.CreateTransaction("Magn", "Emilie", 4)
+
+	//Add transactions to the state
+	state_block.AddTransaction(tx1)
+	state_block.AddTransaction(tx2)
+
+	//Create the block
+	block1 := state_block.CreateBlock(state_block.TxMempool)
+
+	//Mess up parent hash
+	block1.Header.ParentHash = [32]byte{}
+
+	//Add the block
+	err := state_block.AddBlock(block1)
+	if err == nil {
+		t.Errorf("Expected block to be illegal due to wrong parent hash, but wasn't")
+	}
+
+	ResetTest()
+
+}
+
+func TestAddIllegalBlockIllegalTransaction(t *testing.T) {
+
+	t.Log("begin add illegal block to blockchain: Illegal transaction")
+	shared.ResetPersistenceFilesForTest()
+
+	var state_block = LoadState()
+
+	//Create the transactions
+	tx1 := state_block.CreateTransaction("Niels", "Magn", 10)
+
+	//Illegal transaction
+	tx2 := state_block.CreateTransaction("Magn", "Emilie", 10000000)
+
+	//Create the block from a manually created transaction list
+	block1 := state_block.CreateBlock(TransactionList{tx1, tx2})
+
+	//Add the block
+	err := state_block.AddBlock(block1)
+	if err == nil {
+		t.Log("Expected block to be illegal due to illegal transaction, but wasn't", err)
+		t.Fail()
+	}
+
+	ResetTest()
+
+}
+
+func TestAddIllegalBlockWrongTimestamp(t *testing.T) {
+
+	t.Log("begin add illegal block to blockchain: Wrong timestamp")
+	shared.ResetPersistenceFilesForTest()
+
+	var state_block = LoadState()
+
+	//Create the transactions
+	tx1 := state_block.CreateTransaction("Niels", "Magn", 10)
+	tx2 := state_block.CreateTransaction("Magn", "Emilie", 4)
+
+	//Add transactions to the state
+	state_block.AddTransaction(tx1)
+	state_block.AddTransaction(tx2)
+
+	//Create the block
+	block1 := state_block.CreateBlock(state_block.TxMempool)
+
+	//Mess up the timestamp
+	block1.Header.CreatedAt = state_block.LastBlockTimestamp - 1
+
+	//Add the block
+	err := state_block.AddBlock(block1)
+	if err == nil {
+		t.Errorf("Expected block to be illegal due to wrong timestamp, but wasn't")
+
+	}
+
+	ResetTest()
+
+}
+
+func TestAddIllegalBlockWrongBlockHeigh(t *testing.T) {
+
+	t.Log("begin add illegal block to blockchain: Wrong block height")
+	shared.ResetPersistenceFilesForTest()
+
+	var state_block = LoadState()
+
+	//Create the transactions
+	tx1 := state_block.CreateTransaction("Niels", "Magn", 10)
+	tx2 := state_block.CreateTransaction("Magn", "Emilie", 4)
+
+	//Add transactions to the state
+	state_block.AddTransaction(tx1)
+	state_block.AddTransaction(tx2)
+
+	//Create the block
+	block1 := state_block.CreateBlock(state_block.TxMempool)
+
+	//Mess up the height
+	block1.Header.SerialNo -= 1
+
+	//Add the block
+	err := state_block.AddBlock(block1)
+	if err == nil {
+		t.Errorf("Expected block to be illegal due to wrong blockheight, but wasn't")
+
+	}
+
+	ResetTest()
+
+}
+
+func TestAddIllegalBlockNoTransactions(t *testing.T) {
+
+	t.Log("begin add illegal block to blockchain: No transactions")
+	shared.ResetPersistenceFilesForTest()
+
+	var state_block = LoadState()
+
+	//Create the block with no transactions
+	block1 := state_block.CreateBlock(TransactionList{})
+
+	//Add the block
+	err := state_block.AddBlock(block1)
+	if err == nil {
+		t.Errorf("Expected block to be illegal due to no transactions, but wasn't")
+	}
+
+	ResetTest()
+
+}
+
+func TestAddBlockWhereSomeTransactionsFromStateAreInvalidatedAfterBlock(t *testing.T) {
+	t.Log("begin Add Block Where Some Transactions From State Are Invalidated After Block has been added test")
+
+	shared.ResetPersistenceFilesForTest()
+
+	original_state := LoadSnapshot()
+
+	//State one will be the local state with two transactions
+	stateOne := original_state.copyState()
+	stateOne.AddTransaction(stateOne.CreateTransaction("Emilie", "Niels", 10))
+	stateOne.AddTransaction(stateOne.CreateTransaction("Niels", "Magn", 579039)) //this will be invalid after block has been added
+
+	//State two will be the "peer" state that contains the block
+	stateTwo := original_state.copyState()
+	stateTwo.AddTransaction(stateTwo.CreateTransaction("Niels", "Magn", 10)) //Will be valid and cause transaction in state one to be invalid
+
+	block := stateTwo.CreateBlock(stateTwo.TxMempool)
+
+	//Now this block will be added to state one causing one of the transactions to become invalid
+	err := stateOne.AddBlock(block)
+	if err != nil {
+		SaveBlockchain(blockchain_original)
+		t.Errorf("failed to add block to first state...")
+	}
+
+	//At this point state one should only have one legal transaction and the other should have been invalidated
+	if len(stateOne.TxMempool) != 1 {
+		t.Logf("Expected number of transactions to be one, but was %v", len(stateOne.TxMempool))
+		t.Fail()
+	}
+	ResetTest()
+}
+
+//The local state is kept empty. After a block has been feteched it will be added to this local state. The changes from this block should be applied to the local state
+func TestAddBlockWhereSomeTransactionsAreNotInCurrentState(t *testing.T) {
+	t.Log("begin add block where some transactions are not in current state test")
+
+	shared.ResetPersistenceFilesForTest()
+
+	original_state := LoadSnapshot()
+	//State one will be the local state
+	stateOne := original_state.copyState()
+
+	//State two will be the "peer" state that contains the block
+	stateTwo := original_state.copyState()
+	stateTwo.AddTransaction(stateOne.CreateTransaction("Magn", "Niels", 10))
+	stateTwo.AddTransaction(stateOne.CreateTransaction("Niels", "Magn", 10))
+
+	block := stateTwo.CreateBlock(stateTwo.TxMempool)
+
+	//Now this block will be added to state one
+	err := stateOne.AddBlock(block)
+	if err != nil {
+		SaveBlockchain(blockchain_original)
+		t.Errorf("failed to add block to first state...")
+	}
+
+	// Saves the snapshot, since the snapshot is still "outdated" for the other account. This error is due to the fact that we run the software on the same pc.
+	original_state.SaveSnapshot()
+
+	//Now this block will be added to state two
+	err = stateTwo.AddBlock(block)
+	if err != nil {
+		SaveBlockchain(blockchain_original)
+		t.Errorf("failed to add block to second state...")
+	}
+	//At this point state one and state two should be identical in therms of balances and block height + latest hash
+	if stateOne.getLatestHash() != stateTwo.getLatestHash() && stateOne.LastBlockSerialNo != stateTwo.LastBlockSerialNo && reflect.DeepEqual(stateOne.AccountBalances, stateTwo.AccountBalances) {
+		t.Log("Expected the hashes, nounces and balances to be equal, but they aren't")
+		t.Fail()
+	}
+
+	ResetTest()
+
+}
+
+/*
 func TestAddBlockToBlockchain(t *testing.T) {
 	tx1 := state_block.CreateTransaction("Niels", "Magn", 10)
 	tx2 := state_block.CreateTransaction("Magn", "Emilie", 4)
@@ -69,12 +353,18 @@ func TestAddBlockToBlockchain(t *testing.T) {
 
 	ResetTest()
 }
+*/
 
 // This tests makes sure the functionality of sharing the blocks work correctly.
 // Two states will be created, who are orignally identical.
 // One state will create some transactions, Then create a block.
 // The other will create a few transactions too. The first and last should be invalidated when the block from the first state when it is synced.
+
 func TestSeperateStatesShareBlock(t *testing.T) {
+
+	t.Log("begin Seperate States Share Block test")
+	shared.ResetPersistenceFilesForTest()
+
 	original_state := LoadSnapshot()
 	stateOne := original_state.copyState()
 	stateTwo := original_state.copyState()
@@ -112,6 +402,8 @@ func TestSeperateStatesShareBlock(t *testing.T) {
 }
 
 func TestMarshalUnmarshalBlock(t *testing.T) {
+	t.Log("begin marshal unmarshal block test")
+
 	txList := []Transaction{
 		{
 			From:      "Niels",
