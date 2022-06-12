@@ -196,6 +196,9 @@ func (state *State) RecomputeState(deltaIdx int) {
 		newState.ApplyBlock(b)
 	}
 
+	// All pending transactions to the new state
+	newState.TryAddTransactions(state.TxMempool)
+
 	*state = newState
 	state.SaveSnapshot()
 }
