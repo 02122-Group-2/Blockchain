@@ -154,7 +154,12 @@ func computeConsensusNode(nodes []Node) Node {
 			}
 
 			if chainsAgree(latestHash2Node[h1].ChainHashes, latestHash2Node[h2].ChainHashes) {
-				agreeCount[h2] = agreeCount[h1] + agreeCount[h2]
+				// If they agree at some link in the blockchain, let the greatest chain have a count of itself and the count its previous "partitions"
+				if latestHash2Node[h1].State.LastBlockSerialNo > latestHash2Node[h2].State.LastBlockSerialNo {
+					agreeCount[h1] = agreeCount[h1] + agreeCount[h2]
+				} else {
+					agreeCount[h2] = agreeCount[h1] + agreeCount[h2]
+				}
 			}
 		}
 	}
