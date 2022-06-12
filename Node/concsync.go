@@ -101,7 +101,7 @@ func handleConsensus(node Node, nodes []Node) {
 	if len(peerBlocks) > 0 {
 		// TODO: validate all received blocks before clearing and applying
 		// if local chain has blocks that are conflicting at some point with the consensus chain, these must be cleared
-		clearConflictingSubchain(deltaIdx)
+		clearConflictingSubchain(deltaIdx) // Is this necessary since the same is performed in the Recomputestate function call?
 
 		// state must match snapshot from before applying the last block before deltaIdx
 		node.State.RecomputeState(deltaIdx)
@@ -142,29 +142,19 @@ func computeConsensusNode(nodes []Node) Node {
 
 	// store how many nodes agree on chain
 	agreeCount := make(map[string]int)
-	for h1, cPair1 := range latestHashes {
+	for h1 := range latestHashes {
 		// remove to avoid duplicates
 		if _, ok := agreeCount[h1]; !ok {
 			agreeCount[h1] = latestHashes[h1].count
 		}
 		delete(latestHashes, h1)
-		for h2, cPair2 := range latestHashes {
+		for h2 := range latestHashes {
 			if _, ok := agreeCount[h2]; !ok {
 				agreeCount[h2] = latestHashes[h2].count
 			}
 
-			if cPair1.serialNo < cPair2.serialNo {
-				c1 := latestHash2Node[h1].ChainHashes
-				c2 := latestHash2Node[h2].ChainHashes
-				if chainsAgree(c1, c2) {
-					agreeCount[h2] = agreeCount[h1] + agreeCount[h2]
-				}
-			} else if cPair1.serialNo > cPair2.serialNo {
-				c1 := latestHash2Node[h1].ChainHashes
-				c2 := latestHash2Node[h2].ChainHashes
-				if chainsAgree(c2, c1) {
-					agreeCount[h1] = agreeCount[h1] + agreeCount[h2]
-				}
+			if chainsAgree(latestHash2Node[h1].ChainHashes, latestHash2Node[h2].ChainHashes) {
+				agreeCount[h2] = agreeCount[h1] + agreeCount[h2]
 			}
 		}
 	}
@@ -185,10 +175,12 @@ func getMaxAgreeHash(agreeCount map[string]int) string {
 	return maxHash
 }
 
-// contract: c1 is the shorter chain, c2 is the longer
+// Given two lists of hashes, check that the last element for the shortest list is equal to the hash at the same location for the second list
 func chainsAgree(c1 []string, c2 []string) bool {
-	// compare the chains at the latest hash in c1
-	compIdx := len(c1) - 1
+	// Get the location of the last hash in the shortest list
+	compIdx := min(len(c1), len(c2)) - 1
+
+	// compare the chains at the latest hash for the shortest list
 	return c1[compIdx] == c2[compIdx]
 }
 
@@ -218,27 +210,18 @@ func clearConflictingSubchain(deltaIdx int) {
 // apply states from nodes with up-to-date chains
 func tryApplyPeerStates(node Node, nodes []Node) {
 	for _, peer := range nodes {
-		// is ping needed here?
-		if !Ping(peer.Address).Ok {
-			continue
-		}
-		if len(peer.ChainHashes) < len(node.ChainHashes) {
-			if chainsAgree(peer.ChainHashes, node.ChainHashes) {
-				node.State.TryAddTransactions(peer.State.TxMempool)
-			}
-		} else {
-			if chainsAgree(node.ChainHashes, peer.ChainHashes) {
-				node.State.TryAddTransactions(peer.State.TxMempool)
-			}
+		if chainsAgree(peer.ChainHashes, node.ChainHashes) {
+			node.State.TryAddTransactions(peer.State.TxMempool)
 		}
 	}
 }
 
 // ping peer-of-peers to potentially expand own peer set
 func add2ndLevelPeers(pings PingResponseList, peersToCheck PeerSet, nodes []Node) PingResponseList {
+	localIp := getLocalIP()
 	for _, n := range nodes {
 		for peer2 := range n.PeerSet {
-			if !peersToCheck.Exists(peer2) && peer2 != getLocalIP() {
+			if !peersToCheck.Exists(peer2) && peer2 != localIp {
 				pingRes := Ping(peer2)
 				pings = append(pings, pingRes)
 			}
@@ -288,7 +271,7 @@ func getNodesInPeerSet(ps PeerSet, nch chan Node, pch chan PingResponse) {
 			nch <- GetPeerState(peer)
 		} else {
 			pch <- PingResponse{"nil", false, -1}
-			nch <- Node{}
+			// nch <- Node{}
 		}
 	}
 }
