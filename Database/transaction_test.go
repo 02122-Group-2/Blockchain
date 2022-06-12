@@ -96,6 +96,7 @@ func TestAddIllegalGenesisTransaction(t *testing.T) {
 	t.Log("begin create illegal genesis transaction test")
 	shared.ResetPersistenceFilesForTest()
 
+	state = LoadState()
 	g := state.CreateGenesisTransaction("asger", 666.66)
 	err := state.AddTransaction(g)
 	if err == nil {
