@@ -2,6 +2,7 @@ package node
 
 import (
 	Database "blockchain/Database"
+	shared "blockchain/Shared"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -21,7 +22,7 @@ func blockDeltaHandler(w http.ResponseWriter, r *http.Request, state *Database.S
 	fromSerial, _ = strconv.Atoi(serialNoParam)
 	delta := Database.GetBlockChainDelta(localBlockChain, fromSerial)
 
-	writeResult(w, delta)
+	writeResult(w, r, delta)
 }
 
 //Function used to get the state of a peer node
@@ -38,16 +39,16 @@ func getStateHandler(w http.ResponseWriter, r *http.Request, state *Database.Sta
 	json.Unmarshal(bytes, &getStateRequest)
 
 	// load peer set from file and union it with the peer set from the incoming request
-	currentPeerSet := LoadPeerSetFromJSON(peerSetFile)
+	currentPeerSet := LoadPeerSetFromJSON(shared.PeerSetFile)
 	currentPeerSet.UnionWith(getStateRequest.PeerSet)
-	SavePeerSetAsJSON(currentPeerSet, peerSetFile)
+	SavePeerSetAsJSON(currentPeerSet, shared.PeerSetFile)
 
-	fmt.Println(node.PeerSet)
-	writeResult(w, node)
+	// fmt.Println(node.PeerSet)
+	writeResult(w, r, node)
 }
 
 func balancesHandler(w http.ResponseWriter, r *http.Request, state *Database.State) {
-	writeResult(w, balancesResult{state.LatestHash, state.AccountBalances})
+	writeResult(w, r, balancesResult{state.LatestHash, state.AccountBalances})
 }
 
 func transactionHandler(w http.ResponseWriter, r *http.Request, state *Database.State) {
@@ -93,7 +94,7 @@ func transactionHandler(w http.ResponseWriter, r *http.Request, state *Database.
 }
 
 //Writing the result from the server
-func writeResult(w http.ResponseWriter, content interface{}) {
+func writeResult(w http.ResponseWriter, r *http.Request, content interface{}) {
 	contentJson, err := json.Marshal(content)
 	if err != nil {
 		fmt.Println(err)
@@ -102,7 +103,7 @@ func writeResult(w http.ResponseWriter, content interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 	w.Write(contentJson)
-	fmt.Println("Server response sent")
+	shared.Log(fmt.Sprintf("Server response sent to %s", r.RemoteAddr))
 }
 
 //Reading the request from client

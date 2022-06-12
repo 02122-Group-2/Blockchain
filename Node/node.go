@@ -8,16 +8,16 @@ import (
 )
 
 func Run() error {
-	//Assesing if all JSON files are present: CurrentState, LatestSnapshot, state,
-	//Transactions, Blockchain.db
-	err := shared.CheckForNeededFiles()
+	err := shared.EnsureNeededFilesExist()
 	if err != nil {
 		return err
 	}
 
-	fmt.Printf("Listening on port %d\n", httpPort)
-	go synchronization()
+	shared.Log(fmt.Sprintf("Listening on port %d", httpPort))
+
+	go concSynchronization()
 	startNode()
+
 	return nil
 }
 
@@ -28,22 +28,22 @@ func startNode() error {
 	http.HandleFunc("/balances/list", func(w http.ResponseWriter, r *http.Request) {
 		balancesHandler(w, r, state)
 	})
-	fmt.Println("/balances/list setup complete")
+	shared.Log("/balances/list setup complete")
 
 	http.HandleFunc("/transaction/create", func(w http.ResponseWriter, r *http.Request) {
 		transactionHandler(w, r, state)
 	})
-	fmt.Println("/transaction/create setup complete")
+	shared.Log("/transaction/create setup complete")
 
 	http.HandleFunc("/getState", func(w http.ResponseWriter, r *http.Request) {
 		getStateHandler(w, r, state)
 	})
-	fmt.Println("/getState setup complete")
+	shared.Log("/getState setup complete")
 
 	http.HandleFunc("/blockDelta", func(w http.ResponseWriter, r *http.Request) {
 		blockDeltaHandler(w, r, state)
 	})
-	fmt.Println("/blockDelta setup complete")
+	shared.Log("/blockDelta setup complete")
 
 	return http.ListenAndServe(fmt.Sprintf(":%d", httpPort), nil)
 }

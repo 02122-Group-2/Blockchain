@@ -2,6 +2,7 @@ package node
 
 import (
 	Database "blockchain/Database"
+	shared "blockchain/Shared"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -10,8 +11,9 @@ import (
 	"net/http"
 )
 
-func GetPeerBlocks(peerAddr string, lastLocalBlockSerialNo int) []Database.Block {
-	URI := fmt.Sprintf("http://"+peerAddr+"/blockDelta?lastLocalBlockSerialNo=%d", lastLocalBlockSerialNo)
+func GetPeerBlocks(peerAddr string, deltaIdx int) []Database.Block {
+	lastBlockSerialNo := deltaIdx - 1
+	URI := fmt.Sprintf("http://"+peerAddr+"/blockDelta?lastLocalBlockSerialNo=%d", lastBlockSerialNo)
 	resp, err := http.Get(URI)
 
 	if err != nil {
@@ -21,7 +23,7 @@ func GetPeerBlocks(peerAddr string, lastLocalBlockSerialNo int) []Database.Block
 
 	var blockDelta []Database.Block
 
-	bytes, err := readResp(resp)
+	bytes, _ := readResp(resp)
 
 	json.Unmarshal(bytes, &blockDelta)
 
@@ -50,9 +52,9 @@ func GetPeerState(peerAddr string) Node {
 	var peerNodeFromRequest NodeFromPostRequest
 	var peerNode Node
 	bytes, _ := readResp(resp)
-	fmt.Println("Get State response")
-	str := string(bytes)
-	fmt.Println(str)
+	shared.Log(fmt.Sprintf("Get State response from %s", peerAddr))
+	// str := string(bytes)
+	// fmt.Println(str)
 	json.Unmarshal(bytes, &peerNodeFromRequest)
 	json.Unmarshal(bytes, &peerNode)
 	//At this point the data recived should have been saved into peerNode
@@ -62,6 +64,8 @@ func GetPeerState(peerAddr string) Node {
 		lh32[i] = peerNodeFromRequest.State.LatestHash[i]
 	}
 	peerNode.State.LatestHash = lh32
+
+	peerNode.ChainHashes = peerNodeFromRequest.ChainHashes
 
 	return peerNode
 }

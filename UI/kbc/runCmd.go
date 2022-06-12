@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	Node "blockchain/node"
+	Node "blockchain/Node"
 
 	"github.com/spf13/cobra"
 )
@@ -31,3 +31,4 @@ func runCmd() *cobra.Command {
 	return runCmd
 
 }
+

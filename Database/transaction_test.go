@@ -2,18 +2,9 @@ package database
 
 import (
 	Crypto "blockchain/Cryptography"
+	shared "blockchain/Shared"
 	"testing"
 )
-
-// type State struct {
-// 	Balances  map[AccountAddress]uint
-// 	txMempool []Transaction
-// 	dbFile    *os.File
-
-// 	lastTxSerialNo    int
-// 	lastBlockSerialNo int
-// 	latestHash        string
-// }
 
 var state = LoadState()
 var walletUsername1 = "testingWallet1"
@@ -23,6 +14,7 @@ var pswd = "password"
 
 func TestCreate(t *testing.T) {
 	t.Log("begin create transaction test")
+	shared.ResetPersistenceFilesForTest()
 
 	tr := state.CreateTransaction("magn", "niels", 6969.0)
 
@@ -43,6 +35,8 @@ func TestCreate(t *testing.T) {
 }
 
 func TestReward(t *testing.T) {
+	t.Log("begin create reward test")
+	shared.ResetPersistenceFilesForTest()
 	r := state.CreateReward("niels", 1337.420)
 
 	if r.Tx.Amount != 1337.420 {
@@ -51,6 +45,10 @@ func TestReward(t *testing.T) {
 	if r.Tx.From != "system" {
 		t.Errorf("From is set wrong")
 	}
+
+	if r.Tx.To != "niels" {
+		t.Errorf("To is set wrong")
+	}
 	if r.Tx.Type != "reward" {
 		t.Errorf("Type is wrong")
 	}
@@ -58,8 +56,64 @@ func TestReward(t *testing.T) {
 	ResetTest()
 }
 
-func TestApplyLegalTransaction(t *testing.T) {
+func EmptyBlockchain() {
+	ClearBlockchain()
+	ClearTransactions()
+	state.ClearState()
+}
+
+func TestGenesis(t *testing.T) {
+	EmptyBlockchain()
+	g := state.CreateGenesisTransaction("asger", 42.42)
+
+	if g.Tx.Amount != 42.42 {
+		t.Errorf("Amount is set wrong")
+	}
+	if g.Tx.From != "system" {
+		t.Errorf("From is set wrong")
+	}
+	if g.Tx.To != "asger" {
+		t.Errorf("To is set wrong")
+	}
+	if g.Tx.Type != "genesis" {
+		t.Errorf("Type is wrong")
+	}
+	ResetTest()
+}
+
+func TestAddLegalGenesisTransaction(t *testing.T) {
+	t.Log("begin add legal genesis transaction test")
+
+	EmptyBlockchain()
+	g := state.CreateGenesisTransaction("asger", 42.42)
+
+	err := state.AddTransaction(g)
+	if err != nil {
+		t.Errorf("Failed to add transaction. Error: " + err.Error())
+	}
+
+	ResetTest()
+}
+
+func TestAddIllegalGenesisTransaction(t *testing.T) {
+	// for this specific test case, the following reset is needed
+	shared.ResetPersistenceFilesForTest()
+	state = LoadState()
+	t.Log("begin create illegal genesis transaction test")
+	shared.ResetPersistenceFilesForTest()
+
+	state = LoadState()
+	g := state.CreateGenesisTransaction("asger", 666.66)
+	err := state.AddTransaction(g)
+	if err == nil {
+		t.Errorf("Adding genesis transactions later in blockchain is not allowed")
+	}
+	ResetTest()
+}
+
+func TestAddLegalTransaction(t *testing.T) {
 	t.Log("begin create transaction test")
+	shared.ResetPersistenceFilesForTest()
 
 	Crypto.CreateNewWallet(walletUsername1, pswd)
 	testWallet, _ := Crypto.AccessWallet(walletUsername1, pswd)
@@ -77,7 +131,7 @@ func TestApplyLegalTransaction(t *testing.T) {
 
 	err = state.AddTransaction(signedTx)
 	if err != nil {
-		t.Error("Failed to add transaction. Error: " + err.Error())
+		t.Errorf("Failed to add transaction. Error: " + err.Error())
 	}
 
 	if senderBalanceBefore-42 != state.AccountBalances[AccountAddress(testWallet.Address)] {
@@ -92,8 +146,9 @@ func TestApplyLegalTransaction(t *testing.T) {
 	ResetTest()
 }
 
-func TestApplyIllegalTransaction(t *testing.T) {
-	t.Log("begin create transaction test")
+func TestAddIllegalTransaction(t *testing.T) {
+	t.Log("begin create too large transaction test")
+	shared.ResetPersistenceFilesForTest()
 
 	Crypto.CreateNewWallet(walletUsername1, pswd)
 	testWallet, _ := Crypto.AccessWallet(walletUsername1, pswd)
@@ -103,7 +158,7 @@ func TestApplyIllegalTransaction(t *testing.T) {
 	signedTx, _ := state.SignTransaction(testWallet, pswd, tr)
 	err := state.AddTransaction(signedTx)
 	if err == nil {
-		t.Error("Succesfully added transaction but expected to fail.")
+		t.Errorf("Succesfully added transaction but expected to fail.")
 	}
 
 	testWallet.HardDelete()
@@ -112,6 +167,7 @@ func TestApplyIllegalTransaction(t *testing.T) {
 
 func TestSendMoneyToSameUser(t *testing.T) {
 	t.Log("begin create transaction test")
+	shared.ResetPersistenceFilesForTest()
 
 	Crypto.CreateNewWallet(walletUsername1, pswd)
 	testWallet, _ := Crypto.AccessWallet(walletUsername1, pswd)
@@ -121,15 +177,16 @@ func TestSendMoneyToSameUser(t *testing.T) {
 	signedTx, _ := state.SignTransaction(testWallet, pswd, tr)
 	err := state.AddTransaction(signedTx)
 	if err == nil {
-		t.Error("Normal transaction from account to itself is not allowed")
+		t.Errorf("Normal transaction from account to itself is not allowed")
 	}
 
 	testWallet.HardDelete()
 	ResetTest()
 }
 
-func TestApplyTransactionWithNegativeAmount(t *testing.T) {
+func TestAddTransactionWithNegativeAmount(t *testing.T) {
 	t.Log("begin create transaction test")
+	shared.ResetPersistenceFilesForTest()
 
 	Crypto.CreateNewWallet(walletUsername1, pswd)
 	testWallet, _ := Crypto.AccessWallet(walletUsername1, pswd)
@@ -139,7 +196,7 @@ func TestApplyTransactionWithNegativeAmount(t *testing.T) {
 	signedTx, _ := state.SignTransaction(testWallet, pswd, tr)
 	err := state.AddTransaction(signedTx)
 	if err == nil {
-		t.Error("Succesfully added transaction but expected to fail.")
+		t.Errorf("Succesfully added transaction but expected to fail.")
 	}
 
 	testWallet.HardDelete()
@@ -148,6 +205,7 @@ func TestApplyTransactionWithNegativeAmount(t *testing.T) {
 
 func TestAddTransactionFromAnUnknownAccount(t *testing.T) {
 	t.Log("begin create transaction test")
+	shared.ResetPersistenceFilesForTest()
 
 	Crypto.CreateNewWallet(walletUsername1, pswd)
 	testWallet, _ := Crypto.AccessWallet(walletUsername1, pswd)
@@ -156,7 +214,7 @@ func TestAddTransactionFromAnUnknownAccount(t *testing.T) {
 	signedTx, _ := state.SignTransaction(testWallet, pswd, tr)
 	err := state.AddTransaction(signedTx)
 	if err == nil {
-		t.Error("Shouldnt be able to make a transaction from an unknown account")
+		t.Errorf("Shouldnt be able to make a transaction from an unknown account")
 	}
 
 	testWallet.HardDelete()
@@ -165,6 +223,7 @@ func TestAddTransactionFromAnUnknownAccount(t *testing.T) {
 
 func TestAddTransactionToAnUnknownAccount(t *testing.T) {
 	t.Log("begin create transaction test")
+	shared.ResetPersistenceFilesForTest()
 
 	Crypto.CreateNewWallet(walletUsername1, pswd)
 	testWallet, _ := Crypto.AccessWallet(walletUsername1, pswd)
@@ -174,10 +233,29 @@ func TestAddTransactionToAnUnknownAccount(t *testing.T) {
 	signedTx, _ := state.SignTransaction(testWallet, pswd, tr)
 	err := state.AddTransaction(signedTx)
 	if err != nil {
-		t.Error("Should be able to send to unknown account")
+		t.Errorf("Should be able to send to unknown account")
 	}
 
 	testWallet.HardDelete()
+	ResetTest()
+}
+
+func TestAddTransactionWithWrongNounce(t *testing.T) {
+	t.Log("begin create transaction with wrong account nounce")
+	shared.ResetPersistenceFilesForTest()
+
+	Crypto.CreateNewWallet(walletUsername1, pswd)
+	testWallet, _ := Crypto.AccessWallet(walletUsername1, pswd)
+	state.AccountBalances[AccountAddress(testWallet.Address)] = 1000
+
+	tr := state.CreateTransaction(AccountAddress(testWallet.Address), "Niels", 2.0)
+	tr.SenderNounce = 2
+	signedTr, _ := state.SignTransaction(testWallet, pswd, tr)
+
+	err := state.AddTransaction(signedTr)
+	if err == nil {
+		t.Errorf("Should not be able to add transactions with older nounces")
+	}
 	ResetTest()
 }
 
@@ -210,7 +288,7 @@ func TestCreateLegalTransactionAndPersist(t *testing.T) {
 	signedTx, _ := state.SignTransaction(testWallet, pswd, tr)
 	err := state.AddTransaction(signedTx)
 	if err != nil {
-		t.Error("Failed to add transaction. Error: " + err.Error())
+		t.Errorf("Failed to add transaction. Error: " + err.Error())
 	}
 
 	testWallet.HardDelete()
@@ -219,6 +297,7 @@ func TestCreateLegalTransactionAndPersist(t *testing.T) {
 }
 
 func TestAddTransactionAndCheckTheyAreSaved(t *testing.T) {
+	shared.ResetPersistenceFilesForTest()
 	state1 := LoadState()
 
 	Crypto.CreateNewWallet(walletUsername3, pswd)

@@ -2,6 +2,7 @@ package main
 
 import (
 	Database "blockchain/Database"
+	Node "blockchain/Node"
 	"fmt"
 	"time"
 
@@ -23,14 +24,30 @@ func overviewCmd() *cobra.Command {
 			numberOfBlocks := currentState.LastBlockSerialNo
 			fmt.Printf("Current number of blocks in blockchain: %v \n", numberOfBlocks)
 
-			fmt.Printf("Latest hash: %v \n", currentState.LatestHash)
+			fmt.Printf("Latest hash: %x \n", currentState.LatestHash)
 
 			//converting time to readable format
 			tUnix := currentState.LastBlockTimestamp / int64(time.Second)
 			tUnixNanoRemainder := (currentState.LastBlockTimestamp % int64(time.Second))
 			formattedTime := time.Unix(tUnix, tUnixNanoRemainder)
 
-			fmt.Printf("Latest Block Timestamp: %v", formattedTime)
+			fmt.Printf("Latest Block Timestamp: %v \n", formattedTime)
+
+			//Number of actve peers
+			currentPeers := Node.GetNode().PeerSet
+
+			//Counting all active peers
+			var numActivePeers = 0
+			for peer, _ := range currentPeers {
+				if Node.Ping(peer).Ok {
+					continue
+				} else {
+					numActivePeers += 1
+				}
+			}
+
+			fmt.Printf("Number of active peers: %v", numActivePeers)
+
 		},
 	}
 

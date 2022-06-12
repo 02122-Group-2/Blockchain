@@ -8,9 +8,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-
 	// "path/filepath"
-	"time"
 )
 
 type StateFromPostRequest struct {
@@ -33,10 +31,6 @@ type State struct {
 	LastBlockTimestamp int64                   `json: "LastBlockTimestamp"`
 	LatestHash         [32]byte                `json: "LatestHash"`
 	LatestTimestamp    int64                   `json: "LatestTimestamp"`
-}
-
-func makeTimestamp() int64 {
-	return time.Now().UnixNano()
 }
 
 func (s *State) getNextBlockSerialNo() int {
@@ -86,6 +80,20 @@ func LoadState() *State {
 	return &state
 }
 
+func (state *State) ClearState() {
+	state.LastBlockSerialNo = 0
+	err := os.Truncate(shared.LocatePersistenceFile("CurrentState.json", ""), 0)
+	if err != nil {
+		panic(err)
+	}
+
+	err = os.Truncate(shared.LocatePersistenceFile("CurrentState.json", ""), 0)
+	if err != nil {
+		panic(err)
+	}
+
+}
+
 // Adds a transaction to the state. It will validate the transaction, then apply the transaction to the state,
 // then add the transaction to its MemPool and update its latest timestamp field.
 func (state *State) AddTransaction(transaction SignedTransaction) error {
@@ -118,6 +126,10 @@ func (state *State) ValidateTransaction(signedTx SignedTransaction) error {
 		return fmt.Errorf("Transaction Nounce doesn't match account nounce")
 	}
 
+	if signedTx.Tx.Amount <= 0 {
+		return fmt.Errorf("illegal to make a transaction with 0 or less coins")
+	}
+
 	if (state.LastBlockSerialNo == 0 && signedTx.Tx.Type == "genesis") || signedTx.Tx.Type == "reward" {
 		return nil
 	}
@@ -130,15 +142,16 @@ func (state *State) ValidateTransaction(signedTx SignedTransaction) error {
 		return fmt.Errorf("sender of the transaction did not create the transaction!")
 	}
 
+	if state.LastBlockSerialNo != 0 && signedTx.Tx.Type == "genesis" {
+		return fmt.Errorf("a genesis transaction can only be applied to the genesis block (serial 0)")
+	}
+
 	if signedTx.Tx.From == signedTx.Tx.To {
 		return fmt.Errorf("a normal transaction is not allowed to same account")
 	}
 
 	if _, ok := state.AccountBalances[signedTx.Tx.From]; !ok {
 		return fmt.Errorf("sending from Undefined Account \"%s\"", signedTx.Tx.From)
-	}
-	if signedTx.Tx.Amount <= 0 {
-		return fmt.Errorf("illegal to make a transaction with 0 or less coins")
 	}
 
 	if state.AccountBalances[signedTx.Tx.From] < uint(signedTx.Tx.Amount) {
@@ -182,7 +195,38 @@ func (state *State) TryAddTransactions(transactionList SignedTransactionList) er
 	return nil
 }
 
-// Loads the latest snapchat of the state. Each snapshat is meant as the state right after a block has been added.
+// recomputes state snapshot corresponding to a given index (serial no.) on the blockchain
+// mutates state of {state} and the persisted snapshot
+func (state *State) RecomputeState(deltaIdx int) {
+	newState := blankState()
+	bc := LoadBlockchain()[:deltaIdx-1]
+
+	for _, b := range bc {
+		newState.ApplyBlock(b)
+	}
+
+	// Add pending transactions to the new state
+	newState.TryAddTransactions(state.TxMempool)
+
+	*state = newState
+	state.SaveSnapshot()
+}
+
+func blankState() State {
+	newState := State{}
+	newState.AccountBalances = map[AccountAddress]uint{}
+	newState.AccountBalances = map[AccountAddress]uint{}
+	newState.AccountNounces = map[AccountAddress]uint{}
+	newState.TxMempool = SignedTransactionList{}
+	newState.DbFile = &os.File{}
+	newState.LastBlockSerialNo = 0
+	newState.LastBlockTimestamp = 0
+	newState.LatestHash = [32]byte{}
+	newState.LatestTimestamp = 0
+	return newState
+}
+
+// Loads the latest snapshot of the state. Each snapshot is meant as the state right after a block has been added.
 func LoadSnapshot() State {
 	return loadStateFromJSON("LatestSnapshot.json")
 }
@@ -207,7 +251,7 @@ func (state *State) SaveSnapshot() error {
 func saveStateAsJSON(state *State, filename string) error {
 	txFile, _ := json.MarshalIndent(state, "", "  ")
 
-	err := ioutil.WriteFile(shared.LocalDirToFileFolder+filename, txFile, 0644)
+	err := ioutil.WriteFile(shared.LocatePersistenceFile(filename, ""), txFile, 0644)
 	if err != nil {
 		panic(err)
 	}
@@ -217,13 +261,15 @@ func saveStateAsJSON(state *State, filename string) error {
 
 // Function that loads a state from a JSON file
 func loadStateFromJSON(filename string) State {
-	data, err := os.ReadFile(shared.LocalDirToFileFolder + filename)
+	data, err := os.ReadFile(shared.LocatePersistenceFile(filename, ""))
 	if err != nil {
 		panic(err)
 	}
 
 	var state State
-	json.Unmarshal(data, &state)
+	if len(data) != 0 {
+		json.Unmarshal(data, &state)
+	}
 
 	return state
 }

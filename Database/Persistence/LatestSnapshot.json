@@ -1,6 +1,7 @@
 {
   "LatestHash": "b46b7af31379d5b360cc2d0d8e30f2897761746a25421159b5d7698f383cc50a",
   "AccountBalances": {
+    "0x0CfA156eB3438b6c1cB4a6FC6728F0d9aB504C3B": 1000,
     "0x5D34001173D5d05fA3AC865fb2b30131478a13d7": 98999700,
     "0x5b355Cd0C7fB6aD65b2e9342Fb6FBf0146585D7b": 100000000,
     "0xC98f5180FF9836CC2EF67158EfEd9AA5ddeC54F6": 100000000,
@@ -11,7 +12,7 @@
     "0x5D34001173D5d05fA3AC865fb2b30131478a13d7": 4,
     "system": 3
   },
-  "TxMempool": null,
+  "TxMempool": [],
   "DbFile": null,
   "LastBlockSerialNo": 2,
   "LastBlockTimestamp": 1654518796148504300,

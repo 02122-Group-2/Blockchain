@@ -40,3 +40,7 @@ database/constants.go
 Constants/constants.go
 */constants.go
 constants.go
+
+
+# Ignore the constant.go file inorder to avoid overwritting eachothers constants
+Shared/constants.go

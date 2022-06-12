@@ -1,19 +1,34 @@
 {
   "LatestHash": "b46b7af31379d5b360cc2d0d8e30f2897761746a25421159b5d7698f383cc50a",
   "AccountBalances": {
+    "0x0CfA156eB3438b6c1cB4a6FC6728F0d9aB504C3B": 990,
     "0x5D34001173D5d05fA3AC865fb2b30131478a13d7": 98999700,
     "0x5b355Cd0C7fB6aD65b2e9342Fb6FBf0146585D7b": 100000000,
     "0xC98f5180FF9836CC2EF67158EfEd9AA5ddeC54F6": 100000000,
     "0xa329BD06d138A2565C9aE5e7C633B7C81790762a": 1000100,
-    "0xa329bd06d138a2565c9ae5e7c633b7c81790762a": 200
+    "0xa329bd06d138a2565c9ae5e7c633b7c81790762a": 200,
+    "Magn": 10
   },
   "AccountNounces": {
+    "0x0CfA156eB3438b6c1cB4a6FC6728F0d9aB504C3B": 1,
     "0x5D34001173D5d05fA3AC865fb2b30131478a13d7": 4,
     "system": 3
   },
-  "TxMempool": null,
+  "TxMempool": [
+    {
+      "Signature": "SMDt0ARY2kMVBFAHto3ZyBneoCHZw/qo7/0rtio6vVYvZ5w1EiT9Ww6uFFj5Vdqe1PXcU/bU7PnzXm63j8S6fAE=",
+      "Tx": {
+        "From": "0x0CfA156eB3438b6c1cB4a6FC6728F0d9aB504C3B",
+        "To": "Magn",
+        "Amount": 10,
+        "SenderNounce": 1,
+        "Timestamp": 1655058129980375700,
+        "Type": "transaction"
+      }
+    }
+  ],
   "DbFile": null,
   "LastBlockSerialNo": 2,
   "LastBlockTimestamp": 1654518796148504300,
-  "LatestTimestamp": 1654518770758707600
+  "LatestTimestamp": 1655058129980375700
 }

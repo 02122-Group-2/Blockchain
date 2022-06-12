@@ -57,11 +57,11 @@ func (state *State) CreateCustomTransaction(from AccountAddress, to AccountAddre
 		to,
 		amount,
 		accountNounce,
-		makeTimestamp(),
+		shared.MakeTimestamp(),
 		_type,
 	}
 
-	fmt.Println(t)
+	// fmt.Println(t)
 	return t
 }
 
@@ -110,6 +110,13 @@ func (state *State) SignTransaction(wallet Crypto.Account, password string, tran
 	return SignedTransaction{Signature: signature, Tx: transaction}, nil
 }
 
+func ClearTransactions() {
+	err := os.Truncate(shared.LocatePersistenceFile("Transactions.json", ""), 0)
+	if err != nil {
+		panic(err)
+	}
+}
+
 // Given a list of transactions, it saves these transactions as a JSON string in a local text file.
 // Returns a boolean value indicating whether or not it was saved succesfully.
 // This is not used in older version of the blockchain.
@@ -117,7 +124,7 @@ func SaveTransaction(transactionList SignedTransactionList) bool {
 	toSave := LoadedTransactions{transactionList}
 	txFile, _ := json.MarshalIndent(toSave, "", "  ")
 
-	err := ioutil.WriteFile(shared.LocalDirToFileFolder+"Transactions.json", txFile, 0644)
+	err := ioutil.WriteFile(shared.LocatePersistenceFile("Transactions.json", ""), txFile, 0644)
 	if err != nil {
 		panic(err)
 	}
@@ -148,7 +155,7 @@ func (transaction_list *TransactionList) SaveTransactions() error {
 func saveTransactionsAsJSON(transaction_list *TransactionList, filename string) error {
 	txFile, _ := json.MarshalIndent(transaction_list, "", "  ")
 
-	err := ioutil.WriteFile(shared.LocalDirToFileFolder+filename, txFile, 0644)
+	err := ioutil.WriteFile(shared.LocatePersistenceFile(filename, ""), txFile, 0644)
 	if err != nil {
 		panic(err)
 	}
