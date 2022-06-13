@@ -39,7 +39,7 @@ func overviewCmd() *cobra.Command {
 			//Counting all active peers
 			var numActivePeers = 0
 			for peer, _ := range currentPeers {
-				if !Node.Ping(peer) {
+				if Node.Ping(peer).Ok {
 					continue
 				} else {
 					numActivePeers += 1

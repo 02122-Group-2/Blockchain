@@ -22,7 +22,7 @@ func blockDeltaHandler(w http.ResponseWriter, r *http.Request, state *Database.S
 	fromSerial, _ = strconv.Atoi(serialNoParam)
 	delta := Database.GetBlockChainDelta(localBlockChain, fromSerial)
 
-	writeResult(w, delta)
+	writeResult(w, r, delta)
 }
 
 //Function used to get the state of a peer node
@@ -43,57 +43,58 @@ func getStateHandler(w http.ResponseWriter, r *http.Request, state *Database.Sta
 	currentPeerSet.UnionWith(getStateRequest.PeerSet)
 	SavePeerSetAsJSON(currentPeerSet, shared.PeerSetFile)
 
-	fmt.Println(node.PeerSet)
-	writeResult(w, node)
+	// fmt.Println(node.PeerSet)
+	writeResult(w, r, node)
 }
 
 func balancesHandler(w http.ResponseWriter, r *http.Request, state *Database.State) {
-	writeResult(w, balancesResult{state.LatestHash, state.AccountBalances})
+	writeResult(w, r, balancesResult{state.LatestHash, state.AccountBalances})
 }
 
 func transactionHandler(w http.ResponseWriter, r *http.Request, state *Database.State) {
-	req := TxRequest{}
-	bytes, err := readReq(r)
-	if err != nil {
-		return
-	}
-	json.Unmarshal(bytes, &req)
-
-	var transaction Database.Transaction
-	println("TYPE OF REQUEST " + req.Type)
-	switch req.Type {
-	case "genesis":
-		transaction = state.CreateGenesisTransaction(Database.AccountAddress(req.From), float64(req.Amount))
-
-		fmt.Println("Genesis created" + Database.TxToString(transaction))
-
-	case "reward":
-		transaction = state.CreateReward(Database.AccountAddress(req.From), float64(req.Amount))
-
-		fmt.Println("Reward created" + Database.TxToString(transaction))
-
-	case "transaction":
-		if req.To != "" {
-			transaction = state.CreateTransaction(Database.AccountAddress(req.From), Database.AccountAddress(req.To), float64(req.Amount))
-
-			fmt.Println("Transaction created" + Database.TxToString(transaction))
+	/*
+		req := TxRequest{}
+		bytes, err := readReq(r)
+		if err != nil {
+			return
 		}
-	}
+		json.Unmarshal(bytes, &req)
 
-	fmt.Println(transaction)
+		var transaction Database.Transaction
+		println("TYPE OF REQUEST " + req.Type)
+		switch req.Type {
+		case "genesis":
+			transaction = state.CreateGenesisTransaction(Database.AccountAddress(req.From), float64(req.Amount))
 
-	err = state.AddTransaction(transaction)
-	if err != nil {
-		return
-	}
+			fmt.Println("Genesis created" + Database.TxToString(transaction))
 
-	status := Database.SaveTransaction(state.TxMempool)
+		case "reward":
+			transaction = state.CreateReward(Database.AccountAddress(req.From), float64(req.Amount))
 
-	writeResult(w, TxResult{status})
+			fmt.Println("Reward created" + Database.TxToString(transaction))
+
+		case "transaction":
+			if req.To != "" {
+				transaction = state.CreateTransaction(Database.AccountAddress(req.From), Database.AccountAddress(req.To), float64(req.Amount))
+
+				fmt.Println("Transaction created" + Database.TxToString(transaction))
+			}
+		}
+
+		fmt.Println(transaction)
+
+		err = state.AddTransaction(transaction)
+		if err != nil {
+			return
+		}
+
+		status := Database.SaveTransaction(state.TxMempool)
+
+		writeResult(w, TxResult{status}) */
 }
 
 //Writing the result from the server
-func writeResult(w http.ResponseWriter, content interface{}) {
+func writeResult(w http.ResponseWriter, r *http.Request, content interface{}) {
 	contentJson, err := json.Marshal(content)
 	if err != nil {
 		fmt.Println(err)
@@ -102,7 +103,7 @@ func writeResult(w http.ResponseWriter, content interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 	w.Write(contentJson)
-	fmt.Println("Server response sent")
+	shared.Log(fmt.Sprintf("Server response sent to %s", r.RemoteAddr))
 }
 
 //Reading the request from client

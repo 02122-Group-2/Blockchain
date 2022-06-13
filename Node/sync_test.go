@@ -1,18 +1,26 @@
 package node
 
 import (
+	db "blockchain/Database"
 	shared "blockchain/Shared"
+	"encoding/json"
 	"fmt"
 	"testing"
 )
 
 func TestIpRegex(t *testing.T) {
 	shouldBeTrue := "192.168.0.1:8080"
+	shouldBeTrue2 := "localhost:8080"
 	shouldBeFalse := "192.168.0.1:808022"
 	shouldBeFalse2 := "asdf"
+	shouldBeFalse3 := "256.168.0.1:8080"
 
 	if !shared.LegalIpAddress(shouldBeTrue) {
 		panic(fmt.Sprintf("%s should be true", shouldBeTrue))
+	}
+
+	if !shared.LegalIpAddress(shouldBeTrue2) {
+		panic(fmt.Sprintf("%s should be true", shouldBeTrue2))
 	}
 
 	if shared.LegalIpAddress(shouldBeFalse) {
@@ -21,6 +29,9 @@ func TestIpRegex(t *testing.T) {
 
 	if shared.LegalIpAddress(shouldBeFalse2) {
 		panic(fmt.Sprintf("%s should be false", shouldBeFalse2))
+	}
+	if shared.LegalIpAddress(shouldBeFalse3) {
+		panic(fmt.Sprintf("%s should be false", shouldBeFalse3))
 	}
 }
 
@@ -55,3 +66,69 @@ func TestPeerSet(t *testing.T) {
 	}
 }
 
+func TestConstructSubsets(t *testing.T) {
+	ps := PeerSet{}
+	ps.Add("192.168.0.1:8080")
+	ps.Add("192.168.0.2:8080")
+	ps.Add("192.168.0.3:8080")
+	ps.Add("192.168.0.4:8080")
+	ps.Add("192.168.0.5:8080")
+
+	subsets := constructSubsets(ps)
+	t.Log(subsets)
+	if len(subsets) > MAX_SUBSETS {
+		panic(fmt.Sprintf("# of subsets (%d) must not be greater than %d", len(subsets), MAX_SUBSETS))
+	}
+}
+
+func TestGetLocalChainHashes(t *testing.T) {
+	shared.ResetPersistenceFilesForTest()
+	state := db.LoadState()
+	cHashes := db.GetLocalChainHashes(*state, 0)
+	t.Log(cHashes)
+	chainComp := []string{"0000000000000000000000000000000000000000000000000000000000000000", "2eff0509e19f074f48791f06d230f0c05bbe09e0a76d6e0dcf9703cff6fc17e0", "b46b7af31379d5b360cc2d0d8e30f2897761746a25421159b5d7698f383cc50a"}
+	if db.CompareChainHashes(cHashes, chainComp) != -1 {
+		panic("should be equal")
+	}
+}
+
+func TestLocalIP(t *testing.T) {
+	localIP := getLocalIP()
+	t.Log(localIP)
+	if !shared.LegalIpAddress(localIP) {
+		panic(fmt.Sprintf("%s should be legal!", localIP))
+	}
+}
+
+func TestSortByLatency(t *testing.T) {
+	pings := make([]PingResponse, 4)
+	pings[1] = PingResponse{"localhost:8081", true, 1}
+	pings[0] = PingResponse{"localhost:8082", true, 2}
+	pings[2] = PingResponse{"localhost:8083", true, 3}
+	pings[3] = PingResponse{"localhost:8084", true, 4}
+	fastest := getNFastestPeers(pings, 3)
+	// t.Log(fastest)
+	if !(fastest.Exists(pings[1].Address) || fastest.Exists(pings[2].Address) || fastest.Exists(pings[0].Address)) {
+		panic(fmt.Sprintf("PeerSet should include fastest 3 pings. [0]: %s [1]: %s", pings[0].Address, pings[1].Address))
+	}
+	if fastest.Exists(pings[3].Address) {
+		panic(fmt.Sprintf("PeerSet should not include slowest 1 ping. [3]: %s", pings[3].Address))
+	}
+}
+
+func TestMarshalUnmarshalNode(t *testing.T) {
+	node := GetNode()
+	node_json, err := json.Marshal(node)
+	var node_new NodeFromPostRequest
+	err2 := json.Unmarshal(node_json, &node_new)
+
+	if err != nil {
+		panic(fmt.Sprintf("Error marshaling Node, %v", err.Error()))
+	}
+
+	if err2 != nil {
+		panic(fmt.Sprintf("Error unmarshaling Node, %v", err2.Error()))
+	}
+
+	// t.Log(node_new)
+}

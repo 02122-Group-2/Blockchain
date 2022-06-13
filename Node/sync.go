@@ -1,109 +1,157 @@
 package node
 
 import (
-	Database "blockchain/Database"
 	shared "blockchain/Shared"
-	"fmt"
-	"net"
+	"sort"
 	"time"
 )
 
-//Function that essentialy is the implemented version of our peer sync algorithm
-func synchronization() {
+var MAX_SUBSETS int = 4
+var MAX_PEERS int = 40
+
+type cPair struct {
+	serialNo int
+	count    int
+}
+
+// concurrent implementation of our synchronization algorithm, with a simple proof-of-work consensus algorithm
+func concSynchronization() {
 	for {
-		// updates Node to get local changes in case any has been made
-		node := GetNode()
+		shared.Log("Running sync")
 
-		// make copy of initial peers to avoid weird behavior when modifying the slice
-		peersToCheck := node.PeerSet.DeepCopy()
+		syncLoop()
 
-		// slice for storing all active connections from current sync iteration
-		newPeers := PeerSet{}
-
-		for peer, _ := range peersToCheck {
-			newPeers = node.syncPeer(peer, newPeers)
-		}
-		// Persist the updated peer Set
-		SavePeerSetAsJSON(newPeers, shared.PeerSetFile)
-
-		// Wait 20 seconds before running next sync iteration
 		time.Sleep(20 * time.Second)
 	}
 }
 
-func (node Node) syncPeer(peer string, newPeers PeerSet) PeerSet {
-	// if we cannot connect to a peer, skip it and don't append it
-	if !Ping(peer) {
-		return nil
-	} else {
-		newPeers.Add(peer)
+func syncLoop() {
+	// get latest node data
+	node := GetNode()
+
+	noOfPeers := len(node.PeerSet)
+
+	// construct subsets for parallel goroutines to iterate through
+	peerSubsets := constructSubsets(node.PeerSet)
+
+	// make channels for goroutines to write to, main routine to read from
+	nodeChannel := make(chan Node)
+	pingChannel := make(chan PingResponse)
+
+	// create goroutines for concurrent sync and assign channels
+	for _, subset := range peerSubsets {
+		go getNodesInPeerSet(subset, nodeChannel, pingChannel)
 	}
 
-	peerState := GetPeerState(peer)
+	// read data out of goroutines through channel and store in Node slice
+	nodes := make([]Node, noOfPeers)
+	// store addresses mapped to their ping response latencies
+	pings := make([]PingResponse, len(nodes))
 
-	fmt.Println("Got peer state")
-	fmt.Println(peerState)
-
-	peerHasNewerBlock := peerState.State.LastBlockSerialNo > node.State.LastBlockSerialNo
-	if peerHasNewerBlock {
-		peerBlocks := GetPeerBlocks(peer, node.State.LastBlockSerialNo)
-		for _, block := range peerBlocks {
-			node.State.AddBlock(block)
+	// read data from the subroutines' channels
+	for i := 0; i < noOfPeers; i++ {
+		pingResp := <-pingChannel
+		if !pingResp.Ok {
+			nodes = nodes[:len(nodes)-1]
+			pings = pings[:len(pings)-1]
+			continue
 		}
+		nodes[i] = <-nodeChannel
+		pings[i] = pingResp
 	}
 
-	node.State.TryAddTransactions(peerState.State.TxMempool)
+	// TODO: following can only be done in last iteration. Listen for SIGTERM on main process?
+	// close channels, since they will no longer be used
+	// close(nodeChannel)
+	// close(pingChannel)
 
-	reachableIPs := PeerSet{}
-	for peer2, _ := range peerState.PeerSet {
-		if Ping(peer2) { // If the incoming address wasn't in the original list, add it to the new list of addresses
-			reachableIPs.Add(peer2)
-		}
+	// add own node to collection and run consensus algorithm
+	nodes = append(nodes, node)
+	handleConsensus(node, nodes)
+
+	// apply all possible states from peers with newest chain
+	tryApplyPeerStates(node, nodes)
+
+	// compute new PeerSet based on top XX fastest pings
+	newPeers := computeNewPeerSet(pings, node.PeerSet, nodes)
+
+	// persist new peerset to file if there are any - otherwise, it might be because of bad connection
+	if len(newPeers) > 0 {
+		PersistPeerSet(newPeers)
 	}
-
-	return Union(newPeers, reachableIPs)
 }
 
-// Get the initial node state
-func GetNode() Node {
-	node := Node{}
-	node.State = *Database.LoadState()
-	node.PeerSet = GetPeerSet()
-	return node
+// select which peers to keep for next cycle of sync, ranked on ping latency
+func computeNewPeerSet(pings []PingResponse, ps PeerSet, nodes []Node) PeerSet {
+	pings = add2ndLevelPeers(pings, ps, nodes)
+	newPeers := getNFastestPeers(pings, MAX_PEERS)
+	return newPeers
 }
 
-// Get the stored set of nodes
-// If this hasn't been created before, create it using the bootstrap node
-func GetPeerSet() PeerSet {
-	ps := LoadPeerSetFromJSON(shared.PeerSetFile)
-	if len(ps) == 0 {
-		ps.Add(bootstrapNode)
+// ping peer-of-peers to potentially expand own peer set
+func add2ndLevelPeers(pings PingResponseList, peersToCheck PeerSet, nodes []Node) PingResponseList {
+	localIp := getLocalIP()
+	for _, n := range nodes {
+		for peer2 := range n.PeerSet {
+			if !peersToCheck.Exists(peer2) && peer2 != localIp {
+				pingRes := Ping(peer2)
+				pings = append(pings, pingRes)
+			}
+		}
+	}
+	return pings
+}
+
+// get fixed sized peer set ranked by ping latency (low to high)
+func getNFastestPeers(pings PingResponseList, amount int) PeerSet {
+	sort.Sort(pings)
+	ps := PeerSet{}
+	for i, pingRes := range pings {
+		if i >= amount {
+			break
+		}
+		ps.Add(pingRes.Address)
 	}
 	return ps
 }
 
-func Ping(peerAddr string) bool {
-	if !shared.LegalIpAddress(peerAddr) {
-		return false
-	}
+func getNodesInPeerSet(ps PeerSet, nch chan Node, pch chan PingResponse) {
+	for peer := range ps {
+		pingRes := Ping(peer)
 
-	timeout := 1 * time.Second
-	conn, err := net.DialTimeout("tcp", peerAddr, timeout)
-	if err != nil {
-		//fmt.Println("Site unreachable, error: ", err)
-		return false
-	}
-	conn.Close()
-	return true
-}
-
-func contains(s []string, e string) bool {
-	for _, a := range s {
-		if a == e {
-			return true
+		// TODO: configure timeout for GetPeerState?
+		if pingRes.Ok {
+			pch <- pingRes
+			nch <- GetPeerState(peer)
+		} else {
+			pch <- PingResponse{"nil", false, -1}
+			// nch <- Node{}
 		}
 	}
-	return false
 }
 
+func constructSubsets(peersToCheck PeerSet) []PeerSet {
+	psLen := len(peersToCheck)
+	noSubsets := min(psLen, MAX_SUBSETS)
 
+	subsets := make([]PeerSet, noSubsets)
+
+	for peer := range peersToCheck {
+		idx := len(peersToCheck) % noSubsets
+		if subsets[idx] == nil {
+			subsets[idx] = PeerSet{}
+		}
+		subsets[idx].Add(peer)
+		peersToCheck.Remove(peer)
+	}
+
+	return subsets
+}
+
+func min(x int, y int) int {
+	if x < y {
+		return x
+	} else {
+		return y
+	}
+}

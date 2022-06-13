@@ -30,7 +30,7 @@ func (p PeerSet) Exists(k string) bool {
 
 func (p PeerSet) DeepCopy() PeerSet {
 	new := PeerSet{}
-	for k, _ := range p {
+	for k := range p {
 		new[k] = true
 	}
 	return new
@@ -58,7 +58,7 @@ func LoadPeerSetFromJSON(filename string) PeerSet {
 	// Create the file if it doesnt exist
 	shared.InitDataDirIfNotExists(filename)
 
-	data, err := os.ReadFile(shared.LocalDirToFileFolder + filename)
+	data, err := os.ReadFile(shared.LocatePersistenceFile(filename, ""))
 	if err != nil {
 		panic(err)
 	}
@@ -68,16 +68,20 @@ func LoadPeerSetFromJSON(filename string) PeerSet {
 
 	if ps == nil {
 		ps = PeerSet{}
-	} 
+	}
 
 	return ps
+}
+
+func PersistPeerSet(ps PeerSet) {
+	SavePeerSetAsJSON(ps, shared.PeerSetFile)
 }
 
 // Save the peer list in a JSON file
 func SavePeerSetAsJSON(ps PeerSet, filename string) error {
 	psJSON, _ := json.MarshalIndent(ps, "", "  ")
 
-	err := ioutil.WriteFile(shared.LocalDirToFileFolder+filename, psJSON, 0644)
+	err := ioutil.WriteFile(shared.LocatePersistenceFile(filename, ""), psJSON, 0644)
 	if err != nil {
 		panic(err)
 	}

@@ -11,8 +11,8 @@ import (
 )
 
 type Block struct {
-	Header       BlockHeader   `json:"Header"`
-	Transactions []Transaction `json:"Transactions"`
+	Header   BlockHeader           `json:"Header"`
+	SignedTx SignedTransactionList `json:"Transactions"`
 }
 
 type BlockHeader struct {
@@ -36,11 +36,11 @@ type Genesis struct {
 }
 
 // Create a block object that matches the current state, given a list of transactions
-func (state *State) CreateBlock(txs []Transaction) Block {
+func (state *State) CreateBlock(txs SignedTransactionList) Block {
 	return Block{
 		BlockHeader{
 			state.getLatestHash(),
-			makeTimestamp(),
+			shared.MakeTimestamp(),
 			state.getNextBlockSerialNo(),
 		},
 		txs,
@@ -58,8 +58,8 @@ func (state *State) ValidateBlock(block Block) error {
 		}
 	}
 
-	if len(block.Transactions) == 0 {
-		return fmt.Errorf("The number of transactions must be greater than 0")
+	if len(block.SignedTx) == 0 {
+		return fmt.Errorf("the number of transactions must be greater than 0")
 	}
 
 	if block.Header.ParentHash != state.LatestHash {
@@ -83,10 +83,10 @@ func HashBlock(blockString string) [32]byte {
 }
 
 // Applies a single block to the current state.
-// It validates the block and all the transactions within.
+// It validates all the transactions within the block.
 // It applies all the transactions within the block to the state as well.
 func (state *State) ApplyBlock(block Block) error {
-	err := state.AddTransactionList(block.Transactions)
+	err := state.AddTransactionList(block.SignedTx)
 	if err != nil {
 		return err
 	}
@@ -165,7 +165,7 @@ func PersistBlockToDB(block Block) error {
 
 // Load the local blockchain and return it as a list of blocks
 func LoadBlockchain() []Block {
-	data, err := os.ReadFile(shared.LocalDirToFileFolder + "Blockchain.db")
+	data, err := os.ReadFile(shared.LocatePersistenceFile("Blockchain.db", ""))
 	if err != nil {
 		panic(err)
 	}
@@ -180,7 +180,7 @@ func LoadBlockchain() []Block {
 }
 
 func ClearBlockchain() {
-	err := os.Truncate(shared.LocalDirToFileFolder+"Blockchain.db", 0)
+	err := os.Truncate(shared.LocatePersistenceFile("Blockchain.db", ""), 0)
 	if err != nil {
 		panic(err)
 	}
@@ -191,7 +191,7 @@ func SaveBlockchain(blockchain []Block) bool {
 	toSave := Blockchain{blockchain}
 	txFile, _ := json.MarshalIndent(toSave, "", "  ")
 
-	err := ioutil.WriteFile(shared.LocalDirToFileFolder+"Blockchain.db", txFile, 0644)
+	err := ioutil.WriteFile(shared.LocatePersistenceFile("Blockchain.db", ""), txFile, 0644)
 	if err != nil {
 		panic(err)
 	}
@@ -286,8 +286,35 @@ func (block *Block) UnmarshalJSON(data []byte) error {
 func (block *Block) BlockToString() string {
 
 	listOfTransactions := ""
-	for _, currTransaction := range block.Transactions {
-		listOfTransactions += TxToString(currTransaction) + "\n"
+	for _, currTransaction := range block.SignedTx {
+		listOfTransactions += TxToString(currTransaction.Tx) + "\n"
 	}
 	return "Header: \n " + "-Parent Hash: " + fmt.Sprintf("%v \n", block.Header.ParentHash) + "-Created at: " + fmt.Sprintf("%v \n", block.Header.CreatedAt) + "-Serial No.: " + fmt.Sprintf("%v \n", block.Header.SerialNo) + "List of Transactions: \n" + listOfTransactions
+}
+
+func GetLocalChainHashes(state State, fromSerialNo int) []string {
+	blocks := LoadBlockchain()
+	persistedChainHashes := getChainHashes(blocks, fromSerialNo)
+	latestHash := fmt.Sprintf("%x", state.getLatestHash())
+	return append(persistedChainHashes, latestHash)
+}
+
+func getChainHashes(blockchain []Block, fromSerialNo int) []string {
+	var chainHashes []string
+	for _, b := range blockchain {
+		if b.Header.SerialNo > fromSerialNo {
+			chainHashes = append(chainHashes, fmt.Sprintf("%x", b.Header.ParentHash))
+		}
+	}
+	return chainHashes
+}
+
+// returns index of (first) mismatch, -1 if succesful
+func CompareChainHashes(cHashes1 []string, cHashes2 []string) int {
+	for i, hash := range cHashes1 {
+		if i >= len(cHashes2) || hash != cHashes2[i] {
+			return i
+		}
+	}
+	return -1
 }
