@@ -1,4 +1,10 @@
 {
+<<<<<<< HEAD
     "localhost:6969":true,
     "localhost:6970":true
 }
+=======
+    "192.168.0.103:8081": true,
+    "192.168.0.232:8080": true
+  }
+>>>>>>> 3ce26e62678ed7c9fff9376abdab583f275c866e

@@ -31,15 +31,15 @@ func TestCreatePeerSet(t *testing.T) {
 
 // this test is not an actual unit test.
 // it is merely for exploratory tests, e.g. starting a node and debugging
-// func TestRun(t *testing.T) {
-// 	t.Log("begin run test")
+func TestRun(t *testing.T) {
+	t.Log("begin run test")
 
-// 	err := Run()
-// 	if err != nil {
-// 		t.Log("Could not run node")
-// 		t.Fail()
-// 	}
-// }
+	err := Run()
+	if err != nil {
+		t.Log("Could not run node")
+		t.Fail()
+	}
+}
 
 func TestGetPeerState(t *testing.T) {
 	t.Log("begin get peer state test")
