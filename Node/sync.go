@@ -1,62 +1,157 @@
 package node
 
 import (
-	Database "blockchain/Database"
 	shared "blockchain/Shared"
-	"fmt"
-	"net"
-	"os"
+	"sort"
 	"time"
 )
 
-// Get the initial node state
-func GetNode() Node {
-	node := Node{}
-	node.Address = getLocalIP()
-	node.State = *Database.LoadState()
-	node.PeerSet = GetPeerSet()
-	node.ChainHashes = Database.GetLocalChainHashes(node.State, 0)
-	return node
+var MAX_SUBSETS int = 4
+var MAX_PEERS int = 40
+
+type cPair struct {
+	serialNo int
+	count    int
 }
 
-// Get the stored set of nodes
-// If this hasn't been created before, create it using the bootstrap node
-func GetPeerSet() PeerSet {
-	ps := LoadPeerSetFromJSON(shared.PeerSetFile)
-	if ps == nil {
-		ps = PeerSet{bootstrapNode: true}
+// concurrent implementation of our synchronization algorithm, with a simple proof-of-work consensus algorithm
+func concSynchronization() {
+	for {
+		shared.Log("Running sync")
+
+		syncLoop()
+
+		time.Sleep(20 * time.Second)
 	}
-	if len(ps) == 0 {
-		ps.Add(bootstrapNode)
+}
+
+func syncLoop() {
+	// get latest node data
+	node := GetNode()
+
+	noOfPeers := len(node.PeerSet)
+
+	// construct subsets for parallel goroutines to iterate through
+	peerSubsets := constructSubsets(node.PeerSet)
+
+	// make channels for goroutines to write to, main routine to read from
+	nodeChannel := make(chan Node)
+	pingChannel := make(chan PingResponse)
+
+	// create goroutines for concurrent sync and assign channels
+	for _, subset := range peerSubsets {
+		go getNodesInPeerSet(subset, nodeChannel, pingChannel)
+	}
+
+	// read data out of goroutines through channel and store in Node slice
+	nodes := make([]Node, noOfPeers)
+	// store addresses mapped to their ping response latencies
+	pings := make([]PingResponse, len(nodes))
+
+	// read data from the subroutines' channels
+	for i := 0; i < noOfPeers; i++ {
+		pingResp := <-pingChannel
+		if !pingResp.Ok {
+			nodes = nodes[:len(nodes)-1]
+			pings = pings[:len(pings)-1]
+			continue
+		}
+		nodes[i] = <-nodeChannel
+		pings[i] = pingResp
+	}
+
+	// TODO: following can only be done in last iteration. Listen for SIGTERM on main process?
+	// close channels, since they will no longer be used
+	// close(nodeChannel)
+	// close(pingChannel)
+
+	// add own node to collection and run consensus algorithm
+	nodes = append(nodes, node)
+	handleConsensus(node, nodes)
+
+	// apply all possible states from peers with newest chain
+	tryApplyPeerStates(node, nodes)
+
+	// compute new PeerSet based on top XX fastest pings
+	newPeers := computeNewPeerSet(pings, node.PeerSet, nodes)
+
+	// persist new peerset to file if there are any - otherwise, it might be because of bad connection
+	if len(newPeers) > 0 {
+		PersistPeerSet(newPeers)
+	}
+}
+
+// select which peers to keep for next cycle of sync, ranked on ping latency
+func computeNewPeerSet(pings []PingResponse, ps PeerSet, nodes []Node) PeerSet {
+	pings = add2ndLevelPeers(pings, ps, nodes)
+	newPeers := getNFastestPeers(pings, MAX_PEERS)
+	return newPeers
+}
+
+// ping peer-of-peers to potentially expand own peer set
+func add2ndLevelPeers(pings PingResponseList, peersToCheck PeerSet, nodes []Node) PingResponseList {
+	localIp := getLocalIP()
+	for _, n := range nodes {
+		for peer2 := range n.PeerSet {
+			if !peersToCheck.Exists(peer2) && peer2 != localIp {
+				pingRes := Ping(peer2)
+				pings = append(pings, pingRes)
+			}
+		}
+	}
+	return pings
+}
+
+// get fixed sized peer set ranked by ping latency (low to high)
+func getNFastestPeers(pings PingResponseList, amount int) PeerSet {
+	sort.Sort(pings)
+	ps := PeerSet{}
+	for i, pingRes := range pings {
+		if i >= amount {
+			break
+		}
+		ps.Add(pingRes.Address)
 	}
 	return ps
 }
 
-func Ping(peerAddr string) PingResponse {
-	if !shared.LegalIpAddress(peerAddr) {
-		return PingResponse{"nil", false, -1}
-	}
+func getNodesInPeerSet(ps PeerSet, nch chan Node, pch chan PingResponse) {
+	for peer := range ps {
+		pingRes := Ping(peer)
 
-	startTime := shared.MakeTimestamp()
-	timeout := 1 * time.Second
-	conn, err := net.DialTimeout("tcp", peerAddr, timeout)
-	if err != nil {
-		fmt.Println("Site unreachable, error: ", err)
-		return PingResponse{"nil", false, -1}
-	}
-	endTime := shared.MakeTimestamp()
-	latency := endTime - startTime
-	conn.Close()
-	return PingResponse{peerAddr, true, latency}
-}
-
-func getLocalIP() string {
-	host, _ := os.Hostname()
-	addrs, _ := net.LookupIP(host)
-	for _, addr := range addrs {
-		if ipv4 := addr.To4(); ipv4 != nil {
-			return fmt.Sprintf("%v:%d", ipv4, httpPort)
+		// TODO: configure timeout for GetPeerState?
+		if pingRes.Ok {
+			pch <- pingRes
+			nch <- GetPeerState(peer)
+		} else {
+			pch <- PingResponse{"nil", false, -1}
+			// nch <- Node{}
 		}
 	}
-	return fmt.Sprintf("localhost:%d", httpPort)
+}
+
+func constructSubsets(peersToCheck PeerSet) []PeerSet {
+	psLen := len(peersToCheck)
+	noSubsets := min(psLen, MAX_SUBSETS)
+
+	subsets := make([]PeerSet, noSubsets)
+
+	for peer := range peersToCheck {
+		idx := len(peersToCheck) % noSubsets
+		if subsets[idx] == nil {
+			subsets[idx] = PeerSet{}
+		}
+		subsets[idx].Add(peer)
+		peersToCheck.Remove(peer)
+	}
+
+	return subsets
+}
+
+func min(x int, y int) int {
+	if x < y {
+		return x
+	} else {
+		return y
+	}
 }

@@ -119,7 +119,6 @@ func ClearTransactions() {
 
 // Given a list of transactions, it saves these transactions as a JSON string in a local text file.
 // Returns a boolean value indicating whether or not it was saved succesfully.
-// This is not used in older version of the blockchain.
 func SaveTransaction(transactionList SignedTransactionList) bool {
 	toSave := LoadedTransactions{transactionList}
 	txFile, _ := json.MarshalIndent(toSave, "", "  ")
@@ -135,7 +134,7 @@ func SaveTransaction(transactionList SignedTransactionList) bool {
 // Loads the local transactions, saved in the transactions.json file. This is deprecated and only used in early versions of the blockchain.
 // It returns a list of transactions.
 func LoadTransactions() SignedTransactionList {
-	data, err := os.ReadFile(shared.LocalDirToFileFolder + "Transactions.json")
+	data, err := os.ReadFile(shared.LocatePersistenceFile("Transactions.json", ""))
 	if err != nil {
 		panic(err)
 	}
