@@ -184,6 +184,24 @@ func TestSendMoneyToSameUser(t *testing.T) {
 	ResetTest()
 }
 
+func TestAddTransactionFromWrongSender(t *testing.T) {
+	t.Log("begin create transaction test")
+	shared.ResetPersistenceFilesForTest()
+
+	Crypto.CreateNewWallet("EvilWallet", pswd)
+	testWallet, _ := Crypto.AccessWallet("EvilWallet", pswd)
+
+	tr := state.CreateTransaction("Niels", "EvilWallet", 1.0)
+	signedTx, _ := state.SignTransaction(testWallet, pswd, tr)
+	err := state.AddTransaction(signedTx)
+	if err == nil {
+		t.Errorf("Shouldn't be able to make a transaction without a signature from the sender")
+	}
+
+	testWallet.HardDelete()
+	ResetTest()
+}
+
 func TestAddTransactionWithNegativeAmount(t *testing.T) {
 	t.Log("begin create transaction test")
 	shared.ResetPersistenceFilesForTest()
