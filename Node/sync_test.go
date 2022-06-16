@@ -85,8 +85,8 @@ func TestGetLocalChainHashes(t *testing.T) {
 	shared.ResetPersistenceFilesForTest()
 	state := db.LoadState()
 	cHashes := db.GetLocalChainHashes(*state, 0)
-	// t.Log(cHashes)
-	chainComp := []string{"0000000000000000000000000000000000000000000000000000000000000000", "c352edf51ac6fdf40de39d11a85c1f1a90620028905a6ead5fa78da04eee75cc", "0116adebf51528def8fdb441daa7620c017d1fe288fdb8071e24717aea74f81c", "811a21a6ad322ab9e5f68cbcb47bf20a094ba55612a404f00a83ccb93e57c063"}
+	t.Log(cHashes)
+	chainComp := []string{"0000000000000000000000000000000000000000000000000000000000000000", "2eff0509e19f074f48791f06d230f0c05bbe09e0a76d6e0dcf9703cff6fc17e0", "b46b7af31379d5b360cc2d0d8e30f2897761746a25421159b5d7698f383cc50a"}
 	if db.CompareChainHashes(cHashes, chainComp) != -1 {
 		panic("should be equal")
 	}
@@ -116,76 +116,6 @@ func TestSortByLatency(t *testing.T) {
 	}
 }
 
-func TestChainDiffIdx(t *testing.T) {
-	c1 := []string{"a", "b", "c", "d", "e"}
-	c2 := []string{"a", "b", "d", "e", "f"}
-
-	idx := chainDiffIdx(c1, c2)
-	t.Log(idx)
-	if idx != 2 {
-		panic("Found index is wrong!")
-	}
-
-	c1 = []string{"a", "b"}
-	c2 = []string{"a", "b", "d", "e", "f"}
-	idx = chainDiffIdx(c1, c2)
-	t.Log(idx)
-	if idx != 2 {
-		panic("Found index is wrong!")
-	}
-}
-
-func testConsensusUtil(chains [][]string) []Node {
-	s := make([]db.State, len(chains))
-	nodes := make([]Node, len(chains))
-	for i := 0; i < len(chains); i++ {
-		s[i] = db.State{}
-		s[i].LastBlockSerialNo = len(chains[i]) - 1
-		nodes[i] = Node{fmt.Sprintf("localhost:808%d", i+1), nil, s[i], chains[i]}
-	}
-	return nodes
-}
-
-// test fork with equal no. of agreeing nodes
-func TestComputeConsensusNode(t *testing.T) {
-	c1 := []string{"a", "b", "c", "d", "e"}
-	c2 := []string{"a", "b", "d", "e", "f"}
-	c3 := []string{"a", "b"}
-	c4 := []string{"a", "b"}
-	c5 := []string{"a", "b", "c", "d", "e"}
-
-	chains := [][]string{c1, c2, c3, c4, c5}
-
-	nodes := testConsensusUtil(chains)
-
-	cons := computeConsensusNode(nodes)
-
-	t.Log(cons.ChainHashes)
-	if chainDiffIdx(c1, cons.ChainHashes) != -1 {
-		panic("Consensus algo aint work")
-	}
-	fmt.Println("succeeded")
-}
-
-// test with total separate (longer) chain than consensus chain
-func TestComputeConsensusNode2(t *testing.T) {
-	c1 := []string{"a", "b", "c", "d", "e"}
-	c2 := []string{"a", "b", "d", "e", "f"}
-	c3 := []string{"a", "b", "d", "e", "f"}
-	c4 := []string{"q", "x", "y", "z", "w", "æ", "ø", "å"}
-
-	chains := [][]string{c1, c2, c3, c4}
-
-	nodes := testConsensusUtil(chains)
-
-	cons := computeConsensusNode(nodes)
-
-	t.Log(cons.ChainHashes)
-	if chainDiffIdx(c2, cons.ChainHashes) != -1 {
-		panic("Consensus algo aint work")
-	}
-}
-
 func TestMarshalUnmarshalNode(t *testing.T) {
 	node := GetNode()
 	node_json, err := json.Marshal(node)
@@ -201,21 +131,4 @@ func TestMarshalUnmarshalNode(t *testing.T) {
 	}
 
 	// t.Log(node_new)
-}
-
-// if two forks are exactly equal in number of nodes that agree
-func Test5050case(t *testing.T) {
-
-}
-
-func TestHandleLegalConsensusChain(t *testing.T) {
-
-}
-
-func TestHandleIllegalConsensusChain(t *testing.T) {
-
-}
-
-func TestTamperedChain(t *testing.T) {
-
 }
