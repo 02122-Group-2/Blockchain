@@ -130,7 +130,7 @@ func TestAddLegalBlockToBlockchain(t *testing.T) {
 	testWallet1, _ := Crypto.AccessWallet(walletUsername1, pswd)
 	state_block.AccountBalances[AccountAddress(testWallet1.Address)] = 1000
 
-	Crypto.CreateNewWallet(walletUsername1, pswd)
+	Crypto.CreateNewWallet(walletUsername2, pswd)
 	testWallet2, _ := Crypto.AccessWallet(walletUsername2, pswd)
 	state_block.AccountBalances[AccountAddress(testWallet2.Address)] = 1000
 
@@ -143,21 +143,81 @@ func TestAddLegalBlockToBlockchain(t *testing.T) {
 	//Create the transactions Second Transaction
 	tx2, _ := state_block.CreateSignedTransaction(testWallet2, pswd, "Emilie", 4)
 
+	
+
 	//Add transactions to the state
-	state_block.AddTransaction(tx1)
-	state_block.AddTransaction(tx2)
+	err := state_block.AddTransaction(tx1)
+	if err != nil {
+		t.Error("Failed to add transaction 1")
+	}
+
+	err = state_block.AddTransaction(tx2)
+	
+	if err != nil {
+		t.Error("Failed to add transaction 2")
+	}
 
 	//Create the block
 	block1 := state_block.CreateBlock(state_block.TxMempool)
 
 	//Add the block
-	err := state_block.AddBlock(block1)
+	err = state_block.AddBlock(block1)
 	if err != nil {
 		t.Errorf("Expected block to be legal, but wasn't")
 	}
 
+	testWallet1.HardDelete()
+	testWallet2.HardDelete()
 	ResetTest()
 }
+
+
+func TestAddMultipleLegalBlockToBlockchain(t *testing.T) {
+
+	t.Log("begin add legal block to blockchain")
+	shared.ResetPersistenceFilesForTest()
+
+	var state_block = LoadState()
+
+	// Create both wallets
+	Crypto.CreateNewWallet(walletUsername1, pswd)
+	testWallet1, _ := Crypto.AccessWallet(walletUsername1, pswd)
+	state_block.AccountBalances[AccountAddress(testWallet1.Address)] = 1000
+
+	Crypto.CreateNewWallet(walletUsername2, pswd)
+	testWallet2, _ := Crypto.AccessWallet(walletUsername2, pswd)
+	state_block.AccountBalances[AccountAddress(testWallet2.Address)] = 1000
+
+	// Save Snapshot so it will accept the blockchain with the new balance
+	state_block.SaveSnapshot()
+
+	//Create the transactions first Transaction
+	tx1, _ := state_block.CreateSignedTransaction(testWallet1, pswd, "Magn", 10)
+
+	//Create the transactions Second Transaction
+	tx2, _ := state_block.CreateSignedTransaction(testWallet2, pswd, "Emilie", 4)
+	
+	//Create the block 1
+	block1 := state_block.CreateBlock(SignedTransactionList{tx1})
+	
+	//Add block 1
+	err := state_block.AddBlock(block1)
+	if err != nil {
+		t.Errorf("Expected block 1 to be legal, but wasn't. Got Error: " + err.Error())
+	}
+
+	//Create the block 2
+	block2 := state_block.CreateBlock(SignedTransactionList{tx2})
+
+	//Add block 2
+	err = state_block.AddBlock(block2)
+	if err != nil {
+		t.Errorf("Expected block 2 to be legal, but wasn't. Got Error: " + err.Error())
+	}
+
+	ResetTest()
+}
+
 
 func TestAddIllegalBlockWrongParentHash(t *testing.T) {
 

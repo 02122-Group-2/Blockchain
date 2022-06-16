@@ -9,6 +9,13 @@ import (
 //Function that ensures that all files needed to run a node are present on the current system
 //If not they are created
 func EnsureNeededFilesExist() error {
+	if !fileExist(LocalDirToFileFolder) {
+		err := os.Mkdir(LocalDirToFileFolder, 0755)
+    if err != nil {
+			return err
+    }
+	}
+
 	for _, file := range runtimeFiles {
 		err := InitDataDirIfNotExists(file)
 		if err != nil {
@@ -30,6 +37,8 @@ func InitDataDirIfNotExists(dataDir string) error {
 	if err != nil {
 		return err
 	}
+
+
 
 	return nil
 }

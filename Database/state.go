@@ -263,14 +263,14 @@ func saveStateAsJSON(state *State, filename string) error {
 func loadStateFromJSON(filename string) State {
 	data, err := os.ReadFile(shared.LocatePersistenceFile(filename, ""))
 	if err != nil {
-		panic(err)
+		return blankState()
 	}
 
 	var state State
-	if len(data) != 0 {
-		json.Unmarshal(data, &state)
+	err = json.Unmarshal(data, &state)
+	if err != nil {
+		return blankState()
 	}
-
 	return state
 }
 

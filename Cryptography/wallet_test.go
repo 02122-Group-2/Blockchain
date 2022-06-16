@@ -20,6 +20,27 @@ func TestCreateWallet(t *testing.T) {
 	}
 }
 
+func TestCreateExistingWallet(t *testing.T) {
+	testAcc := "testAccount1"
+	newAddr1, _ := CreateNewWallet(testAcc, testingPassword)
+	testWallet1, _ := AccessWallet(testAcc, testingPassword)
+
+	newAddr2, _ := CreateNewWallet(testAcc, testingPassword)
+	testWallet2, _ := AccessWallet(testAcc, testingPassword)
+
+	testWallet1.HardDelete()
+	testWallet2.HardDelete()
+	if newAddr1 != testWallet1.Address {
+		t.Errorf("new account address for account 1 doesn't match the account address returned by GetAddress\n")
+	}
+	if newAddr2 != testWallet2.Address {
+		t.Errorf("new account address for account 2 doesn't match the account address returned by GetAddress\n")
+	}
+	if newAddr1 == newAddr2 {
+		t.Errorf("The two accounts shouldn't have the same address\n")
+	}
+}
+
 func TestDeleteWallet(t *testing.T) {
 	testAcc := "testAccount1"
 	CreateNewWallet(testAcc, testingPassword)
