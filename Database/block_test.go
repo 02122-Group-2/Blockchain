@@ -1,9 +1,11 @@
 package database
 
 import (
+	Crypto "blockchain/Cryptography"
 	shared "blockchain/Shared"
-	"encoding/hex"
-	"encoding/json"
+
+	// "encoding/hex"
+	// "encoding/json"
 	"fmt"
 	"reflect"
 	"testing"
@@ -15,38 +17,52 @@ var snapshot_orignal = LoadSnapshot()
 var transactions_original = LoadTransactions()
 
 func TestCreateBlock(t *testing.T) {
-
-	t.Log("begin create block test")
+	// Prepare Files
 	shared.ResetPersistenceFilesForTest()
 
 	var state_block = LoadState()
 
-	tx1 := state_block.CreateTransaction("Niels", "Asger", 10)
-	tx2 := state_block.CreateTransaction("Asger", "Emilie", 4)
-	state_block.AddTransaction(tx1)
-	state_block.AddTransaction(tx2)
+	// Create a wallet to test the functionality
+	Crypto.CreateNewWallet(walletUsername1, pswd)
+	testWallet, _ := Crypto.AccessWallet(walletUsername1, pswd)
+	state.AccountBalances[AccountAddress(testWallet.Address)] = 1000
+
+	// Dynamically set balance of wallet account for testing purposes.
+	// This exploit would easily be detected in other systems. As the money would come from nowhere.
+	state_block.AccountBalances[AccountAddress(testWallet.Address)] = 1000
+
+	// Create the transactions and sign them with the created wallet
+	signedTx1, _ := state_block.CreateSignedTransaction(testWallet, pswd, "Asger", 10)
+	err1 := state_block.AddTransaction(signedTx1)
+
+	signedTx2, _ := state_block.CreateSignedTransaction(testWallet, pswd, "Emilie", 4)
+	err2 := state_block.AddTransaction(signedTx2)
+
 	block := state_block.CreateBlock(state_block.TxMempool)
 	fmt.Println(block)
+	fmt.Println(err1)
+	fmt.Println(err2)
 
-	if len(block.Transactions) != 2 {
-		t.Logf("Expected number of transactions in block to be 2, but was %v", len(block.Transactions))
+	if len(block.SignedTx) != 2 {
+		t.Logf("Expected number of transactions in block to be 2, but was %v", len(block.SignedTx))
 		t.Fail()
 	}
 
-	trans1 := block.Transactions[0]
-	trans2 := block.Transactions[1]
+	trans1 := block.SignedTx[0]
+	trans2 := block.SignedTx[1]
 
-	if trans1.From != tx1.From && trans1.To != tx1.To && trans1.Amount != tx1.Amount {
+	if trans1.Tx.From != signedTx1.Tx.From && trans1.Tx.To != signedTx1.Tx.To && trans1.Tx.Amount != signedTx1.Tx.Amount {
 		t.Log("Expected the first transaction in the block to be equal to the first transaction but wasn't")
 		t.Fail()
 	}
 
-	if trans2.From != tx2.From && trans2.To != tx2.To && trans2.Amount != tx2.Amount {
+	if trans2.Tx.From != signedTx2.Tx.From && trans2.Tx.To != signedTx2.Tx.To && trans2.Tx.Amount != signedTx2.Tx.Amount {
 		t.Log("Expected the second transaction in the block to be equal to the second transaction but wasn't")
 		t.Fail()
 	}
 
 	ResetTest()
+	testWallet.HardDelete()
 }
 
 func TestSaveBlock(t *testing.T) {
@@ -57,11 +73,22 @@ func TestSaveBlock(t *testing.T) {
 
 	blockchain_original = LoadBlockchain()
 
-	// Create a block
-	tx1 := state_block.CreateTransaction("Niels", "Asger", 10)
-	tx2 := state_block.CreateTransaction("Asger", "Emilie", 4)
-	state_block.AddTransaction(tx1)
-	state_block.AddTransaction(tx2)
+	// Creates a wallet to test the functionality
+	Crypto.CreateNewWallet(walletUsername1, pswd)
+	testWallet, _ := Crypto.AccessWallet(walletUsername1, pswd)
+	state_block.AccountBalances[AccountAddress(testWallet.Address)] = 1000
+
+	// Create a block by creating the transactions and signing them with the new wallet
+	signedTx1, _ := state_block.CreateSignedTransaction(testWallet, pswd, "Asger", 10)
+	err1 := state_block.AddTransaction(signedTx1)
+
+	signedTx2, _ := state_block.CreateSignedTransaction(testWallet, pswd, "Emilie", 4)
+	err2 := state_block.AddTransaction(signedTx2)
+
+	if err1 != nil || err2 != nil {
+		t.Error("Adding one of the two transactions failed")
+	}
+
 	block := state_block.CreateBlock(state_block.TxMempool)
 
 	// var blockList []Block
@@ -78,6 +105,7 @@ func TestSaveBlock(t *testing.T) {
 	}
 
 	ResetTest()
+	testWallet.HardDelete()
 }
 
 func TestLoadBlockchain(t *testing.T) {
@@ -97,25 +125,99 @@ func TestAddLegalBlockToBlockchain(t *testing.T) {
 
 	var state_block = LoadState()
 
-	//Create the transactions
-	tx1 := state_block.CreateTransaction("Niels", "Magn", 10)
-	tx2 := state_block.CreateTransaction("Magn", "Emilie", 4)
+	// Create both wallets
+	Crypto.CreateNewWallet(walletUsername1, pswd)
+	testWallet1, _ := Crypto.AccessWallet(walletUsername1, pswd)
+	state_block.AccountBalances[AccountAddress(testWallet1.Address)] = 1000
+
+	Crypto.CreateNewWallet(walletUsername2, pswd)
+	testWallet2, _ := Crypto.AccessWallet(walletUsername2, pswd)
+	state_block.AccountBalances[AccountAddress(testWallet2.Address)] = 1000
+
+	// Save Snapshot so it will accept the blockchain with the new balance
+	state_block.SaveSnapshot()
+
+	//Create the transactions first Transaction
+	tx1, _ := state_block.CreateSignedTransaction(testWallet1, pswd, "Magn", 10)
+
+	//Create the transactions Second Transaction
+	tx2, _ := state_block.CreateSignedTransaction(testWallet2, pswd, "Emilie", 4)
+
+	
 
 	//Add transactions to the state
-	state_block.AddTransaction(tx1)
-	state_block.AddTransaction(tx2)
+	err := state_block.AddTransaction(tx1)
+	if err != nil {
+		t.Error("Failed to add transaction 1")
+	}
+
+	err = state_block.AddTransaction(tx2)
+	
+	if err != nil {
+		t.Error("Failed to add transaction 2")
+	}
 
 	//Create the block
 	block1 := state_block.CreateBlock(state_block.TxMempool)
 
 	//Add the block
-	err := state_block.AddBlock(block1)
+	err = state_block.AddBlock(block1)
 	if err != nil {
 		t.Errorf("Expected block to be legal, but wasn't")
 	}
 
+	testWallet1.HardDelete()
+	testWallet2.HardDelete()
 	ResetTest()
 }
+
+
+func TestAddMultipleLegalBlockToBlockchain(t *testing.T) {
+
+	t.Log("begin add legal block to blockchain")
+	shared.ResetPersistenceFilesForTest()
+
+	var state_block = LoadState()
+
+	// Create both wallets
+	Crypto.CreateNewWallet(walletUsername1, pswd)
+	testWallet1, _ := Crypto.AccessWallet(walletUsername1, pswd)
+	state_block.AccountBalances[AccountAddress(testWallet1.Address)] = 1000
+
+	Crypto.CreateNewWallet(walletUsername2, pswd)
+	testWallet2, _ := Crypto.AccessWallet(walletUsername2, pswd)
+	state_block.AccountBalances[AccountAddress(testWallet2.Address)] = 1000
+
+	// Save Snapshot so it will accept the blockchain with the new balance
+	state_block.SaveSnapshot()
+
+	//Create the transactions first Transaction
+	tx1, _ := state_block.CreateSignedTransaction(testWallet1, pswd, "Magn", 10)
+
+	//Create the transactions Second Transaction
+	tx2, _ := state_block.CreateSignedTransaction(testWallet2, pswd, "Emilie", 4)
+	
+	//Create the block 1
+	block1 := state_block.CreateBlock(SignedTransactionList{tx1})
+	
+	//Add block 1
+	err := state_block.AddBlock(block1)
+	if err != nil {
+		t.Errorf("Expected block 1 to be legal, but wasn't. Got Error: " + err.Error())
+	}
+
+	//Create the block 2
+	block2 := state_block.CreateBlock(SignedTransactionList{tx2})
+
+	//Add block 2
+	err = state_block.AddBlock(block2)
+	if err != nil {
+		t.Errorf("Expected block 2 to be legal, but wasn't. Got Error: " + err.Error())
+	}
+
+	ResetTest()
+}
+
 
 func TestAddIllegalBlockWrongParentHash(t *testing.T) {
 
@@ -124,9 +226,17 @@ func TestAddIllegalBlockWrongParentHash(t *testing.T) {
 
 	var state_block = LoadState()
 
-	//Create the transactions
-	tx1 := state_block.CreateTransaction("Niels", "Magn", 10)
-	tx2 := state_block.CreateTransaction("Magn", "Emilie", 4)
+	//Create the transactions first Transaction
+	Crypto.CreateNewWallet(walletUsername1, pswd)
+	testWallet1, _ := Crypto.AccessWallet(walletUsername1, pswd)
+	state_block.AccountBalances[AccountAddress(testWallet1.Address)] = 1000
+	tx1, _ := state_block.CreateSignedTransaction(testWallet1, pswd, "Magn", 10)
+
+	//Create the transactions Second Transaction
+	Crypto.CreateNewWallet(walletUsername1, pswd)
+	testWallet2, _ := Crypto.AccessWallet(walletUsername2, pswd)
+	state_block.AccountBalances[AccountAddress(testWallet2.Address)] = 1000
+	tx2, _ := state_block.CreateSignedTransaction(testWallet2, pswd, "Emilie", 4)
 
 	//Add transactions to the state
 	state_block.AddTransaction(tx1)
@@ -155,14 +265,20 @@ func TestAddIllegalBlockIllegalTransaction(t *testing.T) {
 
 	var state_block = LoadState()
 
-	//Create the transactions
-	tx1 := state_block.CreateTransaction("Niels", "Magn", 10)
+	//Create the transactions first Transaction
+	Crypto.CreateNewWallet(walletUsername1, pswd)
+	testWallet1, _ := Crypto.AccessWallet(walletUsername1, pswd)
+	state_block.AccountBalances[AccountAddress(testWallet1.Address)] = 1000
+	tx1, _ := state_block.CreateSignedTransaction(testWallet1, pswd, "Magn", 10)
 
-	//Illegal transaction
-	tx2 := state_block.CreateTransaction("Magn", "Emilie", 10000000)
+	//Create the transactions Second Transaction
+	Crypto.CreateNewWallet(walletUsername1, pswd)
+	testWallet2, _ := Crypto.AccessWallet(walletUsername2, pswd)
+	state_block.AccountBalances[AccountAddress(testWallet2.Address)] = 1000
+	tx2, _ := state_block.CreateSignedTransaction(testWallet2, pswd, "Emilie", 2000)
 
 	//Create the block from a manually created transaction list
-	block1 := state_block.CreateBlock(TransactionList{tx1, tx2})
+	block1 := state_block.CreateBlock(SignedTransactionList{tx1, tx2})
 
 	//Add the block
 	err := state_block.AddBlock(block1)
@@ -182,9 +298,17 @@ func TestAddIllegalBlockWrongTimestamp(t *testing.T) {
 
 	var state_block = LoadState()
 
-	//Create the transactions
-	tx1 := state_block.CreateTransaction("Niels", "Magn", 10)
-	tx2 := state_block.CreateTransaction("Magn", "Emilie", 4)
+	//Create the transactions first Transaction
+	Crypto.CreateNewWallet(walletUsername1, pswd)
+	testWallet1, _ := Crypto.AccessWallet(walletUsername1, pswd)
+	state_block.AccountBalances[AccountAddress(testWallet1.Address)] = 1000
+	tx1, _ := state_block.CreateSignedTransaction(testWallet1, pswd, "Magn", 10)
+
+	//Create the transactions Second Transaction
+	Crypto.CreateNewWallet(walletUsername1, pswd)
+	testWallet2, _ := Crypto.AccessWallet(walletUsername2, pswd)
+	state_block.AccountBalances[AccountAddress(testWallet2.Address)] = 1000
+	tx2, _ := state_block.CreateSignedTransaction(testWallet2, pswd, "Emilie", 4)
 
 	//Add transactions to the state
 	state_block.AddTransaction(tx1)
@@ -214,9 +338,17 @@ func TestAddIllegalBlockWrongBlockHeigh(t *testing.T) {
 
 	var state_block = LoadState()
 
-	//Create the transactions
-	tx1 := state_block.CreateTransaction("Niels", "Magn", 10)
-	tx2 := state_block.CreateTransaction("Magn", "Emilie", 4)
+	//Create the transactions first Transaction
+	Crypto.CreateNewWallet(walletUsername1, pswd)
+	testWallet1, _ := Crypto.AccessWallet(walletUsername1, pswd)
+	state_block.AccountBalances[AccountAddress(testWallet1.Address)] = 1000
+	tx1, _ := state_block.CreateSignedTransaction(testWallet1, pswd, "Magn", 10)
+
+	//Create the transactions Second Transaction
+	Crypto.CreateNewWallet(walletUsername1, pswd)
+	testWallet2, _ := Crypto.AccessWallet(walletUsername2, pswd)
+	state_block.AccountBalances[AccountAddress(testWallet2.Address)] = 1000
+	tx2, _ := state_block.CreateSignedTransaction(testWallet2, pswd, "Emilie", 4)
 
 	//Add transactions to the state
 	state_block.AddTransaction(tx1)
@@ -247,7 +379,7 @@ func TestAddIllegalBlockNoTransactions(t *testing.T) {
 	var state_block = LoadState()
 
 	//Create the block with no transactions
-	block1 := state_block.CreateBlock(TransactionList{})
+	block1 := state_block.CreateBlock(SignedTransactionList{})
 
 	//Add the block
 	err := state_block.AddBlock(block1)
@@ -268,13 +400,31 @@ func TestAddBlockWhereSomeTransactionsFromStateAreInvalidatedAfterBlock(t *testi
 
 	//State one will be the local state with two transactions
 	stateOne := original_state.copyState()
-	stateOne.AddTransaction(stateOne.CreateTransaction("Emilie", "Niels", 10))
-	stateOne.AddTransaction(stateOne.CreateTransaction("Niels", "Magn", 579039)) //this will be invalid after block has been added
+
+	// Create the two wallets and save the state snapshot
+	Crypto.CreateNewWallet(walletUsername1, pswd)
+	testWallet1, _ := Crypto.AccessWallet(walletUsername1, pswd)
+	stateOne.AccountBalances[AccountAddress(testWallet1.Address)] = 1000
+
+	Crypto.CreateNewWallet(walletUsername2, pswd)
+	testWallet2, _ := Crypto.AccessWallet(walletUsername2, pswd)
+	stateOne.AccountBalances[AccountAddress(testWallet2.Address)] = 1000
+
+	stateOne.SaveSnapshot()
+
+	//Create the transactions
+	tx1, _ := stateOne.CreateSignedTransaction(testWallet1, pswd, "Niels", 10)
+	tx2, _ := stateOne.CreateSignedTransaction(testWallet2, pswd, "Magn", 67) //this will be invalid after block has been added
+	stateOne.AddTransaction(tx1)
+	stateOne.AddTransaction(tx2)
 
 	//State two will be the "peer" state that contains the block
 	stateTwo := original_state.copyState()
-	stateTwo.AddTransaction(stateTwo.CreateTransaction("Niels", "Magn", 10)) //Will be valid and cause transaction in state one to be invalid
+	stateTwo.AccountBalances[AccountAddress(testWallet2.Address)] = 1000
+	tx3, _ := stateTwo.CreateSignedTransaction(testWallet2, pswd, "Magn", 10) //Will be valid and cause transaction in state one to be invalid
+	stateTwo.AddTransaction(tx3)
 
+	// Creates the block
 	block := stateTwo.CreateBlock(stateTwo.TxMempool)
 
 	//Now this block will be added to state one causing one of the transactions to become invalid
@@ -304,10 +454,25 @@ func TestAddBlockWhereSomeTransactionsAreNotInCurrentState(t *testing.T) {
 
 	//State two will be the "peer" state that contains the block
 	stateTwo := original_state.copyState()
-	stateTwo.AddTransaction(stateOne.CreateTransaction("Magn", "Niels", 10))
-	stateTwo.AddTransaction(stateOne.CreateTransaction("Niels", "Magn", 10))
 
+	// Create and add the transactions
+	Crypto.CreateNewWallet(walletUsername1, pswd)
+	testWallet1, _ := Crypto.AccessWallet(walletUsername1, pswd)
+	stateOne.AccountBalances[AccountAddress(testWallet1.Address)] = 1000
+	stateTwo.AccountBalances[AccountAddress(testWallet1.Address)] = 1000
+
+	// Create the transactions
+	tx1, _ := stateTwo.CreateSignedTransaction(testWallet1, pswd, "Niels", 10)
+	tx2, _ := stateTwo.CreateSignedTransaction(testWallet1, pswd, "Magn", 10)
+	stateTwo.AddTransaction(tx1)
+	stateTwo.AddTransaction(tx2)
+
+	// Create the block
 	block := stateTwo.CreateBlock(stateTwo.TxMempool)
+
+	// Prepare Snapshot
+	original_state.AccountBalances[AccountAddress(testWallet1.Address)] = 1000
+	original_state.SaveSnapshot()
 
 	//Now this block will be added to state one
 	err := stateOne.AddBlock(block)
@@ -337,21 +502,38 @@ func TestAddBlockWhereSomeTransactionsAreNotInCurrentState(t *testing.T) {
 
 /*
 func TestAddBlockToBlockchain(t *testing.T) {
-	tx1 := state_block.CreateTransaction("Niels", "Magn", 10)
-	tx2 := state_block.CreateTransaction("Magn", "Emilie", 4)
-	state_block.AddTransaction(tx1)
-	state_block.AddTransaction(tx2)
+	// Start by ensuring the setup is correct
+	ResetTest()
+	state_block = LoadState()
+	// Creates a wallet to test the functionality
+	Crypto.CreateNewWallet(walletUsername1, pswd)
+	testWallet, _ := Crypto.AccessWallet(walletUsername1, pswd)
+	state_block.AccountBalances[AccountAddress(testWallet.Address)] = 1000
+
+	// Save the block as the latest snapshot, as it would otherwise fail as the account is undefined.
+	err := state_block.SaveSnapshot()
+
+	// Create a block by creating the transactions and signing them with the new wallet
+	signedTx1, _ := state_block.CreateSignedTransaction(testWallet, pswd, "Asger", 10)
+	state_block.AddTransaction(signedTx1)
+
+	signedTx2, _ := state_block.CreateSignedTransaction(testWallet, pswd, "Emilie", 4)
+	state_block.AddTransaction(signedTx2)
+
 	block2 := state_block.CreateBlock(state_block.TxMempool)
 
-	tx3 := state_block.CreateTransaction("Magn", "Emilie", 22)
-	state_block.AddTransaction(tx3)
+	signedTx3, _ := state_block.CreateSignedTransaction(testWallet, pswd, "Niels", 89)
+	state_block.AddTransaction(signedTx3)
 
-	err := state_block.AddBlock(block2)
+	err = state_block.AddBlock(block2)
 	if err != nil || len(state_block.TxMempool) != 1 {
+		t.Log(state_block.TxMempool)
+		t.Log(len(state_block.TxMempool))
 		t.Errorf("failed - expected no errors and that the length of the TxMemPool is 1")
 	}
 
 	ResetTest()
+	testWallet.HardDelete()
 }
 */
 
@@ -361,23 +543,52 @@ func TestAddBlockToBlockchain(t *testing.T) {
 // The other will create a few transactions too. The first and last should be invalidated when the block from the first state when it is synced.
 
 func TestSeperateStatesShareBlock(t *testing.T) {
+	stateOne := LoadSnapshot()
+	stateTwo := stateOne.copyState()
 
-	t.Log("begin Seperate States Share Block test")
-	shared.ResetPersistenceFilesForTest()
+	// Creates three wallets
+	// Creates the first wallet to test the functionality
+	Crypto.CreateNewWallet(walletUsername1, pswd)
+	testWallet1, _ := Crypto.AccessWallet(walletUsername1, pswd)
+	stateOne.AccountBalances[AccountAddress(testWallet1.Address)] = 1000
+	stateTwo.AccountBalances[AccountAddress(testWallet1.Address)] = 1000
 
-	original_state := LoadSnapshot()
-	stateOne := original_state.copyState()
-	stateTwo := original_state.copyState()
+	// Creates the second wallet to test the functionality
+	Crypto.CreateNewWallet(walletUsername2, pswd)
+	testWallet2, _ := Crypto.AccessWallet(walletUsername2, pswd)
+	stateOne.AccountBalances[AccountAddress(testWallet2.Address)] = 1000
+	stateTwo.AccountBalances[AccountAddress(testWallet2.Address)] = 1000
 
-	stateOne.AddTransaction(stateOne.CreateTransaction("Magn", "Niels", 10))
-	stateOne.AddTransaction(stateOne.CreateTransaction("Niels", "Magn", 10))
-	stateOne.AddTransaction(stateOne.CreateTransaction("Magn", "Emilie", 10))
+	// Creates the third wallet to test the functionality
+	Crypto.CreateNewWallet(walletUsername3, pswd)
+	testWallet3, _ := Crypto.AccessWallet(walletUsername3, pswd)
+	stateOne.AccountBalances[AccountAddress(testWallet3.Address)] = 1000
+	stateTwo.AccountBalances[AccountAddress(testWallet3.Address)] = 1000
+
+	// Saves the snapshot as the latest snapshot, otherwise the test would fail
+	// Makes a copy of stateOne to get the original state.
+	original_state := stateOne.copyState()
+	stateOne.SaveSnapshot()
+
+	signedTx1, _ := stateOne.CreateSignedTransaction(testWallet1, pswd, "Niels", 10)
+	stateOne.AddTransaction(signedTx1)
+
+	signedTx2, _ := stateOne.CreateSignedTransaction(testWallet2, pswd, "Magn", 10)
+	stateOne.AddTransaction(signedTx2)
+
+	signedTx3, _ := stateOne.CreateSignedTransaction(testWallet1, pswd, "Emilie", 10)
+	stateOne.AddTransaction(signedTx3)
 
 	blockOne := stateOne.CreateBlock(stateOne.TxMempool)
 
-	stateTwo.AddTransaction(stateTwo.CreateTransaction("Magn", "Niels", 10))   // Should be invalid when merging the other block - Because of Nounces
-	stateTwo.AddTransaction(stateTwo.CreateTransaction("Asger", "Emilie", 10)) // Should be valid
-	stateTwo.AddTransaction(stateTwo.CreateTransaction("Niels", "Asger", 10))  // Should be invalid when merging the other block
+	signedTx1_2, _ := stateTwo.CreateSignedTransaction(testWallet1, pswd, "Niels", 10) // Should be invalid when merging the other block - Because of Nounces
+	stateTwo.AddTransaction(signedTx1_2)
+
+	signedTx2_2, _ := stateTwo.CreateSignedTransaction(testWallet3, pswd, "Emilie", 10) // Should be valid
+	stateTwo.AddTransaction(signedTx2_2)
+
+	signedTx3_2, _ := stateTwo.CreateSignedTransaction(testWallet2, pswd, "Asger", 10) // Should be invalid when merging the other block
+	stateTwo.AddTransaction(signedTx3_2)
 
 	err := stateOne.AddBlock(blockOne)
 	if err != nil {
@@ -398,9 +609,13 @@ func TestSeperateStatesShareBlock(t *testing.T) {
 		t.Errorf("failed - all transactions should be removed from the first state and one should remain in the last")
 	}
 
+	testWallet1.HardDelete()
+	testWallet2.HardDelete()
+	testWallet3.HardDelete()
 	ResetTest()
 }
 
+/*
 func TestMarshalUnmarshalBlock(t *testing.T) {
 	t.Log("begin marshal unmarshal block test")
 
@@ -448,92 +663,30 @@ func TestMarshalUnmarshalBlock(t *testing.T) {
 
 	ResetTest()
 }
-
+*/
 func ResetTest() {
 	SaveBlockchain(blockchain_original)
 	state_original.SaveState()
 	snapshot_orignal.SaveSnapshot()
-	transactions_original.SaveTransactions()
 }
 
 // Only run this to remake the local blockchain
 // func TestCreateTestDatabase(t *testing.T) {
 // 	state_block.SaveSnapshot()
-// 	tx1 := state_block.CreateGenesisTransaction("Alberto", 100)
-// 	err := state_block.AddTransaction(tx1)
-// 	tx2 := state_block.CreateGenesisTransaction("Emilie", 5)
-// 	err  = state_block.AddTransaction(tx2)
-// 	tx3 := state_block.CreateGenesisTransaction("Niels", 1000000)
-// 	err  = state_block.AddTransaction(tx3)
-// 	tx4 := state_block.CreateGenesisTransaction("Asger", 420)
-// 	err  = state_block.AddTransaction(tx4)
-// 	tx5 := state_block.CreateGenesisTransaction("Magn", 69)
-// 	err  = state_block.AddTransaction(tx5)
-// 	tx6 := state_block.CreateTransaction("Niels", "Magn", 1000)
-// 	err  = state_block.AddTransaction(tx6)
-// 	tx7 := state_block.CreateTransaction("Magn", "Emilie", 12)
-// 	err  = state_block.AddTransaction(tx7)
-// 	tx8 := state_block.CreateTransaction("Emilie", "Asger", 3)
-// 	err  = state_block.AddTransaction(tx8)
-// 	tx9 := state_block.CreateTransaction("Emilie", "Magn", 2)
-// 	err  = state_block.AddTransaction(tx9)
-// 	tx10 := state_block.CreateTransaction("Emilie", "Niels", 2)
-// 	err  = state_block.AddTransaction(tx10)
-// 	tx11 := state_block.CreateReward("Emilie", 2)
-// 	err  = state_block.AddTransaction(tx11)
-// 	tx12 := state_block.CreateReward("Emilie", 2)
-// 	err  = state_block.AddTransaction(tx12)
-// 	tx13 := state_block.CreateTransaction("Magn", "Niels", 69)
-// 	err  = state_block.AddTransaction(tx13)
-// 	tx14 := state_block.CreateTransaction("Magn", "Niels", 69)
-// 	err  = state_block.AddTransaction(tx14)
-// 	tx15 := state_block.CreateTransaction("Magn", "Niels", 42)
-// 	err  = state_block.AddTransaction(tx15)
-// 	tx16 := state_block.CreateTransaction("Niels", "gggg", 1)
-// 	err  = state_block.AddTransaction(tx16)
-// 	tx17 := state_block.CreateReward("Alberto", 5000)
-// 	err  = state_block.AddTransaction(tx17)
-// 	tx18 := state_block.CreateTransaction("Niels", "Magn", 200000)
-// 	err  = state_block.AddTransaction(tx18)
-// 	tx19 := state_block.CreateTransaction("Magn", "Niels", 42)
-// 	err  = state_block.AddTransaction(tx19)
-// 	tx20 := state_block.CreateTransaction("Magn", "Niels", 89898)
-// 	err  = state_block.AddTransaction(tx20)
-// 	tx21 := state_block.CreateTransaction("Niels", "gggg", 1)
-// 	err  = state_block.AddTransaction(tx21)
-// 	tx22 := state_block.CreateReward("Alberto", 5000)
-// 	err  = state_block.AddTransaction(tx22)
-// 	tx23 := state_block.CreateTransaction("Niels", "Magn", 200000)
-// 	err  = state_block.AddTransaction(tx23)
-// 	tx24 := state_block.CreateTransaction("Magn", "Niels", 42)
-// 	err  = state_block.AddTransaction(tx24)
-// 	tx25 := state_block.CreateTransaction("Magn", "Niels", 89898)
-// 	err  = state_block.AddTransaction(tx25)
-// 	tx26 := state_block.CreateTransaction("Niels", "gggg", 1)
-// 	err  = state_block.AddTransaction(tx26)
-// 	tx27 := state_block.CreateReward("Alberto", 5000)
-// 	err  = state_block.AddTransaction(tx27)
-// 	tx28 := state_block.CreateTransaction("Niels", "Magn", 200000)
-// 	err  = state_block.AddTransaction(tx28)
+// 	// Genesis transaction to Emilie
+// 	tx1 := state_block.CreateGenesisTransaction("0xC98f5180FF9836CC2EF67158EfEd9AA5ddeC54F6", 100000000)
+// 	_    = state_block.AddTransaction(tx1)
+
+// 	// Genesis transaction to Asger
+// 	tx2 := state_block.CreateGenesisTransaction("0x5b355Cd0C7fB6aD65b2e9342Fb6FBf0146585D7b", 100000000)
+// 	_    = state_block.AddTransaction(tx2)
+
+// 	// Genesis transaction to Magn
+// 	tx3 := state_block.CreateGenesisTransaction("0x5D34001173D5d05fA3AC865fb2b30131478a13d7", 100000000)
+// 	_    = state_block.AddTransaction(tx3)
 
 // 	block := state_block.CreateBlock(state_block.TxMempool)
-// 	err   = state_block.AddBlock(block)
-
-// 	tx29 := state_block.CreateTransaction("Niels", "Magn", 10)
-// 	err  = state_block.AddTransaction(tx29)
-// 	tx30 := state_block.CreateTransaction("Magn", "Emilie", 4)
-// 	err  = state_block.AddTransaction(tx30)
-
-// 	block = state_block.CreateBlock(state_block.TxMempool)
-// 	err = state_block.AddBlock(block)
-
-// 	tx31 := state_block.CreateTransaction("Niels", "Magn", 10)
-// 	err  = state_block.AddTransaction(tx31)
-// 	tx32 := state_block.CreateTransaction("Magn", "Emilie", 4)
-// 	err  = state_block.AddTransaction(tx32)
-
-// 	block = state_block.CreateBlock(state_block.TxMempool)
-// 	err = state_block.AddBlock(block)
+// 	err   := state_block.AddBlock(block)
 
 // 	if err != nil {
 // 		fmt.Println("d")

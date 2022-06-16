@@ -4,11 +4,12 @@ import (
 	"fmt"
 	"os"
 
+	shared "blockchain/Shared"
+
 	"github.com/spf13/cobra"
 )
 
 func main() {
-
 	var kbcCmd = &cobra.Command{
 		Use:   "kbc",
 		Short: "The Kaelder Bar Coin CLI",
@@ -16,12 +17,15 @@ func main() {
 		},
 	}
 
+	shared.EnsureNeededFilesExist()
+
 	kbcCmd.AddCommand(versionCmd)
 	kbcCmd.AddCommand(transactionCmd())
 	kbcCmd.AddCommand(balancesCmd())
 	kbcCmd.AddCommand(runCmd())
 	kbcCmd.AddCommand(blockCmd())
 	kbcCmd.AddCommand(overviewCmd())
+	kbcCmd.AddCommand(walletCmd())
 	kbcCmd.AddCommand(peerCmd())
 
 	err := kbcCmd.Execute()

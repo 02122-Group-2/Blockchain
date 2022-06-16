@@ -31,9 +31,19 @@ $RECYCLE.BIN/
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
 
+
+
 # Dependency directories (remove the comment below to include it)
 # vendor/
+Cryptography/Wallets/*
+database/constants.go
+Constants/constants.go
+*/constants.go
+constants.go
 
 
 # Ignore the constant.go file inorder to avoid overwritting eachothers constants
 Shared/constants.go
+
+# Niels's Mac cmd files
+run_*

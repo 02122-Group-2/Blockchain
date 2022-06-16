@@ -11,8 +11,8 @@ import (
 )
 
 type Block struct {
-	Header       BlockHeader   `json:"Header"`
-	Transactions []Transaction `json:"Transactions"`
+	Header   BlockHeader           `json:"Header"`
+	SignedTx SignedTransactionList `json:"Transactions"`
 }
 
 type BlockHeader struct {
@@ -36,7 +36,7 @@ type Genesis struct {
 }
 
 // Create a block object that matches the current state, given a list of transactions
-func (state *State) CreateBlock(txs []Transaction) Block {
+func (state *State) CreateBlock(txs SignedTransactionList) Block {
 	return Block{
 		BlockHeader{
 			state.getLatestHash(),
@@ -58,8 +58,8 @@ func (state *State) ValidateBlock(block Block) error {
 		}
 	}
 
-	if len(block.Transactions) == 0 {
-		return fmt.Errorf("The number of transactions must be greater than 0")
+	if len(block.SignedTx) == 0 {
+		return fmt.Errorf("the number of transactions must be greater than 0")
 	}
 
 	if block.Header.ParentHash != state.LatestHash {
@@ -83,10 +83,10 @@ func HashBlock(blockString string) [32]byte {
 }
 
 // Applies a single block to the current state.
-// It validates the block and all the transactions within.
+// It validates all the transactions within the block.
 // It applies all the transactions within the block to the state as well.
 func (state *State) ApplyBlock(block Block) error {
-	err := state.AddTransactionList(block.Transactions)
+	err := state.AddTransactionList(block.SignedTx)
 	if err != nil {
 		return err
 	}
@@ -167,13 +167,13 @@ func PersistBlockToDB(block Block) error {
 func LoadBlockchain() []Block {
 	data, err := os.ReadFile(shared.LocatePersistenceFile("Blockchain.db", ""))
 	if err != nil {
-		panic(err)
+		return []Block{}
 	}
 
 	var loadedBlockchain Blockchain
 	unm_err := json.Unmarshal(data, &loadedBlockchain)
 	if unm_err != nil {
-		panic(unm_err)
+		return []Block{}
 	}
 
 	return loadedBlockchain.Blockchain
@@ -286,8 +286,8 @@ func (block *Block) UnmarshalJSON(data []byte) error {
 func (block *Block) BlockToString() string {
 
 	listOfTransactions := ""
-	for _, currTransaction := range block.Transactions {
-		listOfTransactions += TxToString(currTransaction) + "\n"
+	for _, currTransaction := range block.SignedTx {
+		listOfTransactions += TxToString(currTransaction.Tx) + "\n"
 	}
 	return "Header: \n " + "-Parent Hash: " + fmt.Sprintf("%v \n", block.Header.ParentHash) + "-Created at: " + fmt.Sprintf("%v \n", block.Header.CreatedAt) + "-Serial No.: " + fmt.Sprintf("%v \n", block.Header.SerialNo) + "List of Transactions: \n" + listOfTransactions
 }

@@ -52,44 +52,45 @@ func balancesHandler(w http.ResponseWriter, r *http.Request, state *Database.Sta
 }
 
 func transactionHandler(w http.ResponseWriter, r *http.Request, state *Database.State) {
-	req := TxRequest{}
-	bytes, err := readReq(r)
-	if err != nil {
-		return
-	}
-	json.Unmarshal(bytes, &req)
-
-	var transaction Database.Transaction
-	println("TYPE OF REQUEST " + req.Type)
-	switch req.Type {
-	case "genesis":
-		transaction = state.CreateGenesisTransaction(Database.AccountAddress(req.From), float64(req.Amount))
-
-		fmt.Println("Genesis created" + Database.TxToString(transaction))
-
-	case "reward":
-		transaction = state.CreateReward(Database.AccountAddress(req.From), float64(req.Amount))
-
-		fmt.Println("Reward created" + Database.TxToString(transaction))
-
-	case "transaction":
-		if req.To != "" {
-			transaction = state.CreateTransaction(Database.AccountAddress(req.From), Database.AccountAddress(req.To), float64(req.Amount))
-
-			fmt.Println("Transaction created" + Database.TxToString(transaction))
+	/*
+		req := TxRequest{}
+		bytes, err := readReq(r)
+		if err != nil {
+			return
 		}
-	}
+		json.Unmarshal(bytes, &req)
 
-	// fmt.Println(transaction)
+		var transaction Database.Transaction
+		println("TYPE OF REQUEST " + req.Type)
+		switch req.Type {
+		case "genesis":
+			transaction = state.CreateGenesisTransaction(Database.AccountAddress(req.From), float64(req.Amount))
 
-	err = state.AddTransaction(transaction)
-	if err != nil {
-		return
-	}
+			fmt.Println("Genesis created" + Database.TxToString(transaction))
 
-	status := Database.SaveTransaction(state.TxMempool)
+		case "reward":
+			transaction = state.CreateReward(Database.AccountAddress(req.From), float64(req.Amount))
 
-	writeResult(w, r, TxResult{status})
+			fmt.Println("Reward created" + Database.TxToString(transaction))
+
+		case "transaction":
+			if req.To != "" {
+				transaction = state.CreateTransaction(Database.AccountAddress(req.From), Database.AccountAddress(req.To), float64(req.Amount))
+
+				fmt.Println("Transaction created" + Database.TxToString(transaction))
+			}
+		}
+
+		fmt.Println(transaction)
+
+		err = state.AddTransaction(transaction)
+		if err != nil {
+			return
+		}
+
+		status := Database.SaveTransaction(state.TxMempool)
+
+		writeResult(w, TxResult{status}) */
 }
 
 //Writing the result from the server

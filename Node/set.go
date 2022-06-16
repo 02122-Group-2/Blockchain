@@ -60,17 +60,21 @@ func LoadPeerSetFromJSON(filename string) PeerSet {
 
 	data, err := os.ReadFile(shared.LocatePersistenceFile(filename, ""))
 	if err != nil {
-		panic(err)
+		return PeerSet{}
 	}
 
 	var ps PeerSet
 	json.Unmarshal(data, &ps)
 
 	if ps == nil {
-		ps = PeerSet{}
+		return PeerSet{}
 	}
 
 	return ps
+}
+
+func PersistPeerSet(ps PeerSet) {
+	SavePeerSetAsJSON(ps, shared.PeerSetFile)
 }
 
 // Save the peer list in a JSON file

@@ -1,6 +1,7 @@
 package database
 
 import (
+	Crypto "blockchain/Cryptography"
 	shared "blockchain/Shared"
 	"encoding/json"
 	"fmt"
@@ -10,7 +11,7 @@ import (
 
 type AccountAddress string
 
-type Transaction struct {
+type Transaction_Old struct {
 	From         AccountAddress
 	To           AccountAddress
 	Amount       float64
@@ -19,10 +20,29 @@ type Transaction struct {
 	Type         string
 }
 
-type TransactionList []Transaction
+type TransactionList []Transaction_Old
+
+type SignedTransaction struct {
+	Signature []byte
+	Tx        Transaction_Old
+}
+
+type SignedTransactionList []SignedTransaction
 
 type LoadedTransactions struct {
-	Transactions TransactionList `json:"transactions"`
+	Transactions SignedTransactionList `json:"transactions"`
+}
+
+func (transaction Transaction_Old) toJsonString() string {
+	json, err := json.Marshal(transaction)
+	if err != nil {
+		panic(err)
+	}
+	return string(json)
+}
+
+func (transaction *Transaction_Old) hash() [32]byte {
+	return Crypto.HashTransaction(transaction.toJsonString())
 }
 
 func (state *State) newAccountAddr(value string) AccountAddress {
@@ -30,9 +50,9 @@ func (state *State) newAccountAddr(value string) AccountAddress {
 }
 
 // Create a custom transaction. Used as a helper function.
-func (state *State) CreateCustomTransaction(from AccountAddress, to AccountAddress, amount float64, _type string) Transaction {
+func (state *State) CreateCustomTransaction(from AccountAddress, to AccountAddress, amount float64, _type string) Transaction_Old {
 	accountNounce := state.AccountNounces[from] + 1
-	t := Transaction{
+	t := Transaction_Old{
 		from,
 		to,
 		amount,
@@ -47,20 +67,47 @@ func (state *State) CreateCustomTransaction(from AccountAddress, to AccountAddre
 
 // Creates an ordinary transaction between two users.
 // Takes two addresses (strings) and the amount sent (float)
-func (state *State) CreateTransaction(from AccountAddress, to AccountAddress, amount float64) Transaction {
+func (state *State) CreateTransaction(from AccountAddress, to AccountAddress, amount float64) Transaction_Old {
 	return state.CreateCustomTransaction(from, to, amount, "transaction")
+}
+
+// Takes a wallet, password, receiver, amount and returns a signed transaction
+func (state *State) CreateSignedTransaction(wallet Crypto.Account, password string, receiver AccountAddress, amount float64) (SignedTransaction, error) {
+	tx := state.CreateTransaction(AccountAddress(wallet.Address), receiver, amount)
+	return state.SignTransaction(wallet, password, tx)
 }
 
 // Creates a genesis type transaction from the system to a certain user.
 // Takes the receiver address (string) and the amount sent (float)
-func (state *State) CreateGenesisTransaction(accountAddress AccountAddress, amount float64) Transaction {
-	return state.CreateCustomTransaction("system", accountAddress, amount, "genesis")
+func (state *State) CreateGenesisTransaction(accountAddress AccountAddress, amount float64) SignedTransaction {
+	return SignedTransaction{
+		Signature: []byte{},
+		Tx:        state.CreateCustomTransaction("system", accountAddress, amount, "genesis"),
+	}
 }
 
 // Creates a reward type transaction from the system to a certain user.
 // Takes the receiver address (string) and the amount sent (float)
-func (state *State) CreateReward(accountAddress AccountAddress, amount float64) Transaction {
-	return state.CreateCustomTransaction("system", accountAddress, amount, "reward")
+// Is automatically created as signed transaction
+func (state *State) CreateReward(accountAddress AccountAddress, amount float64) SignedTransaction {
+	return SignedTransaction{
+		Signature: []byte{},
+		Tx:        state.CreateCustomTransaction("system", accountAddress, amount, "reward"),
+	}
+}
+
+// Given the password for the wallet and a regular transaction, sign the transaction, if the sender is equal to the address of the wallet
+// Returns the signed transaction or an error
+func (state *State) SignTransaction(wallet Crypto.Account, password string, transaction Transaction_Old) (SignedTransaction, error) {
+	if transaction.From != AccountAddress(wallet.Address) {
+		return SignedTransaction{}, fmt.Errorf("this transaction is not able to be signed by you!")
+	}
+	txHash := transaction.hash()
+	signature, err := wallet.SignTransaction(password, txHash)
+	if err != nil {
+		return SignedTransaction{}, err
+	}
+	return SignedTransaction{Signature: signature, Tx: transaction}, nil
 }
 
 func ClearTransactions() {
@@ -72,8 +119,7 @@ func ClearTransactions() {
 
 // Given a list of transactions, it saves these transactions as a JSON string in a local text file.
 // Returns a boolean value indicating whether or not it was saved succesfully.
-// This is not used in older version of the blockchain.
-func SaveTransaction(transactionList TransactionList) bool {
+func SaveTransaction(transactionList SignedTransactionList) bool {
 	toSave := LoadedTransactions{transactionList}
 	txFile, _ := json.MarshalIndent(toSave, "", "  ")
 
@@ -87,7 +133,7 @@ func SaveTransaction(transactionList TransactionList) bool {
 
 // Loads the local transactions, saved in the transactions.json file. This is deprecated and only used in early versions of the blockchain.
 // It returns a list of transactions.
-func LoadTransactions() TransactionList {
+func LoadTransactions() SignedTransactionList {
 	data, err := os.ReadFile(shared.LocatePersistenceFile("Transactions.json", ""))
 	if err != nil {
 		panic(err)
@@ -117,6 +163,11 @@ func saveTransactionsAsJSON(transaction_list *TransactionList, filename string) 
 }
 
 // Formats a given transaction to text format.
-func TxToString(transaction Transaction) string {
+func TxToString(transaction Transaction_Old) string {
 	return "From: " + string(transaction.From) + "\n To: " + string(transaction.To) + "\n Amount: " + fmt.Sprintf("%v", transaction.Amount)
+}
+
+// Formats a given signed transaction to text format.
+func SignedTxToString(transaction SignedTransaction) string {
+	return "From: " + string(transaction.Tx.From) + "\n To: " + string(transaction.Tx.To) + "\n Amount: " + fmt.Sprintf("%v", transaction.Tx.Amount)
 }
