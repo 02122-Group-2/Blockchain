@@ -167,13 +167,13 @@ func PersistBlockToDB(block Block) error {
 func LoadBlockchain() []Block {
 	data, err := os.ReadFile(shared.LocatePersistenceFile("Blockchain.db", ""))
 	if err != nil {
-		panic(err)
+		return []Block{}
 	}
 
 	var loadedBlockchain Blockchain
 	unm_err := json.Unmarshal(data, &loadedBlockchain)
 	if unm_err != nil {
-		panic(unm_err)
+		return []Block{}
 	}
 
 	return loadedBlockchain.Blockchain
