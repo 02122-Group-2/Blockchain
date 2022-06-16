@@ -198,7 +198,7 @@ func (state *State) TryAddTransactions(transactionList SignedTransactionList) er
 // recomputes state snapshot corresponding to a given index (serial no.) on the blockchain
 // mutates state of {state} and the persisted snapshot
 func (state *State) RecomputeState(deltaIdx int) {
-	newState := blankState()
+	newState := BlankState()
 	bc := LoadBlockchain()[:deltaIdx-1]
 
 	for _, b := range bc {
@@ -212,7 +212,45 @@ func (state *State) RecomputeState(deltaIdx int) {
 	state.SaveSnapshot()
 }
 
-func blankState() State {
+// Given a block delta, try and add the new blocks to the current blockchain from the point where the fork happens.
+func (state *State) TryMergeBlockDelta(deltaIdx int, newBlocks []Block) error {
+	originalBlockchain := LoadBlockchain() 
+	agreedBlockchain := originalBlockchain[:deltaIdx-1]
+
+	newState := BlankState()
+	// Add the old blocks from the local blockchain
+	for _, block := range agreedBlockchain {
+		blockErr := newState.AddBlock(block)
+		if blockErr != nil {
+			state.SaveSnapshot() // If it fails to add the new blocks, revert to the original snapshot and blockchain
+			SaveBlockchain(originalBlockchain)
+			return fmt.Errorf("One of the local blocks has been tampered with or otherwise corrupted. Got error: " + blockErr.Error()) 
+		}
+	}
+	//Add the new blocks
+	for _, block := range newBlocks {
+		blockErr := newState.AddBlock(block)
+		if blockErr != nil {
+			state.SaveSnapshot() // If it fails to add the new blocks, revert to the original snapshot and blockchain
+			SaveBlockchain(originalBlockchain)
+			return fmt.Errorf("One of the new blocks are invalid. Got error: " + blockErr.Error()) 
+		}
+	}
+
+	// Add pending transactions to the new state
+	newState.TryAddTransactions(state.TxMempool)
+
+	// Save the new current State
+	newState.SaveState()
+
+	// Overwrite old state with NEW state
+	*state = newState
+
+	return nil 
+}
+
+// Returns a blank state object
+func BlankState() State {
 	newState := State{}
 	newState.AccountBalances = map[AccountAddress]uint{}
 	newState.AccountBalances = map[AccountAddress]uint{}
@@ -263,13 +301,13 @@ func saveStateAsJSON(state *State, filename string) error {
 func loadStateFromJSON(filename string) State {
 	data, err := os.ReadFile(shared.LocatePersistenceFile(filename, ""))
 	if err != nil {
-		return blankState()
+		return BlankState()
 	}
 
 	var state State
 	err = json.Unmarshal(data, &state)
 	if err != nil {
-		return blankState()
+		return BlankState()
 	}
 	return state
 }

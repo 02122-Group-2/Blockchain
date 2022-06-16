@@ -21,20 +21,15 @@ func handleConsensus(node Node, nodes []Node) {
 	// match blockchain with consensus chain, newest blocks
 	peerBlocks := fetchConsensusChainDelta(consensusNode, deltaIdx)
 	if len(peerBlocks) > 0 {
-		// TODO: validate all received blocks before clearing and applying
-		// if local chain has blocks that are conflicting at some point with the consensus chain, these must be cleared
-		clearConflictingSubchain(deltaIdx) // Is this necessary since the same is performed in the Recomputestate function call?
-
-		// state must match snapshot from before applying the last block before deltaIdx
-		node.State.RecomputeState(deltaIdx)
-		for _, block := range peerBlocks {
-			blockErr := node.State.AddBlock(block)
-			if blockErr != nil {
-				fmt.Println(blockErr.Error())
-			}
+		err := node.State.TryMergeBlockDelta(deltaIdx, peerBlocks)
+		if err != nil {
+			fmt.Println("Merge unsuccesful - Chain isn't legit")
+			node.PeerSet.Remove(consensusNode.Address)
 		}
 	}
 }
+
+
 
 // returns first node that contains the consensus chain (longest chain that most agree upon)
 func computeConsensusNode(nodes []Node) Node {
