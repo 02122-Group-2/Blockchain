@@ -2,7 +2,6 @@ package node
 
 import (
 	Database "blockchain/Database"
-	shared "blockchain/Shared"
 )
 
 type NodeFromPostRequest struct {
@@ -18,9 +17,6 @@ type Node struct {
 	State       Database.State `json:"state"`
 	ChainHashes []string       `json:"chain_hashes"`
 }
-
-const httpPort = shared.HttpPort
-const bootstrapNode = shared.BootstrapNode
 
 //Models the balances data recived
 type balancesResult struct {
