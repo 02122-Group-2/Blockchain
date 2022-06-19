@@ -87,7 +87,7 @@ func (state *State) ClearState() {
 		panic(err)
 	}
 
-	err = os.Truncate(shared.LocatePersistenceFile("CurrentState.json", ""), 0)
+	err = os.Truncate(shared.LocatePersistenceFile("LatestSnapshot.json", ""), 0)
 	if err != nil {
 		panic(err)
 	}

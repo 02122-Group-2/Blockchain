@@ -1,30 +1,14 @@
 {
-<<<<<<< HEAD
-  "LatestHash": "8fb9500d6ff6289d9d4585908bbf0082ba1146aee6ea45fcf5f49408ad2140da",
-=======
-  "LatestHash": "d1e6d8de29e702ffe8d0b8342c0b4396ac4c2875c313026cb987de48fe37409f",
->>>>>>> f96b21870cd231a1e9d0b5617e82158acae3f51d
+  "LatestHash": "40b73f3a0ef803a7ffa3e67af6b7b2e52c2ee31885751c15994da75cd034e0ac",
   "AccountBalances": {
-    "0x03644C1766367f2f6e9Dd5b2bB4F1b1159d1E475": 2000069,
-    "0x5D34001173D5d05fA3AC865fb2b30131478a13d7": 95999531,
-    "0x5b355Cd0C7fB6aD65b2e9342Fb6FBf0146585D7b": 100000000,
-    "0xC98f5180FF9836CC2EF67158EfEd9AA5ddeC54F6": 100000000,
-    "0xa329BD06d138A2565C9aE5e7C633B7C81790762a": 1000100,
-    "0xa329bd06d138a2565c9ae5e7c633b7c81790762a": 200,
-    "0xd66Ebd6D938AAC5fEFa5330fb34345DB18E39FbB": 1000100
+    "": 123456790
   },
   "AccountNounces": {
-    "0x5D34001173D5d05fA3AC865fb2b30131478a13d7": 8,
-    "system": 3
+    "system": 2
   },
   "TxMempool": null,
-  "DbFile": null,
-  "LastBlockSerialNo": 5,
-<<<<<<< HEAD
-  "LastBlockTimestamp": 1654862763074926000,
-  "LatestTimestamp": 1648641894935865700
-=======
-  "LastBlockTimestamp": 1655109798066772900,
-  "LatestTimestamp": 1655109791745301100
->>>>>>> f96b21870cd231a1e9d0b5617e82158acae3f51d
+  "DbFile": {},
+  "LastBlockSerialNo": 1,
+  "LastBlockTimestamp": 1655656606025717000,
+  "LatestTimestamp": 1655656581853437000
 }

@@ -95,6 +95,29 @@ func TestAddLegalGenesisTransaction(t *testing.T) {
 	ResetTest()
 }
 
+// ? utility function for creating a entirely new blockchain
+// func TestCreateBlockchain(t *testing.T) {
+// 	EmptyBlockchain()
+// 	wallet, _ := Crypto.AccessWallet("niels", "niels")
+// 	wallet2, _ := Crypto.AccessWallet("niels2", "niels2")
+// 	g := state.CreateGenesisTransaction(AccountAddress(wallet.Address), 123456789)
+
+// 	err := state.AddTransaction(g)
+// 	if err != nil {
+// 		t.Errorf("Failed to add transaction. Error: " + err.Error())
+// 	}
+// 	g2 := state.CreateGenesisTransaction(AccountAddress(wallet2.Address), 1)
+// 	err = state.AddTransaction(g2)
+// 	if err != nil {
+// 		t.Errorf("Failed to add transaction. Error: " + err.Error())
+// 	}
+
+// 	b := state.CreateBlock(state.TxMempool)
+// 	SaveBlockchain([]Block{b})
+
+// 	// ResetTest()
+// }
+
 func TestAddIllegalGenesisTransaction(t *testing.T) {
 	// for this specific test case, the following reset is needed
 	shared.ResetPersistenceFilesForTest()

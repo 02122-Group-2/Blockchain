@@ -143,8 +143,6 @@ func TestAddLegalBlockToBlockchain(t *testing.T) {
 	//Create the transactions Second Transaction
 	tx2, _ := state_block.CreateSignedTransaction(testWallet2, pswd, "Emilie", 4)
 
-	
-
 	//Add transactions to the state
 	err := state_block.AddTransaction(tx1)
 	if err != nil {
@@ -152,7 +150,7 @@ func TestAddLegalBlockToBlockchain(t *testing.T) {
 	}
 
 	err = state_block.AddTransaction(tx2)
-	
+
 	if err != nil {
 		t.Error("Failed to add transaction 2")
 	}
@@ -170,7 +168,6 @@ func TestAddLegalBlockToBlockchain(t *testing.T) {
 	testWallet2.HardDelete()
 	ResetTest()
 }
-
 
 func TestAddMultipleLegalBlockToBlockchain(t *testing.T) {
 
@@ -196,10 +193,10 @@ func TestAddMultipleLegalBlockToBlockchain(t *testing.T) {
 
 	//Create the transactions Second Transaction
 	tx2, _ := state_block.CreateSignedTransaction(testWallet2, pswd, "Emilie", 4)
-	
+
 	//Create the block 1
 	block1 := state_block.CreateBlock(SignedTransactionList{tx1})
-	
+
 	//Add block 1
 	err := state_block.AddBlock(block1)
 	if err != nil {
@@ -217,7 +214,6 @@ func TestAddMultipleLegalBlockToBlockchain(t *testing.T) {
 
 	ResetTest()
 }
-
 
 func TestAddIllegalBlockWrongParentHash(t *testing.T) {
 
