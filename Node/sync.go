@@ -67,13 +67,13 @@ func syncLoop() {
 
 	// add own node to collection and run consensus algorithm
 	nodes = append(nodes, node)
-	handleConsensus(node, nodes)
+	succesfullyApplied := handleConsensus(node, nodes)
 
 	// apply all possible states from peers with newest chain
 	tryApplyPeerStates(node, nodes)
 
 	// compute new PeerSet based on top XX fastest pings
-	newPeers := computeNewPeerSet(pings, node.PeerSet, nodes)
+	newPeers := computeNewPeerSet(pings, node.PeerSet, nodes, succesfullyApplied)
 
 	// persist new peerset to file if there are any - otherwise, it might be because of bad connection
 	if len(newPeers) > 0 {
@@ -82,8 +82,11 @@ func syncLoop() {
 }
 
 // select which peers to keep for next cycle of sync, ranked on ping latency
-func computeNewPeerSet(pings []PingResponse, ps PeerSet, nodes []Node) PeerSet {
-	pings = add2ndLevelPeers(pings, ps, nodes)
+func computeNewPeerSet(pings []PingResponse, ps PeerSet, nodes []Node, shouldExpandPeerset bool) PeerSet {
+	// if last consensus chain was illegal, then the consensus node was removed. This flag is to prevent it from being immediately added again
+	if shouldExpandPeerset {
+		pings = add2ndLevelPeers(pings, ps, nodes)
+	}
 	newPeers := getNFastestPeers(pings, MAX_PEERS)
 	return newPeers
 }
@@ -121,8 +124,8 @@ func getNodesInPeerSet(ps PeerSet, nch chan Node, pch chan PingResponse) {
 
 		// TODO: configure timeout for GetPeerState?
 		if pingRes.Ok {
-			nch <- GetPeerState(peer)
 			pch <- pingRes
+			nch <- GetPeerState(peer)
 		} else {
 			pch <- PingResponse{"nil", false, -1}
 			// nch <- Node{}

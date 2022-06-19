@@ -6,7 +6,8 @@ import (
 )
 
 // Simple majority consensus algorithm
-func handleConsensus(node Node, nodes []Node) {
+// returns boolean value signalling success
+func handleConsensus(node Node, nodes []Node) bool {
 	// gets node object that has consensus chain, i.e. longest chain that most nodes agree on
 	consensusNode := computeConsensusNode(nodes)
 
@@ -23,13 +24,13 @@ func handleConsensus(node Node, nodes []Node) {
 	if len(peerBlocks) > 0 {
 		err := node.State.TryMergeBlockDelta(deltaIdx, peerBlocks)
 		if err != nil {
-			fmt.Println("Merge unsuccesful - Chain isn't legit")
+			fmt.Println("Merge unsuccesful - Chain isn't legal")
 			node.PeerSet.Remove(consensusNode.Address)
+			return false
 		}
 	}
+	return true
 }
-
-
 
 // returns first node that contains the consensus chain (longest chain that most agree upon)
 func computeConsensusNode(nodes []Node) Node {
