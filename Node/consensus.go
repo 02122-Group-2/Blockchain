@@ -58,6 +58,12 @@ func computeConsensusNode(nodes []Node) Node {
 	// for each, iterate all other unique hashes
 	// if serialNo (block height) is greater on one, if they agree, add the count of the lower block height chain to the longer one
 
+	// make deep copy of latest hashes map for later use
+	latestHashesCopy := make(map[string]cPair)
+	for k, v := range latestHashes {
+		latestHashesCopy[k] = v
+	}
+
 	// store how many nodes agree on chain
 	agreeCount := make(map[string]int)
 	for h1 := range latestHashes {
@@ -81,21 +87,49 @@ func computeConsensusNode(nodes []Node) Node {
 			}
 		}
 	}
-	maxAgreeHash := getMaxAgreeHash(agreeCount)
+	maxAgreeHash := getMaxAgreeHash(agreeCount, latestHashesCopy)
 
 	return latestHash2Node[maxAgreeHash]
 }
 
-func getMaxAgreeHash(agreeCount map[string]int) string {
+func getMaxAgreeHash(agreeCount map[string]int, latestHashes map[string]cPair) string {
 	var max int = 0
-	var maxHash string
+	var maxHashes []string  // store all hashes that have max agree count
+	indeterminable := false // flag for when there is more than one chain with max chain length
 	for hash, count := range agreeCount {
 		if count > max {
 			max = count
-			maxHash = hash
+			maxHashes = []string{hash}
+			indeterminable = false
+		} else if count == max {
+			maxHashes = append(maxHashes, hash)
+			indeterminable = true
 		}
 	}
-	return maxHash
+	if indeterminable {
+		maxBlockheight := 0
+		var maxBlockheightHash string
+		existsLongestChain := false
+		for _, hash := range maxHashes {
+			if latestHashes[hash].serialNo > maxBlockheight {
+				maxBlockheight = latestHashes[hash].serialNo
+				maxBlockheightHash = hash
+				existsLongestChain = true
+			} else if latestHashes[hash].serialNo == maxBlockheight {
+				existsLongestChain = false
+			}
+		}
+
+		if existsLongestChain {
+			return maxBlockheightHash
+		}
+
+		// fallback: return own last hash
+		chs := GetNode().ChainHashes
+		return chs[len(chs)-1]
+	}
+
+	return maxHashes[0] // if !indeterminable, only 1 hash has max agree count
 }
 
 // Given two lists of hashes, check that the last element for the shortest list is equal to the hash at the same location for the second list

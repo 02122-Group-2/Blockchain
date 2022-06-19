@@ -49,15 +49,17 @@ func syncLoop() {
 	pings := make([]PingResponse, len(nodes))
 
 	// read data from the subroutines' channels
+	offset := 0
 	for i := 0; i < noOfPeers; i++ {
 		pingResp := <-pingChannel
 		if !pingResp.Ok {
 			nodes = nodes[:len(nodes)-1]
 			pings = pings[:len(pings)-1]
+			offset++
 			continue
 		}
-		nodes[i] = <-nodeChannel
-		pings[i] = pingResp
+		nodes[i-offset] = <-nodeChannel
+		pings[i-offset] = pingResp
 	}
 
 	// TODO: following can only be done in last iteration. Listen for SIGTERM on main process?
@@ -98,7 +100,9 @@ func add2ndLevelPeers(pings PingResponseList, peersToCheck PeerSet, nodes []Node
 		for peer2 := range n.PeerSet {
 			if !peersToCheck.Exists(peer2) && peer2 != localIp {
 				pingRes := Ping(peer2)
-				pings = append(pings, pingRes)
+				if pingRes.Ok {
+					pings = append(pings, pingRes)
+				}
 			}
 		}
 	}
@@ -109,8 +113,8 @@ func add2ndLevelPeers(pings PingResponseList, peersToCheck PeerSet, nodes []Node
 func getNFastestPeers(pings PingResponseList, amount int) PeerSet {
 	sort.Sort(pings)
 	ps := PeerSet{}
-	for i, pingRes := range pings {
-		if i >= amount {
+	for _, pingRes := range pings {
+		if len(ps) >= amount {
 			break
 		}
 		ps.Add(pingRes.Address)
