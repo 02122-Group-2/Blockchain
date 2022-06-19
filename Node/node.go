@@ -68,6 +68,9 @@ func GetPeerSet() PeerSet {
 	if ps == nil {
 		ps = PeerSet{shared.BootstrapNode: true}
 	}
+	if len(ps) == 0 {
+		ps = PeerSet{shared.BootstrapNode: true}
+	}
 	ps.Add(shared.BootstrapNode)
 	return ps
 }

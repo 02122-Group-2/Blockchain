@@ -121,8 +121,8 @@ func getNodesInPeerSet(ps PeerSet, nch chan Node, pch chan PingResponse) {
 
 		// TODO: configure timeout for GetPeerState?
 		if pingRes.Ok {
-			nch <- GetPeerState(peer)
 			pch <- pingRes
+			nch <- GetPeerState(peer)
 		} else {
 			pch <- PingResponse{"nil", false, -1}
 			// nch <- Node{}
