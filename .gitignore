@@ -43,7 +43,7 @@ constants.go
 
 
 # Ignore the constant.go file inorder to avoid overwritting eachothers constants
-Shared/constants.go
+# Shared/constants.go
 
 # Niels's Mac cmd files
 run_*
