@@ -9,6 +9,7 @@ var testingPassword = "testingPassword123"
 var testingHashedTransaction = [32]byte{'h', 'e', 'j', 's', 'a', 'b', 'm', 'm', 'h', 'e', 'j', 's', 'a', 'b', 'm', 'm', 'h', 'e', 'j', 's', 'a', 'b', 'm', 'm', 'h', 'e', 'j', 's', 'a', 'b', 'm', 'm'}
 var testingHashedTransaction2 = [32]byte{'k', 'e', 'j', 's', 'a', 'b', 'm', 'm', 'h', 'e', 'j', 's', 'a', 'b', 'm', 'm', 'h', 'e', 'j', 's', 'a', 'b', 'm', 'm', 'h', 'e', 'j', 's', 'a', 'b', 'm', 'm'}
 
+// * Magnus, s204509
 func TestCreateWallet(t *testing.T) {
 	testAcc := "testAccount1"
 	newAddr, _ := CreateNewWallet(testAcc, testingPassword)
@@ -20,6 +21,7 @@ func TestCreateWallet(t *testing.T) {
 	}
 }
 
+// * Magnus, s204509
 func TestCreateExistingWallet(t *testing.T) {
 	testAcc := "testAccount1"
 	newAddr1, _ := CreateNewWallet(testAcc, testingPassword)
@@ -41,6 +43,7 @@ func TestCreateExistingWallet(t *testing.T) {
 	}
 }
 
+// * Emilie, s204471
 func TestDeleteWallet(t *testing.T) {
 	testAcc := "testAccount1"
 	CreateNewWallet(testAcc, testingPassword)
@@ -53,6 +56,7 @@ func TestDeleteWallet(t *testing.T) {
 	}
 }
 
+// * Emilie, s204471
 func TestDeleteWalletWithWrongPassword(t *testing.T) {
 	testAcc := "testAccount1"
 	CreateNewWallet(testAcc, testingPassword)
@@ -67,6 +71,7 @@ func TestDeleteWalletWithWrongPassword(t *testing.T) {
 	}
 }
 
+// * Emilie, s204471
 func TestAccessWalletWithWrongPassword(t *testing.T) {
 	testAcc := "testAccount1"
 	CreateNewWallet(testAcc, testingPassword)
@@ -81,6 +86,7 @@ func TestAccessWalletWithWrongPassword(t *testing.T) {
 	}
 }
 
+// * Emilie, s204471
 func TestAccessWalletWithWrongUsername(t *testing.T) {
 	testAcc := "testAccount1"
 	CreateNewWallet(testAcc, testingPassword)
@@ -93,6 +99,7 @@ func TestAccessWalletWithWrongUsername(t *testing.T) {
 	}
 }
 
+// * Emilie, s204471
 func TestAccessWalletWithCorrectPassword(t *testing.T) {
 	testAcc := "testAccount1"
 	CreateNewWallet(testAcc, testingPassword)
@@ -107,6 +114,7 @@ func TestAccessWalletWithCorrectPassword(t *testing.T) {
 	}
 }
 
+// * Magnus, s204509
 func TestSignTransaction(t *testing.T) {
 	testAcc := "testAccount1"
 	CreateNewWallet(testAcc, testingPassword)
@@ -131,6 +139,7 @@ func TestSignTransaction(t *testing.T) {
 	}
 }
 
+// * Emilie, s204471
 func TestSignTransactionWithWrongPassword(t *testing.T) {
 	testAcc := "testAccount1"
 	CreateNewWallet(testAcc, testingPassword)
@@ -144,6 +153,7 @@ func TestSignTransactionWithWrongPassword(t *testing.T) {
 	}
 }
 
+// * Emilie, s204471
 func TestSignTransactionWhereSenderIsntTheSigner(t *testing.T) {
 	//Sending account1
 	testAcc := "testAccount1"
@@ -171,6 +181,7 @@ func TestSignTransactionWhereSenderIsntTheSigner(t *testing.T) {
 
 }
 
+// * Magnus, s204509
 func TestRetrieveAddressFromSignature(t *testing.T) {
 	testAcc := "testAccount1"
 	addr, _ := CreateNewWallet(testAcc, testingPassword)
@@ -189,6 +200,7 @@ func TestRetrieveAddressFromSignature(t *testing.T) {
 	}
 }
 
+// * Magnus, s204509
 func TestSignTwoTransactionWithTwoAccounts(t *testing.T) {
 	testAcc := "testAccount1"
 	CreateNewWallet(testAcc, testingPassword)
@@ -229,6 +241,7 @@ func TestSignTwoTransactionWithTwoAccounts(t *testing.T) {
 	}
 }
 
+// * Emilie, s204471
 func TestSignaturesFromSameWalletDifferForTransactions(t *testing.T) {
 	testAcc := "testAccount1"
 	CreateNewWallet(testAcc, testingPassword)

@@ -8,6 +8,8 @@ import (
 	"testing"
 )
 
+// * file: Niels, s204503
+
 func TestLoadState(t *testing.T) {
 	shared.ResetPersistenceFilesForTest()
 	t.Log("Start load state test")

@@ -6,6 +6,8 @@ import (
 	"time"
 )
 
+// * file: Niels, s204503
+
 var MAX_SUBSETS int = 4
 var MAX_PEERS int = 40
 

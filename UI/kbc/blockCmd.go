@@ -7,6 +7,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// * Asger, s204435
+
 func blockCmd() *cobra.Command {
 	var blockCmd = &cobra.Command{
 		Use:   "block",

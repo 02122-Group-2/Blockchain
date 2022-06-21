@@ -10,6 +10,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// * Magnus, s204509
+
 func walletCmd() *cobra.Command {
 	var walletCmd = &cobra.Command{
 		Use:   "wallet",

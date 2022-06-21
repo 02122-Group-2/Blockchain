@@ -11,6 +11,7 @@ import (
 	// "path/filepath"
 )
 
+// * Magnus, s204509
 type StateFromPostRequest struct {
 	AccountBalances    map[AccountAddress]uint `json:"AccountBalances"`
 	AccountNounces     map[AccountAddress]uint `json:"AccountNounces"`
@@ -22,6 +23,7 @@ type StateFromPostRequest struct {
 	LatestTimestamp    int64                   `json:"LatestTimestamp"`
 }
 
+// * Emilie, s204471
 type State struct {
 	AccountBalances    map[AccountAddress]uint `json: "AccountBalances"`
 	AccountNounces     map[AccountAddress]uint `json: "AccountNounces"`
@@ -33,14 +35,17 @@ type State struct {
 	LatestTimestamp    int64                   `json: "LatestTimestamp"`
 }
 
+// * Niels, s204503
 func (s *State) getNextBlockSerialNo() int {
 	return s.LastBlockSerialNo + 1
 }
 
+// * Niels, s204503
 func (s *State) getLatestHash() [32]byte {
 	return s.LatestHash
 }
 
+// * Niels, s204503
 func (s *State) MarshalJSON() ([]byte, error) {
 	type Alias State
 	return json.Marshal(&struct {
@@ -52,6 +57,7 @@ func (s *State) MarshalJSON() ([]byte, error) {
 	})
 }
 
+// * Niels, s204503
 func (s *State) UnmarshalJSON(data []byte) error {
 	type Alias State
 	aux := &struct {
@@ -74,12 +80,14 @@ func (s *State) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+// * Magnus, s204509
 // Creates a state based from the data in the local blockchain.db file.
 func LoadState() *State {
 	state := loadStateFromJSON("CurrentState.json")
 	return &state
 }
 
+// * Asger, s204435
 func (state *State) ClearState() {
 	state.LastBlockSerialNo = 0
 	err := os.Truncate(shared.LocatePersistenceFile("CurrentState.json", ""), 0)
@@ -94,6 +102,7 @@ func (state *State) ClearState() {
 
 }
 
+// * Magnus, s204509
 // Adds a transaction to the state. It will validate the transaction, then apply the transaction to the state,
 // then add the transaction to its MemPool and update its latest timestamp field.
 func (state *State) AddTransaction(transaction SignedTransaction) error {
@@ -111,6 +120,7 @@ func (state *State) AddTransaction(transaction SignedTransaction) error {
 	return nil
 }
 
+// * Magnus, s204509
 // Apply the transaction by updating the balances of the affected users.
 func (state *State) ApplyTransaction(transaction SignedTransaction) {
 	if transaction.Tx.Type != "genesis" && transaction.Tx.Type != "reward" {
@@ -120,6 +130,7 @@ func (state *State) ApplyTransaction(transaction SignedTransaction) {
 	state.AccountBalances[transaction.Tx.To] += uint(transaction.Tx.Amount)
 }
 
+// * Magnus, s204509
 // Validates a given signed transaction against the state. It validate the sender and receiver and amount and timestamp and the balance of the sender.
 func (state *State) ValidateTransaction(signedTx SignedTransaction) error {
 	if state.AccountNounces[signedTx.Tx.From]+1 != signedTx.Tx.SenderNounce {
@@ -161,6 +172,7 @@ func (state *State) ValidateTransaction(signedTx SignedTransaction) error {
 	return nil
 }
 
+// * Magnus, s204509
 // Validates a list of transactions against the state.
 func (state *State) ValidateTransactionList(transactionList SignedTransactionList) error {
 	for i, t := range transactionList {
@@ -172,6 +184,7 @@ func (state *State) ValidateTransactionList(transactionList SignedTransactionLis
 	return nil
 }
 
+// * Magnus, s204509
 // Adds a list of transaction to the state.
 func (state *State) AddTransactionList(transactionList SignedTransactionList) error {
 	for i, t := range transactionList {
@@ -183,6 +196,7 @@ func (state *State) AddTransactionList(transactionList SignedTransactionList) er
 	return nil
 }
 
+// * Magnus, s204509
 // Tries to add all transactions to a state
 // This assumes that all the transactions that tries to be added have been validated before.
 // This function is meant to be used to add the remaining transactions in the local memory pool after receiving a block
@@ -195,6 +209,7 @@ func (state *State) TryAddTransactions(transactionList SignedTransactionList) er
 	return nil
 }
 
+// * Niels, s204503
 // recomputes state snapshot corresponding to a given index (serial no.) on the blockchain
 // mutates state of {state} and the persisted snapshot
 func (state *State) RecomputeState(deltaIdx int) {
@@ -212,6 +227,7 @@ func (state *State) RecomputeState(deltaIdx int) {
 	state.SaveSnapshot()
 }
 
+// * Magnus, s204509 & Niels, s204503
 // Given a block delta, try and add the new blocks to the current blockchain from the point where the fork happens.
 func (state *State) TryMergeBlockDelta(deltaIdx int, newBlocks []Block) error {
 	originalBlockchain := LoadBlockchain()
@@ -259,6 +275,7 @@ func (state *State) TryMergeBlockDelta(deltaIdx int, newBlocks []Block) error {
 	return nil
 }
 
+// * Niels, s204503
 // Returns a blank state object
 func BlankState() State {
 	newState := State{}
@@ -274,17 +291,20 @@ func BlankState() State {
 	return newState
 }
 
+// * Emilie, s204471
 // Loads the latest snapshot of the state. Each snapshot is meant as the state right after a block has been added.
 func LoadSnapshot() State {
 	return loadStateFromJSON("LatestSnapshot.json")
 }
 
+// * Emilie, s204471
 // Given a state, save the state as the Current State, including local changes.
 // This is different from a snapshot, as the current state also saves local changes, aka. transactions.
 func (state *State) SaveState() error {
 	return saveStateAsJSON(state, "CurrentState.json")
 }
 
+// * Asger, s204435
 // Given a state, save the state as the local state snapshot.
 // I.e. the state at the moment a new block is added. Any local Tx's are therefore not included.
 func (state *State) SaveSnapshot() error {
@@ -295,6 +315,7 @@ func (state *State) SaveSnapshot() error {
 	return saveStateAsJSON(state, "LatestSnapshot.json")
 }
 
+// * Asger, s204435
 // Function that saves a state as a json file
 func saveStateAsJSON(state *State, filename string) error {
 	txFile, _ := json.MarshalIndent(state, "", "  ")
@@ -307,6 +328,7 @@ func saveStateAsJSON(state *State, filename string) error {
 	return nil
 }
 
+// * Asger, s204435
 // Function that loads a state from a JSON file
 func loadStateFromJSON(filename string) State {
 	data, err := os.ReadFile(shared.LocatePersistenceFile(filename, ""))
@@ -322,6 +344,7 @@ func loadStateFromJSON(filename string) State {
 	return state
 }
 
+// * Emilie, s204471
 // Given a state, make a deep copy of the state and return the copy.
 func (currState *State) copyState() State {
 	copy := State{}

@@ -10,31 +10,37 @@ import (
 	"os"
 )
 
+// * Magnus, s204509
 type Block struct {
 	Header   BlockHeader           `json:"Header"`
 	SignedTx SignedTransactionList `json:"Transactions"`
 }
 
+// * Niels, s204503
 type BlockHeader struct {
 	ParentHash [32]byte `json:"ParentHash"`
 	CreatedAt  int64    `json:"CreatedAt"`
 	SerialNo   int      `json:"SerialNo"`
 }
 
+// * Niels, s204503
 type BhDTO struct {
 	ParentHash string `json:"ParentHash"`
 	CreatedAt  int64  `json:"CreatedAt"` // make date
 	SerialNo   int    `json:"SerialNo"`
 }
 
+// * Magnus, s204509
 type Blockchain struct {
 	Blockchain []Block `json:"Blockchain"`
 }
 
+// * Magnus, s204509
 type Genesis struct {
 	Balances map[AccountAddress]int `json:"balances"`
 }
 
+// * Asger, s204435
 // Create a block object that matches the current state, given a list of transactions
 func (state *State) CreateBlock(txs SignedTransactionList) Block {
 	return Block{
@@ -47,6 +53,7 @@ func (state *State) CreateBlock(txs SignedTransactionList) Block {
 	}
 }
 
+// * Magnus, s204509
 // Validates a given block against the current state
 // It checks: The parent hash, Serial No., Timestamp, and the validity of the transactions within the block.
 func (state *State) ValidateBlock(block Block) error {
@@ -77,6 +84,7 @@ func (state *State) ValidateBlock(block Block) error {
 	return nil
 }
 
+// * Niels, s204503
 // Takes a Block in JSON string format and calculates the 32-byte hash of this block and returns it.
 func HashBlock(blockString string) [32]byte {
 	return sha256.Sum256([]byte(blockString))
@@ -103,6 +111,7 @@ func (state *State) ApplyBlock(block Block) error {
 	return nil
 }
 
+// * Emilie, s204471
 // Applies a list of blocks to the current state. Given a list of block (blockchain) it will apply each block to the state.
 func (state *State) ApplyBlocks(blocks []Block) error {
 	for _, t := range blocks {
@@ -117,6 +126,7 @@ func (state *State) ApplyBlocks(blocks []Block) error {
 	return nil
 }
 
+// * Magnus, s204509
 // This functions takes a block and validates it against the state, then saves the block to the local blackchain.db file.
 // It then applies the block to the state and saves a snapshot of the last "block"-state.
 func (state *State) AddBlock(block Block) error {
@@ -151,6 +161,7 @@ func (state *State) AddBlock(block Block) error {
 	return nil
 }
 
+// * Niels, s204503
 // This updates the local blockchain.db file, by receiving a block and appending it to the list of blocks.
 func PersistBlockToDB(block Block) error {
 	oldBlocks := LoadBlockchain()
@@ -163,6 +174,7 @@ func PersistBlockToDB(block Block) error {
 	return nil
 }
 
+// * Emilie, s204471
 // Load the local blockchain and return it as a list of blocks
 func LoadBlockchain() []Block {
 	data, err := os.ReadFile(shared.LocatePersistenceFile("Blockchain.db", ""))
@@ -179,6 +191,7 @@ func LoadBlockchain() []Block {
 	return loadedBlockchain.Blockchain
 }
 
+// * Asger, s204435
 func ClearBlockchain() {
 	err := os.Truncate(shared.LocatePersistenceFile("Blockchain.db", ""), 0)
 	if err != nil {
@@ -186,6 +199,7 @@ func ClearBlockchain() {
 	}
 }
 
+// * Asger, s204435
 // Given a list of blocks, save the list as the local blockchain.
 func SaveBlockchain(blockchain []Block) bool {
 	toSave := Blockchain{blockchain}
@@ -199,6 +213,7 @@ func SaveBlockchain(blockchain []Block) bool {
 	return true
 }
 
+// * Niels, s204503
 // Load difference in contents of blockchain (for sending deltas to peer)
 // TODO: data structure of blockchain not the most scalable... 🤔
 func GetBlockChainDelta(blockchain []Block, fromBlockSerialNo int) []Block {
@@ -222,6 +237,7 @@ func GetBlockChainDelta(blockchain []Block, fromBlockSerialNo int) []Block {
 	return blockchain[(startIdx):]
 }
 
+// * Niels, s204503
 // Given a block, convert it to a JSON string
 func BlockToJsonString(block Block) (string, error) {
 	json, err := json.Marshal(block)
@@ -231,6 +247,7 @@ func BlockToJsonString(block Block) (string, error) {
 	return string(json), nil
 }
 
+// * Niels, s204503
 func (bh *BlockHeader) encodeBH() BhDTO {
 	dto := BhDTO{}
 	dto.ParentHash = fmt.Sprintf("%x", bh.ParentHash)
@@ -240,6 +257,7 @@ func (bh *BlockHeader) encodeBH() BhDTO {
 	return dto
 }
 
+// * Niels, s204503
 func (dto *BhDTO) decodeBH() BlockHeader {
 	bh := BlockHeader{}
 	ph, _ := hex.DecodeString(dto.ParentHash)
@@ -254,6 +272,7 @@ func (dto *BhDTO) decodeBH() BlockHeader {
 	return bh
 }
 
+// * Niels, s204503
 func (block *Block) MarshalJSON() ([]byte, error) {
 	type Alias Block
 	return json.Marshal(&struct {
@@ -265,6 +284,7 @@ func (block *Block) MarshalJSON() ([]byte, error) {
 	})
 }
 
+// * Niels, s204503
 func (block *Block) UnmarshalJSON(data []byte) error {
 	type Alias Block
 	aux := &struct {
@@ -283,6 +303,7 @@ func (block *Block) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+// * Emilie, s204471
 func (block *Block) BlockToString() string {
 
 	listOfTransactions := ""
@@ -292,6 +313,7 @@ func (block *Block) BlockToString() string {
 	return "Header: \n " + "-Parent Hash: " + fmt.Sprintf("%v \n", block.Header.ParentHash) + "-Created at: " + fmt.Sprintf("%v \n", block.Header.CreatedAt) + "-Serial No.: " + fmt.Sprintf("%v \n", block.Header.SerialNo) + "List of Transactions: \n" + listOfTransactions
 }
 
+// * Niels, s204503
 func GetLocalChainHashes(state State, fromSerialNo int) []string {
 	blocks := LoadBlockchain()
 	persistedChainHashes := getChainHashes(blocks, fromSerialNo)
@@ -299,6 +321,7 @@ func GetLocalChainHashes(state State, fromSerialNo int) []string {
 	return append(persistedChainHashes, latestHash)
 }
 
+// * Niels, s204503
 func getChainHashes(blockchain []Block, fromSerialNo int) []string {
 	var chainHashes []string
 	for _, b := range blockchain {
@@ -309,6 +332,7 @@ func getChainHashes(blockchain []Block, fromSerialNo int) []string {
 	return chainHashes
 }
 
+// * Niels, s204503
 // returns index of (first) mismatch, -1 if succesful
 func CompareChainHashes(cHashes1 []string, cHashes2 []string) int {
 	for i, hash := range cHashes1 {

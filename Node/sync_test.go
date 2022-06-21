@@ -8,6 +8,8 @@ import (
 	"testing"
 )
 
+// * File: Niels, s204503
+
 func TestIpRegex(t *testing.T) {
 	shouldBeTrue := "192.168.0.1:8080"
 	shouldBeTrue2 := "localhost:8080"

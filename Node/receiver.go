@@ -10,6 +10,7 @@ import (
 	"strconv"
 )
 
+// * Niels, s204503
 func blockDeltaHandler(w http.ResponseWriter, r *http.Request, state *Database.State) {
 	localBlockChain := Database.LoadBlockchain()
 	serialNoParam := r.URL.Query().Get("lastLocalBlockSerialNo")
@@ -25,6 +26,7 @@ func blockDeltaHandler(w http.ResponseWriter, r *http.Request, state *Database.S
 	writeResult(w, r, delta)
 }
 
+// * Emilie, s204471
 //Function used to get the state of a peer node
 func getStateHandler(w http.ResponseWriter, r *http.Request, state *Database.State) {
 	//Response: Get your own state to send to the one requesting it
@@ -48,52 +50,12 @@ func getStateHandler(w http.ResponseWriter, r *http.Request, state *Database.Sta
 	writeResult(w, r, node)
 }
 
+// * Emilie, s204471
 func balancesHandler(w http.ResponseWriter, r *http.Request, state *Database.State) {
 	writeResult(w, r, balancesResult{state.LatestHash, state.AccountBalances})
 }
 
-func transactionHandler(w http.ResponseWriter, r *http.Request, state *Database.State) {
-	/*
-		req := TxRequest{}
-		bytes, err := readReq(r)
-		if err != nil {
-			return
-		}
-		json.Unmarshal(bytes, &req)
-
-		var transaction Database.Transaction
-		println("TYPE OF REQUEST " + req.Type)
-		switch req.Type {
-		case "genesis":
-			transaction = state.CreateGenesisTransaction(Database.AccountAddress(req.From), float64(req.Amount))
-
-			fmt.Println("Genesis created" + Database.TxToString(transaction))
-
-		case "reward":
-			transaction = state.CreateReward(Database.AccountAddress(req.From), float64(req.Amount))
-
-			fmt.Println("Reward created" + Database.TxToString(transaction))
-
-		case "transaction":
-			if req.To != "" {
-				transaction = state.CreateTransaction(Database.AccountAddress(req.From), Database.AccountAddress(req.To), float64(req.Amount))
-
-				fmt.Println("Transaction created" + Database.TxToString(transaction))
-			}
-		}
-
-		fmt.Println(transaction)
-
-		err = state.AddTransaction(transaction)
-		if err != nil {
-			return
-		}
-
-		status := Database.SaveTransaction(state.TxMempool)
-
-		writeResult(w, TxResult{status}) */
-}
-
+// * Asger, s204435
 //Writing the result from the server
 func writeResult(w http.ResponseWriter, r *http.Request, content interface{}) {
 	contentJson, err := json.Marshal(content)
@@ -107,6 +69,7 @@ func writeResult(w http.ResponseWriter, r *http.Request, content interface{}) {
 	shared.Log(fmt.Sprintf("Server response sent to %s", r.RemoteAddr))
 }
 
+// * Asger, s204435
 //Reading the request from client
 func readReq(r *http.Request) ([]byte, error) {
 	reqJson, err := ioutil.ReadAll(r.Body)

@@ -9,10 +9,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// * Asger, s204435
+
 func main() {
 	var kbcCmd = &cobra.Command{
 		Use:   "kbc",
-		Short: "The Kaelder Bar Coin CLI",
+		Short: "The KiloBitCoin CLI",
 		Run: func(cmd *cobra.Command, args []string) {
 		},
 	}
@@ -35,8 +37,8 @@ func main() {
 	}
 }
 
-const Major = "0"
-const Minor = "1"
+const Major = "2"
+const Minor = "0"
 const Fix = "0"
 const Verbal = "TX Add && Balances List"
 const flagDataDir = "datadir"
