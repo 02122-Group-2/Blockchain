@@ -1,7 +1,4 @@
 {
-  "localhost:6969": true,
-  "localhost:6970": true,
-  "localhost:6971": true,
-  "localhost:6972": true,
-  "localhost:6973": true
-}
+    "192.168.0.103:8081": true,
+    "192.168.0.232:8080": true
+  }
