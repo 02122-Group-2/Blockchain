@@ -5,9 +5,13 @@ import (
 	"os"
 
 	Node "blockchain/Node"
+	shared "blockchain/Shared"
 
 	"github.com/spf13/cobra"
 )
+
+var setPort = "port"
+var setBootstrap = "bootstrap"
 
 func runCmd() *cobra.Command {
 	var runCmd = &cobra.Command{
@@ -16,6 +20,18 @@ func runCmd() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 
 			fmt.Println("Starting up...")
+
+			port, _ := cmd.Flags().GetInt(setPort)
+			bootstrp, _ := cmd.Flags().GetString(setBootstrap)
+
+			fmt.Println(shared.BootstrapNode)
+			fmt.Println(bootstrp)
+
+			shared.HttpPort = port
+			shared.BootstrapNode = bootstrp
+
+			fmt.Println(shared.BootstrapNode)
+			fmt.Println(bootstrp)
 
 			err := Node.Run()
 			if err != nil {
@@ -26,9 +42,10 @@ func runCmd() *cobra.Command {
 		},
 	}
 
+	runCmd.Flags().Int(setPort, shared.HttpPort, "Optinal Flag: Manually set port. Default is "+string(shared.HttpPort))
+	runCmd.Flags().String(setBootstrap, shared.BootstrapNode, "Optional Flag: Manually set bootstrap node. Default is "+shared.BootstrapNode)
 	//addDefaultRequiredFlags(runCmd)
 
 	return runCmd
 
 }
-

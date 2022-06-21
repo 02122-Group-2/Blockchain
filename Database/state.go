@@ -214,26 +214,34 @@ func (state *State) RecomputeState(deltaIdx int) {
 
 // Given a block delta, try and add the new blocks to the current blockchain from the point where the fork happens.
 func (state *State) TryMergeBlockDelta(deltaIdx int, newBlocks []Block) error {
-	originalBlockchain := LoadBlockchain() 
+	originalBlockchain := LoadBlockchain()
+	originalSnapshot := LoadSnapshot()
+	originalState := LoadState()
 	agreedBlockchain := originalBlockchain[:deltaIdx-1]
 
 	newState := BlankState()
+	newState.SaveSnapshot()   // Save the snapshot to use for adding blocks
+	newState.SaveState()      // Save the current state to handle transaction logic
+	SaveBlockchain([]Block{}) // Save the empty block to handle block append
+
 	// Add the old blocks from the local blockchain
 	for _, block := range agreedBlockchain {
 		blockErr := newState.AddBlock(block)
 		if blockErr != nil {
-			state.SaveSnapshot() // If it fails to add the new blocks, revert to the original snapshot and blockchain
+			originalSnapshot.SaveSnapshot() // If it fails to add the new blocks, revert to the original snapshot and blockchain
+			originalState.SaveState()       // It it fails to add the blocks revert to original state
 			SaveBlockchain(originalBlockchain)
-			return fmt.Errorf("One of the local blocks has been tampered with or otherwise corrupted. Got error: " + blockErr.Error()) 
+			return fmt.Errorf("One of the local blocks has been tampered with or otherwise corrupted. Got error: " + blockErr.Error())
 		}
 	}
 	//Add the new blocks
 	for _, block := range newBlocks {
 		blockErr := newState.AddBlock(block)
 		if blockErr != nil {
-			state.SaveSnapshot() // If it fails to add the new blocks, revert to the original snapshot and blockchain
+			originalSnapshot.SaveSnapshot() // If it fails to add the new blocks, revert to the original snapshot and blockchain
+			originalState.SaveState()       // It it fails to add the blocks revert to original state
 			SaveBlockchain(originalBlockchain)
-			return fmt.Errorf("One of the new blocks are invalid. Got error: " + blockErr.Error()) 
+			return fmt.Errorf("One of the new blocks are invalid. Got error: " + blockErr.Error())
 		}
 	}
 
@@ -243,10 +251,12 @@ func (state *State) TryMergeBlockDelta(deltaIdx int, newBlocks []Block) error {
 	// Save the new current State
 	newState.SaveState()
 
+	// Save the new blockchain
+
 	// Overwrite old state with NEW state
 	*state = newState
 
-	return nil 
+	return nil
 }
 
 // Returns a blank state object

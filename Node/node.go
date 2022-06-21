@@ -16,7 +16,7 @@ func Run() error {
 		return err
 	}
 
-	shared.Log(fmt.Sprintf("Listening on port %d", httpPort))
+	shared.Log(fmt.Sprintf("Listening on port %d", shared.HttpPort))
 
 	go concSynchronization()
 	startNode()
@@ -48,7 +48,7 @@ func startNode() error {
 	})
 	shared.Log("/blockDelta setup complete")
 
-	return http.ListenAndServe(fmt.Sprintf(":%d", httpPort), nil)
+	return http.ListenAndServe(fmt.Sprintf(":%d", shared.HttpPort), nil)
 }
 
 // Get the initial node state
@@ -66,11 +66,12 @@ func GetNode() Node {
 func GetPeerSet() PeerSet {
 	ps := LoadPeerSetFromJSON(shared.PeerSetFile)
 	if ps == nil {
-		ps = PeerSet{bootstrapNode: true}
+		ps = PeerSet{shared.BootstrapNode: true}
 	}
 	if len(ps) == 0 {
-		ps.Add(bootstrapNode)
+		ps = PeerSet{shared.BootstrapNode: true}
 	}
+	ps.Add(shared.BootstrapNode)
 	return ps
 }
 
@@ -97,8 +98,8 @@ func getLocalIP() string {
 	addrs, _ := net.LookupIP(host)
 	for _, addr := range addrs {
 		if ipv4 := addr.To4(); ipv4 != nil {
-			return fmt.Sprintf("%v:%d", ipv4, httpPort)
+			return fmt.Sprintf("%v:%d", ipv4, shared.HttpPort)
 		}
 	}
-	return fmt.Sprintf("localhost:%d", httpPort)
+	return fmt.Sprintf("localhost:%d", shared.HttpPort)
 }
