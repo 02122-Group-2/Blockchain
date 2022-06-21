@@ -10,8 +10,8 @@ import (
 //Function that ensures that all files needed to run a node are present on the current system
 //If not they are created
 func EnsureNeededFilesExist() error {
-	if !fileExist(shared.LocalDirToFileFolder) {
-		err := os.Mkdir(shared.LocalDirToFileFolder, 0755)
+	if !fileExist(LocalDirToFileFolder) {
+		err := os.Mkdir(LocalDirToFileFolder, 0755)
 		if err != nil {
 			return err
 		}
