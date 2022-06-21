@@ -86,7 +86,7 @@ func TestGetLocalChainHashes(t *testing.T) {
 	state := db.LoadState()
 	cHashes := db.GetLocalChainHashes(*state, 0)
 	t.Log(cHashes)
-	chainComp := []string{"0000000000000000000000000000000000000000000000000000000000000000", "2eff0509e19f074f48791f06d230f0c05bbe09e0a76d6e0dcf9703cff6fc17e0", "b46b7af31379d5b360cc2d0d8e30f2897761746a25421159b5d7698f383cc50a"}
+	chainComp := []string{"0000000000000000000000000000000000000000000000000000000000000000", "2eff0509e19f074f48791f06d230f0c05bbe09e0a76d6e0dcf9703cff6fc17e0", "b46b7af31379d5b360cc2d0d8e30f2897761746a25421159b5d7698f383cc50a", "1fe834bffdbb95aa634aefca9b808244acb2378128ea5d22a34f8a623e9383fb", "415e4522a692fc4d9234285347f92ff0edec6a5d246a1462c9157cdb909a4f3c", "d1e6d8de29e702ffe8d0b8342c0b4396ac4c2875c313026cb987de48fe37409f"}
 	if db.CompareChainHashes(cHashes, chainComp) != -1 {
 		panic("should be equal")
 	}
@@ -102,10 +102,10 @@ func TestLocalIP(t *testing.T) {
 
 func TestSortByLatency(t *testing.T) {
 	pings := make([]PingResponse, 4)
-	pings[1] = PingResponse{"localhost:8081", true, 1}
-	pings[0] = PingResponse{"localhost:8082", true, 2}
-	pings[2] = PingResponse{"localhost:8083", true, 3}
-	pings[3] = PingResponse{"localhost:8084", true, 4}
+	pings[1] = PingResponse{"localhost:1000", true, 1}
+	pings[0] = PingResponse{"localhost:2000", true, 2}
+	pings[2] = PingResponse{"localhost:3000", true, 3}
+	pings[3] = PingResponse{"localhost:4000", true, 4}
 	fastest := getNFastestPeers(pings, 3)
 	// t.Log(fastest)
 	if !(fastest.Exists(pings[1].Address) || fastest.Exists(pings[2].Address) || fastest.Exists(pings[0].Address)) {

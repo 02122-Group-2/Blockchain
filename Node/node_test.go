@@ -15,7 +15,7 @@ func TestCreatePeerSet(t *testing.T) {
 	peerSetTestFile := fmt.Sprintf("%s_test.json", shared.PeerSetFile[:(len(shared.PeerSetFile)-len(".json"))])
 	SavePeerSetAsJSON(ps, peerSetTestFile)
 
-	correctChecksum := "31f74234299b520c9a680a8022b7b0b24f707668c30f34be152a334d015dec0e"
+	correctChecksum := "3e36c8c5f1a51eee9d6707632b17849153a53e8cc04f3bb9404cc349fa1388dd"
 
 	realChecksum := shared.GetChecksum(shared.LocatePersistenceFile(peerSetTestFile, "test_data"))
 
