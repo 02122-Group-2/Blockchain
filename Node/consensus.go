@@ -6,7 +6,7 @@ import (
 )
 
 // Simple majority consensus algorithm
-// returns boolean value signalling success
+// returns boolean value signalling success or not
 func handleConsensus(node Node, nodes []Node) bool {
 	// gets node object that has consensus chain, i.e. longest chain that most nodes agree on
 	consensusNode := computeConsensusNode(nodes)
@@ -87,11 +87,16 @@ func computeConsensusNode(nodes []Node) Node {
 			}
 		}
 	}
+
+	// determine hash of longest chain with max agree count
 	maxAgreeHash := getMaxAgreeHash(agreeCount, latestHashesCopy)
 
 	return latestHash2Node[maxAgreeHash]
 }
 
+// compares agree count of nodes
+// returns chain with largest agree count, then largest block height
+// if no such chain exists, return local node (no update until determinable)
 func getMaxAgreeHash(agreeCount map[string]int, latestHashes map[string]cPair) string {
 	var max int = 0
 	var maxHashes []string  // store all hashes that have max agree count
@@ -106,10 +111,14 @@ func getMaxAgreeHash(agreeCount map[string]int, latestHashes map[string]cPair) s
 			indeterminable = true
 		}
 	}
+
+	// multiple differing chains with equal agree count
 	if indeterminable {
 		maxBlockheight := 0
 		var maxBlockheightHash string
 		existsLongestChain := false
+
+		// find longest chain, i.e. largest block height
 		for _, hash := range maxHashes {
 			if latestHashes[hash].serialNo > maxBlockheight {
 				maxBlockheight = latestHashes[hash].serialNo
@@ -132,7 +141,7 @@ func getMaxAgreeHash(agreeCount map[string]int, latestHashes map[string]cPair) s
 	return maxHashes[0] // if !indeterminable, only 1 hash has max agree count
 }
 
-// Given two lists of hashes, check that the last element for the shortest list is equal to the hash at the same location for the second list
+// Given two hash sequences, check that the last element for the shortest sequence is equal to the hash at the same location for the second sequence
 func chainsAgree(c1 []string, c2 []string) bool {
 	// Get the location of the last hash in the shortest list
 	compIdx := min(len(c1), len(c2)) - 1

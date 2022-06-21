@@ -102,10 +102,10 @@ func TestLocalIP(t *testing.T) {
 
 func TestSortByLatency(t *testing.T) {
 	pings := make([]PingResponse, 4)
-	pings[1] = PingResponse{"localhost:8081", true, 1}
-	pings[0] = PingResponse{"localhost:8082", true, 2}
-	pings[2] = PingResponse{"localhost:8083", true, 3}
-	pings[3] = PingResponse{"localhost:8084", true, 4}
+	pings[1] = PingResponse{"localhost:8069", true, 1}
+	pings[0] = PingResponse{"localhost:8070", true, 2}
+	pings[2] = PingResponse{"localhost:8071", true, 3}
+	pings[3] = PingResponse{"localhost:8072", true, 4}
 	fastest := getNFastestPeers(pings, 3)
 	// t.Log(fastest)
 	if !(fastest.Exists(pings[1].Address) || fastest.Exists(pings[2].Address) || fastest.Exists(pings[0].Address)) {
