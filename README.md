@@ -1,8 +1,8 @@
-# Blockchain
+# KiloBitCoin - Blockchain & Cryptocurrency
 Blockchain and cryptocurrency implementation in Go.
 Based on the Go implementation of Ethereum, implemented in a simplified version from the bottom up.
 
-Currently, there is no mining algorithm, but everything else, including a consensus algorithm for a Proof-Of-Work type mining system and signing of transactions.
+Currently, there is no mining algorithm, but everything else, including a consensus algorithm for a Proof-Of-Work type mining system and signing of transactions, is implemented in this proof of concept, developed for educational purposes.
 
 ## Overview of the project structure:
 ```bash
