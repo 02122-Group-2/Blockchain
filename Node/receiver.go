@@ -39,6 +39,7 @@ func getStateHandler(w http.ResponseWriter, r *http.Request, state *Database.Sta
 	json.Unmarshal(bytes, &getStateRequest)
 
 	// load peer set from file and union it with the peer set from the incoming request
+	// ! Should this happen? I think we should remove this functionality, since it interferes with consensus
 	currentPeerSet := LoadPeerSetFromJSON(shared.PeerSetFile)
 	currentPeerSet.UnionWith(getStateRequest.PeerSet)
 	SavePeerSetAsJSON(currentPeerSet, shared.PeerSetFile)

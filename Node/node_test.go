@@ -34,7 +34,7 @@ func TestCreatePeerSet(t *testing.T) {
 func TestRun(t *testing.T) {
 	t.Log("begin run test")
 
-	shared.BootstrapNode = "192.168.0.106:8081"
+	// shared.BootstrapNode = "192.168.0.106:8081"
 	err := Run()
 	if err != nil {
 		t.Log("Could not run node")

@@ -3,6 +3,7 @@ package node
 import (
 	shared "blockchain/Shared"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"os"
 )
@@ -12,6 +13,10 @@ import (
 type PeerSet map[string]bool
 
 func (p PeerSet) Add(k string) {
+	// don't add itself
+	if k == fmt.Sprintf("localhost:%d", shared.HttpPort) {
+		return
+	}
 	if shared.LegalIpAddress(k) {
 		p[k] = true
 	}
