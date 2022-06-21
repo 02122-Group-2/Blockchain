@@ -6,6 +6,7 @@ import (
 	"testing"
 )
 
+// * Emilie, s204471
 //Tests if CheckingForNeededFiles work for all the needed files
 func TestEnsureNeededFilesExist(t *testing.T) {
 	t.Log("begin EnsureNeededFilesExist test")
@@ -34,6 +35,7 @@ func TestEnsureNeededFilesExist(t *testing.T) {
 	}
 }
 
+// * Niels, s204503
 // test result is cached and as a result the reset is not run more than once when running the test
 func TestResetPersistenceFiles(t *testing.T) {
 	ResetPersistenceFilesForTest()

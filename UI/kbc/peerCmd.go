@@ -9,6 +9,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// * Magnus, s204509
+
 func peerCmd() *cobra.Command {
 	var peerCmd = &cobra.Command{
 		Use:   "peer",

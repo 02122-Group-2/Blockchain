@@ -10,6 +10,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// * Emilie, s204471
+
 var setPort = "port"
 var setBootstrap = "bootstrap"
 

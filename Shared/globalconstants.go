@@ -1,5 +1,7 @@
 package shared
 
+// * file: Niels, s204503
+
 // name of file to save PeerSet
 const PeerSetFile = "PeerSet.json"
 

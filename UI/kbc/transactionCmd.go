@@ -10,6 +10,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// * Asger, s204435
+
 const flagUsername = "username"
 const flagPassword = "password"
 const flagTo = "to"
@@ -35,7 +37,7 @@ func transactionCreateCmd() *cobra.Command {
 		Short: "Create transaction to database",
 		Run: func(cmd *cobra.Command, args []string) {
 			//Initialize the flags
-			
+
 			username, _ := cmd.Flags().GetString(flagUsername)
 			password, _ := cmd.Flags().GetString(flagPassword)
 			toRaw, _ := cmd.Flags().GetString(flagTo)
@@ -61,7 +63,7 @@ func transactionCreateCmd() *cobra.Command {
 				if err != nil {
 					fmt.Fprintln(os.Stderr, err)
 					os.Exit(1)
-				} 
+				}
 				fmt.Println("Transaction created: " + Database.TxToString(transaction.Tx))
 
 				err = state.AddTransaction(transaction)
@@ -69,12 +71,10 @@ func transactionCreateCmd() *cobra.Command {
 				if err != nil {
 					fmt.Fprintln(os.Stderr, err)
 					os.Exit(1)
-				} 
-				
-				fmt.Println("Transaction succsesfully saved")
-				
+				}
 
-				
+				fmt.Println("Transaction succsesfully saved")
+
 			} else {
 				fmt.Fprintln(os.Stderr, "Sender is undefined")
 				os.Exit(1)

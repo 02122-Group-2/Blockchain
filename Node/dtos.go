@@ -4,6 +4,8 @@ import (
 	Database "blockchain/Database"
 )
 
+// * File: Niels, s204503
+
 type NodeFromPostRequest struct {
 	Address     string                        `json:"address"`
 	PeerSet     PeerSet                       `json:"peer_set"`

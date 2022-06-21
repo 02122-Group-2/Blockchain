@@ -6,22 +6,7 @@ import (
 	"testing"
 )
 
-// if two forks are exactly equal in number of nodes that agree
-func Test5050case(t *testing.T) {
-
-}
-
-func TestHandleLegalConsensusChain(t *testing.T) {
-
-}
-
-func TestHandleIllegalConsensusChain(t *testing.T) {
-
-}
-
-func TestTamperedChain(t *testing.T) {
-
-}
+// * file: Niels, s204503
 
 func TestChainDiffIdx(t *testing.T) {
 	c1 := []string{"a", "b", "c", "d", "e"}

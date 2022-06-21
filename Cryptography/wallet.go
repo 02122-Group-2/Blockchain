@@ -18,6 +18,8 @@ import (
 	"path/filepath"
 )
 
+// * All functions in file: Magnus, s204509
+
 // Given a password, this function will create a new wallet in the ./wallet folder. It will not delete the old wallets.
 func CreateNewWallet(username string, password string) (string, error) {
 	hashedUsername := crypto.Keccak256Hash([]byte(username)).Hex()

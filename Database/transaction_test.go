@@ -6,6 +6,8 @@ import (
 	"testing"
 )
 
+// * file: Asger, s204435
+
 var state = LoadState()
 var walletUsername1 = "testingWallet1"
 var walletUsername2 = "testingWallet265"

@@ -8,6 +8,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// * Emilie, s204471
+
 func balancesCmd() *cobra.Command {
 	var balancesCmd = &cobra.Command{
 		Use:   "balances",

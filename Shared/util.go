@@ -10,6 +10,8 @@ import (
 	"time"
 )
 
+// * file: Niels, s204503
+
 func MakeTimestamp() int64 {
 	return time.Now().UnixNano()
 }

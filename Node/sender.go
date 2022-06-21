@@ -11,6 +11,7 @@ import (
 	"net/http"
 )
 
+// * Niels, s204503
 func GetPeerBlocks(peerAddr string, deltaIdx int) []Database.Block {
 	lastBlockSerialNo := deltaIdx - 1
 	URI := fmt.Sprintf("http://"+peerAddr+"/blockDelta?lastLocalBlockSerialNo=%d", lastBlockSerialNo)
@@ -30,6 +31,7 @@ func GetPeerBlocks(peerAddr string, deltaIdx int) []Database.Block {
 	return blockDelta
 }
 
+// * Emilie, s204471
 //The following is done using POST,
 //The header contain the address of the peer that is currently being accessed
 //The body should contain the current state of the requesting node
@@ -70,6 +72,7 @@ func GetPeerState(peerAddr string) Node {
 	return peerNode
 }
 
+// * Asger, s204435
 //Reading the server response
 func readResp(r *http.Response) ([]byte, error) {
 	reqJson, err := ioutil.ReadAll(r.Body)

@@ -5,6 +5,8 @@ import (
 	"fmt"
 )
 
+// * File: Niels, s204503
+
 // Simple majority consensus algorithm
 // returns boolean value signalling success
 func handleConsensus(node Node, nodes []Node) bool {

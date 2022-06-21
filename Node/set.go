@@ -8,6 +8,8 @@ import (
 	"os"
 )
 
+// * file: Niels, s204503
+
 // simple set type for storing IP addresses, with only the needed set operations; Add, Remove, Exists, Union
 
 type PeerSet map[string]bool

@@ -7,6 +7,7 @@ import (
 	"testing"
 )
 
+// * Niels, s204503
 func TestCreatePeerSet(t *testing.T) {
 	addr := getFirstPeerInPeerset()
 	ps := PeerSet{}
@@ -29,6 +30,7 @@ func TestCreatePeerSet(t *testing.T) {
 	os.Remove(shared.LocatePersistenceFile(peerSetTestFile, ""))
 }
 
+// * Emilie, s204471
 // this test is not an actual unit test.
 // it is merely for exploratory tests, e.g. starting a node and debugging
 func TestRun(t *testing.T) {
@@ -42,6 +44,7 @@ func TestRun(t *testing.T) {
 	}
 }
 
+// * Emilie, s204471
 func TestGetPeerState(t *testing.T) {
 	t.Log("begin get peer state test")
 
@@ -57,6 +60,7 @@ func TestGetPeerState(t *testing.T) {
 	// fmt.Println(nodeState.State)
 }
 
+// * Emilie, s204471
 func TestGetPeerBlocks(t *testing.T) {
 	addr := getFirstPeerInPeerset()
 	res := GetPeerBlocks(addr, 0)
@@ -64,6 +68,7 @@ func TestGetPeerBlocks(t *testing.T) {
 	fmt.Println(res)
 }
 
+// * Niels, s204503
 func TestPingActiveConnection(t *testing.T) {
 	addr := getFirstPeerInPeerset()
 	pingRes := Ping(addr)
@@ -73,6 +78,7 @@ func TestPingActiveConnection(t *testing.T) {
 	}
 }
 
+// * Niels, s204503
 func getFirstPeerInPeerset() string {
 	peers := LoadPeerSetFromJSON(shared.PeerSetFile)
 	var addr string
